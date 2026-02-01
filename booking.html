@@ -1,6 +1,6 @@
-```html
+        ```html
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,64 +8,60 @@
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f0f7f8;
-            direction: rtl; /* Sets text to read Right-to-Left for Arabic */
+            margin: 0; padding: 0;
+            background-color: #f4f9fb;
+            direction: rtl;
         }
         header {
             background-color: #0077b6;
-          color: white;
-            padding: 30px;
-            text-align: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
+            color: white;
+            padding: 25px;
+            text-align: center;}
         .container {
             max-width: 900px;
             margin: 20px auto;
             background: white;
             padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
         }
         .info-bar {
             display: flex;
             justify-content: space-around;
             background: #e9f5f8;
             padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            font-size: 0.9rem;
-          flex-wrap: wrap;
-            gap: 10px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            font-size: 1.1rem;
+            color: #0077b6;
         }
-        h1 { margin: 0; font-size: 1.8rem; }
-        .booking-frame { min-height: 700px; width: 100%; border: none; }
+        instruction {
+            text-align: center;
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
 
     <header>
         <h1>عيادة الدكتور محمد برهان لطب الأسنان</h1>
-        <p>احجز موعدك الآن بكل سهولة</p>
+        <p>أهلاً بكم.. احجزوا موعدكم إلكترونياً الآن</p>
     </header>
-    
-<!-- Arabic Instruction for the patient -->
-        <div class="instruction">
-            يرجى اختيار اليوم والوقت المناسب لكم من التقويم أدناه:
-        </div>
+
     <div class="container">
         <div class="info-bar">
             <span>📍 كركوك</span>
             <span>📞 0770 912 6081</span>
-            <span>🕒 السبت - الخميس: 2 مساءً - 8 مساءً</span>
-          </div>
+        </div>
+        <div class="instruction">
+            يرجى اختيار اليوم والوقت المناسب لكم من التقويم أدناه:
+        </div>
 
         <!-- THE CORRECTED CALENDLY PART -->
         <div class="calendly-inline-widget" data-url="https://calendly.com/haiyam-khalid/30min?locale=ar" style="min-width:320px;height:750px;"></div>
         <script type="text/javascript" src="https://assets.calendly.com/assets/external/widget.js" async></script>
     </div>
-        
 
 </body>
 </html>
