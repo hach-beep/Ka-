@@ -1,0 +1,116 @@
+```html
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>حجز موعد - عيادة الدكتور محمد برهان</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background-color: #f0f7f9; direction: rtl; color: #333; }
+        header { background-color: #0077b6; color: white; padding: 20px; text-align: center; }
+        .container { max-width: 500px; margin: 20px auto; background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+    .section-title { font-weight: bold; margin-bottom: 15px; display: block; color: #0077b6; }
+        
+        /* Date Picker Styling */
+        input[type="date"], input[type="text"] { 
+            width: 100%; padding: 15px; border: 2px solid #eef2f3; border-radius: 12px; 
+            margin-bottom: 25px; font-size: 1rem; outline: none; transition: 0.3s;
+        }
+        input:focus { border-color: #0077b6; }
+
+        /* Time Slot Grid (Like Calendly) */
+        .time-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 25px; }
+        .time-slot { 
+            padding: 12px; text-align: center; 
+      border: 2px solid #0077b6; color: #0077b6; 
+            border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s;
+        }
+        .time-slot:hover { background-color: #e9f5f8; }
+        .time-slot.selected { background-color: #0077b6; color: white; }
+
+        .btn-confirm { 
+            background-color: #25D366; color: white; border: none; padding: 18px; width: 100%; 
+            border-radius: 12px; font-size: 1.2rem; font-weight: bold; cursor: pointer;
+            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
+        }
+        .clinic-card { background: #f8fdff; padding: 15px; border-radius: 12px; margin-bottom: 20px; text-align: center; font-size: 0.9rem; }
+    </style>
+    </head>
+<body>
+
+    <header>
+        <h1>عيادة الدكتور محمد برهان</h1>
+        <p>اختر موعدك المفضل وسنؤكده معك عبر واتساب</p>
+    </header>
+
+    <div class="container">
+        <div class="clinic-card">
+            📍 كركوك | 📞 07709126081 <br>
+            🕒 السبت - الخميس: 2:00 م - 8:00 م
+        </div>
+
+        <label class="section-title">1. اختر التاريخ:</label>
+        <input type="date" id="bookingDate">
+
+        <label class="section-title">2. اختر الوقت:</label>
+        <div class="time-grid" id="timeGrid">
+            <!-- Slots from 2:00 to 7:30 PM -->
+          <div class="time-slot" onclick="selectTime(this)">02:00 م</div>
+            <div class="time-slot" onclick="selectTime(this)">02:30 م</div>
+            <div class="time-slot" onclick="selectTime(this)">03:00 م</div>
+            <div class="time-slot" onclick="selectTime(this)">03:30 م</div>
+            <div class="time-slot" onclick="selectTime(this)">04:00 م</div>
+            <div class="time-slot" onclick="selectTime(this)">04:30 م</div>
+            <div class="time-slot" onclick="selectTime(this)">05:00 م</div>
+            <div class="time-slot" onclick="selectTime(this)">05:30 م</div>
+            <div class="time-slot" onclick="selectTime(this)">06:00 م</div>
+            <div class="time-slot" onclick="selectTime(this)">06:30 م</div>
+            <div class="time-slot" onclick="selectTime(this)">07:00 م</div>
+            <div class="time-slot" onclick="selectTime(this)">07:30 م</div>
+        </div>
+
+        <label class="section-title">3. اسم المريض:</label>
+        <input type="text" id="patientName" placeholder="اكتب اسمك هنا...">
+
+        <button class="btn-confirm" onclick="sendToWhatsApp()">
+            تأكيد الموعد عبر واتساب ✅
+        </button>
+    </div>
+
+    <script>
+        let selectedTimeSlot = "";
+
+        function selectTime(element) {
+            // Unselect all other slots
+            document.querySelectorAll('.time-slot').forEach(slot => {
+                slot.classList.remove('selected');
+            });
+          // Select this slot
+            element.classList.add('selected');
+            selectedTimeSlot = element.innerText;
+        }
+
+        function sendToWhatsApp() {
+            const clinicNumber = "9647709126081"; 
+            const name = document.getElementById('patientName').value;
+            const date = document.getElementById('bookingDate').value;
+
+            if (name === "" || date === "" || selectedTimeSlot === "") {
+                alert("يرجى اختيار التاريخ والوقت وكتابة الاسم");
+                return;
+            }
+          const message = `مرحباً دكتور محمد، أود حجز موعد في العيادة:%0A%0A` +
+                            `*الاسم:* ${name}%0A` +
+                            `*التاريخ:* ${date}%0A` +
+                            `*الوقت:* ${selectedTimeSlot}%0A%0A` +
+                            `بانتظار تأكيدكم. شكراً جزيلاً.`;
+
+            const whatsappURL = `https://wa.me/${clinicNumber}?text=${message}`;
+            window.open(whatsappURL, '_blank');
+        }
+    </script>
+
+</body>
+</html>
+```
+          
