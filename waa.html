@@ -1,0 +1,117 @@
+```html
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>حجز موعد - عيادة الدكتور محمد برهان</title>
+    <style>
+        :root { --primary: #0066ff; --bg: #f8fafc; --text: #1e293b; }
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background-color: var(--bg); color: var(--text); direction: rtl; }
+        
+        /* Layout */
+        .header { background: white; padding: 20px; text-align: center; border-bottom: 1px solid #e2e8f0; }
+        .main-card { max-width: 800px; margin: 20px auto; background: white; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); display: flex; flex-wrap: wrap; overflow: hidden; }
+        
+        /* Left Sidebar (Info) */
+        .sidebar { flex: 1; min-width: 250px; padding: 30px; border-left: 1px solid #e2e8f0; }
+        .sidebar h2 { font-size: 1.2rem; margin-bottom: 10px; }
+        .clinic-detail { font-size: 0.9rem; color: #64748b; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+
+        /* Right Content (The Logic) */
+        .content { flex: 2; padding: 30px; min-width: 300px; }
+        .step-title { font-weight: bold; margin-bottom: 20px; display: block; }
+      
+/* Calendar Styling */
+        input[type="date"] { width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 20px; font-size: 1rem; }
+
+        /* Time Grid (Calendly Style) */
+        .time-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .time-btn { padding: 12px; border: 1px solid var(--primary); color: var(--primary); border-radius: 8px; cursor: pointer; text-align: center; font-weight: 600; transition: 0.2s; }
+        .time-btn:hover { background: #eff6ff; }
+        .time-btn.selected { background: var(--primary); color: white; }
+
+        /* Name Input & Confirm */
+        .footer { margin-top: 30px; border-top: 1px solid #e2e8f0; padding-top: 20px; }
+        input[type="text"] { width: 100%; padding: 12px; border: 1px solid #e2e8f0; 
+      border-radius: 8px; margin-bottom: 20px; box-sizing: border-box; }
+        .confirm-btn { background: #25D366; color: white; border: none; padding: 15px; width: 100%; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; display: flex; justify-content: center; gap: 10px; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1 style="margin:0; font-size: 1.5rem;">عيادة الدكتور محمد برهان</h1>
+    </div>
+
+    <div class="main-card">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <h2>فحص أسنان عام</h2>
+            <div class="clinic-detail">⏱️ 30 دقيقة</div>
+            <div class="clinic-detail">📍 كركوك، عيادة الدكتور محمد برهان</div>
+            <p style="font-size: 0.85rem; color: #64748b; line-height: 1.6;">
+                يرجى اختيار موعد مناسب. سيتم تحويلك إلى الواتساب لتأكيد الحجز مع العيادة مباشرة.
+            </p>
+        </div>
+
+        <!-- Content -->
+        <div class="content">
+            <span class="step-title">1. اختر التاريخ:</span>
+            <input type="date" id="dateInput" onchange="showTimes()">
+
+            <div id="timeSection" style="display:none;">
+                <span class="step-title">2. اختر الوقت (مساءً):</span>
+                <div class="time-grid">
+                    <div class="time-btn" onclick="selectTime(this)">02:00 م</div>
+                    <div class="time-btn" onclick="selectTime(this)">03:00 م</div>
+                    <div class="time-btn" onclick="selectTime(this)">04:00 م</div>
+                    <div class="time-btn" onclick="selectTime(this)">05:00 م</div>
+                    <div class="time-btn" onclick="selectTime(this)">06:00 م</div>
+                    <div class="time-btn" onclick="selectTime(this)">07:00 م</div>
+                </div>
+
+                <div class="footer">
+                    <span class="step-title">3. الاسم الكامل:</span>
+                    <input type="text" id="patientName" placeholder="اكتب اسمك هنا...">
+                    <button class="confirm-btn" onclick="bookWhatsApp()">
+                        تأكيد الموعد عبر واتساب ✅
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedTime = "";
+
+        function showTimes() {
+            document.getElementById('timeSection').style.display = 'block';
+        }
+
+        function selectTime(btn) {
+            document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            selectedTime = btn.innerText;}
+
+        function bookWhatsApp() {
+            const name = document.getElementById('patientName').value;
+            const date = document.getElementById('dateInput').value;
+            const clinicPhone = "9647709126081";
+
+            if (!name || !date || !selectedTime) {
+                alert("يرجى إكمال جميع البيانات");
+                return;
+            }
+
+            const message = `مرحباً دكتور محمد، أود حجز موعد:%0A%0A` +
+                            `*الاسم:* ${name}%0A` +
+                            `*التاريخ:* ${date}%0A` +
+                            `*الوقت:* ${selectedTime}`;
+        }
+      window.open(`https://wa.me/${clinicPhone}?text=${message}`, '_blank');
+        }
+    </script>
+</body>
+</html>
+```
