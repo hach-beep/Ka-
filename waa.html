@@ -1,3 +1,4 @@
+
 ```html
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
@@ -6,100 +7,86 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>حجز موعد - عيادة الدكتور محمد برهان</title>
     <style>
-        :root { --primary: #0066ff; --bg: #f8fafc; --text: #1e293b; }
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; background-color: var(--bg); color: var(--text); direction: rtl; }
+        :root { --primary: #0077b6; --bg: #f0f7f9; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; background-color: var(--bg); direction: rtl; }
+        header { background-color: var(--primary); color: white; padding: 25px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .container { max-width: 500px; margin: 20px auto; background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+        .info-box { background: #e9f5f8; padding: 15px; border-radius: 12px; margin-bottom: 25px; color: var(--primary); font-weight: bold; text-align: center; }
         
-        /* Layout */
-        .header { background: white; padding: 20px; text-align: center; border-bottom: 1px solid #e2e8f0; }
-        .main-card { max-width: 800px; margin: 20px auto; background: white; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); display: flex; flex-wrap: wrap; overflow: hidden; }
+        label { display: block; margin-bottom: 8px; font-weight: bold; color: #333; }
+        input { width: 100%; padding: 14px; margin-bottom: 20px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; font-size: 1rem; }
         
-        /* Left Sidebar (Info) */
-        .sidebar { flex: 1; min-width: 250px; padding: 30px; border-left: 1px solid #e2e8f0; }
-        .sidebar h2 { font-size: 1.2rem; margin-bottom: 10px; }
-        .clinic-detail { font-size: 0.9rem; color: #64748b; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
-        /* Right Content (The Logic) */
-        .content { flex: 2; padding: 30px; min-width: 300px; }
-        .step-title { font-weight: bold; margin-bottom: 20px; display: block; }
-/* Calendar Styling */
-        input[type="date"] { width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 20px; font-size: 1rem; }
-
-        /* Time Grid (Calendly Style) */
-        .time-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .time-btn { padding: 12px; border: 1px solid var(--primary); color: var(--primary); border-radius: 8px; cursor: pointer; text-align: center; font-weight: 600; transition: 0.2s; }
-        .time-btn:hover { background: #eff6ff; }
-        .time-btn.selected { background: var(--primary); color: white; }
-        /* Name Input & Confirm */
-        .footer { margin-top: 30px; border-top: 1px solid #e2e8f0; padding-top: 20px; }
-        input[type="text"] { width: 100%; padding: 12px; border: 1px solid #e2e8f0; 
-      border-radius: 8px; margin-bottom: 20px; box-sizing: border-box; }
-        .confirm-btn { background: #25D366; color: white; border: none; padding: 15px; width: 100%; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; display: flex; justify-content: center; gap: 10px; }
+        .btn-confirm { background-color: var(--primary); color: white; border: none; padding: 18px; width: 100%; border-radius: 10px; font-size: 1.2rem; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .btn-confirm:disabled { background-color: #ccc; cursor: not-allowed; }
+        
+        #successMsg { display: none; text-align: center; padding: 20px; }
+        .success-icon { font-size: 50px; color: #25D366; margin-bottom: 10px; }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1 style="margin:0; font-size: 1.5rem;">عيادة الدكتور محمد برهان</h1>
-    </div>
-    <div class="main-card">
-        <!-- Sidebar -->
-        <div class="sidebar">
-            <h2>فحص أسنان عام</h2>
-            <div class="clinic-detail">⏱️ 30 دقيقة</div>
-            <div class="clinic-detail">📍 كركوك، عيادة الدكتور محمد برهان</div>
-            <p style="font-size: 0.85rem; color: #64748b; line-height: 1.6;">
-                يرجى اختيار موعد مناسب. سيتم تحويلك إلى الواتساب لتأكيد الحجز مع العيادة مباشرة.
-            </p>
-        </div>
-        <!-- Content -->
-        <div class="content">
-            <span class="step-title">1. اختر التاريخ:</span>
-            <input type="date" id="dateInput" onchange="showTimes()">
-            <div id="timeSection" style="display:none;">
-                <span class="step-title">2. اختر الوقت (مساءً):</span>
-                <div class="time-grid">
-                    <div class="time-btn" onclick="selectTime(this)">02:00 م</div>
-                    <div class="time-btn" onclick="selectTime(this)">03:00 م</div>
-                    <div class="time-btn" onclick="selectTime(this)">04:00 م</div>
-                    <div class="time-btn" onclick="selectTime(this)">05:00 م</div>
-                    <div class="time-btn" onclick="selectTime(this)">06:00 م</div>
-                    <div class="time-btn" onclick="selectTime(this)">07:00 م</div>
-                </div>
 
-                <div class="footer">
-                    <span class="step-title">3. الاسم الكامل:</span>
-                    <input type="text" id="patientName" placeholder="اكتب اسمك هنا...">
-                    <button class="confirm-btn" onclick="bookWhatsApp()">
-                        تأكيد الموعد عبر واتساب ✅
-                    </button>
-                </div>
-            </div>
-        </div>
+    <header>
+        <h1>عيادة الدكتور محمد برهان</h1>
+        <p>نظام حجز المواعيد الإلكتروني</p>
+    </header>
+
+    <div class="container" id="bookingForm">
+        <div class="info-box">📍 كركوك | 📞 07709126081</div>
+
+        <label>الاسم الكامل للمريض:</label>
+        <input type="text" id="patientName" placeholder="اكتب اسمك هنا...">
+
+        <label>اختر التاريخ:</label>
+        <input type="date" id="bookingDate">
+
+        <label>اختر الوقت:</label>
+        <input type="time" id="bookingTime">
+
+        <button class="btn-confirm" id="submitBtn" onclick="sendToSheet()">تأكيد الحجز الآن ✅</button>
+    </div>
+
+    <div class="container" id="successMsg">
+        <div class="success-icon">✔️</div>
+        <h2>تم استلام طلبك!</h2>
+        <p>شكراً لك. لقد تم تسجيل موعدك في نظام العيادة بنجاح.</p>
+        <button class="btn-confirm" onclick="location.reload()">حجز موعد آخر</button>
     </div>
 
     <script>
-        let selectedTime = "";
+        function sendToSheet() {
+            const btn = document.getElementById('submitBtn');
+            const scriptURL = 'https://script.google.com/macros/s/AKfycbyFdyEq_1QuSzn1_EaLVNjUmtWsgtLDgzWgYXHX_Utp3YW04OyNdNTZhjCratoTbMJpQQ/exec';
 
-        function showTimes() {
-            document.getElementById('timeSection').style.display = 'block';
-        }
-
-        function selectTime(btn) {
-            document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('selected'));
-            btn.classList.add('selected');
-            selectedTime = btn.innerText;}
-
-        function bookWhatsApp() {
             const name = document.getElementById('patientName').value;
-            const date = document.getElementById('dateInput').value;
-            const clinicPhone = "9647709126081";
+            const date = document.getElementById('bookingDate').value;
+            const time = document.getElementById('bookingTime').value;
 
-            if (!name || !date || !selectedTime) {
-                alert("يرجى إكمال جميع البيانات");
-                return;  }
-            const message = `مرحباً دكتور محمد، أود حجز موعد:%0A%0A` +
-                            `*الاسم:* ${name}%0A` +
-                            `*التاريخ:* ${date}%0A` +
-                            `*الوقت:* ${selectedTime}`; }
-      window.open(`https://wa.me/${clinicPhone}?text=${message}`, '_blank');  }
+            if (!name || !date || !time) {
+                alert("يرجى ملء جميع الحقول");
+                return;
+            }
+
+            btn.innerText = "جاري الحفظ...";
+            btn.disabled = true;
+
+            const data = { name: name, date: date, time: time };
+
+            fetch(scriptURL, {
+                method: 'POST',
+                mode: 'no-cors',
+                cache: 'no-cache',
+                body: JSON.stringify(data)
+            })
+            .then(() => {
+                document.getElementById('bookingForm').style.display = 'none';
+                document.getElementById('successMsg').style.display = 'block';
+            })
+            .catch(() => {
+                alert("حدث خطأ. يرجى المحاولة مرة أخرى.");
+                btn.disabled = false;
+                btn.innerText = "تأكيد الحجز الآن ✅";
+            });
+        }
     </script>
 </body>
 </html>
