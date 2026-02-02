@@ -1,1 +1,67 @@
-html <!DOCTYPE html> <html lang="ar" dir="rtl"> <head> <meta charset="UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>عيادة الدكتور محمد برهان</title> <style> body { font-family: sans-serif; margin: 0; background-color: #f4f9fb; direction: rtl; text-align: center; } header { background-color: #0077b6; color: white; padding: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); } .container { max-width: 800px; margin: 20px auto; background: white; padding: 15px; border-radius: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); } h1 { margin: 0; font-size: 1.5rem; } .info { background: #e9f5f8; padding: 10px; border-radius: 10px; margin-bottom: 20px; color: #0077b6; font-weight: bold; } </style> </head> <body> <header> <h1>عيادة الدكتور محمد برهان لطب الأسنان</h1> </header> <div class="container"> <div class="info">📍 كركوك | 📞 0770 912 6081</div> <p>يرجى اختيار اليوم والوقت المناسب لحجز موعدكم:</p> <!-- THE CALENDLY AREA --> <div class="calendly-inline-widget" data-url="https://calendly.com/haiyamkhalid/30min" style="min-width:320px;height:700px;"></div> <script type="text/javascript" src="https://assets.calendly.com/assets/external/widget.js" async></script> </div> </body> </html> `` ###
+```html
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>حجز موعد - عيادة الدكتور محمد برهان</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f7f8;
+            direction: rtl; /* Sets text to read Right-to-Left for Arabic */
+        }
+        header {
+            background-color: #0077b6;
+            color: white;
+          padding: 30px;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        .info-bar {
+            display: flex;
+            justify-content: space-around;
+            background: #e9f5f8;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            flex-wrap: wrap;
+          gap: 10px;
+        }
+        h1 { margin: 0; font-size: 1.8rem; }
+        .booking-frame { min-height: 700px; width: 100%; border: none; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>عيادة الدكتور محمد برهان لطب الأسنان</h1>
+        <p>احجز موعدك الآن بكل سهولة،يرجى اختيار اليوم والوقت المناسب لحجز موعدكم ة</p>
+    </header>
+
+    <div class="container">
+        <div class="info-bar">
+            <span>📍 كركوك</span>
+            <span>📞 0770 912 6081</span>
+            <span>🕒 السبت - الخميس: 2 مساءً - 8 مساءً</span>
+        </div>
+                <!-- CALENDLY EMBED START -->
+        <div class="calendly-inline-widget" data-url="https://calendly.com/haiyamkhalid/30min" style="min-width:320px;height:700px;"></div>
+        <script type="text/javascript" src="https://assets.calendly.com/assets/external/widget.js" async></script>
+        <!-- CALENDLY EMBED END -->
+    </div>
+
+</body>
+</html>
+```
