@@ -5,84 +5,221 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>حجز موعد - عيادة الدكتور محمد برهان</title>
     <style>
-        :root { --primary: #0077b6; --bg: #f0f7f9; }
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; background-color: var(--bg); direction: rtl; }
-        header { background-color: var(--primary); color: white; padding: 25px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        .container { max-width: 500px; margin: 20px auto; background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
-        .info-box { background: #e9f5f8; padding: 15px; border-radius: 12px; margin-bottom: 25px; color: var(--primary); font-weight: bold; text-align: center; }
-        
-        label { display: block; margin-bottom: 8px; font-weight: bold; color: #333; }
-        input { width: 100%; padding: 14px; margin-bottom: 20px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; font-size: 1rem; }
-        
-        .btn-confirm { background-color: var(--primary); color: white; border: none; padding: 18px; width: 100%; border-radius: 10px; font-size: 1.2rem; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        .btn-confirm:disabled { background-color: #ccc; cursor: not-allowed; }
-        
-        #successMsg { display: none; text-align: center; padding: 20px; }
-        .success-icon { font-size: 50px; color: #25D366; margin-bottom: 10px; }
+        :root { 
+            --primary: #005f8d;
+            --secondary: #eef6fb;
+            --accent: #25D366;
+            --text: #1e293b;
+        }
+
+        body { 
+            font-family: 'Segoe UI', Tahoma, sans-serif; 
+            margin: 0; 
+            background-color: #f8fafc; 
+            direction: rtl; 
+            color: var(--text);
+        }
+
+        /* HERO HEADER (Pinterest Top Style) */
+        .hero {
+            background: linear-gradient(rgba(0, 95, 141, 0.9), rgba(0, 95, 141, 0.9)), url('https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&q=80&w=1000');
+            background-size: cover;
+            background-position: center;
+            padding: 60px 20px;
+            color: white;
+            text-align: center;
+        }
+
+        .hero h1 { font-size: 2.2rem; margin: 0; font-weight: 800; }
+        .hero p { font-size: 1.2rem; margin-top: 10px; opacity: 0.9; font-style: italic; }
+
+        /* SERVICES GRID (Pinterest Middle Style) */
+        .services-title { text-align: center; margin-top: 40px; font-weight: bold; color: var(--primary); }
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 15px;
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 0 15px;
+        }
+        .service-card {
+            background: white;
+            padding: 15px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+            border: 1px solid #edf2f7;
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+
+        /* DOCTOR PROFILE SECTION (Exactly like your image) */
+        .booking-section {
+            max-width: 600px;
+            margin: 40px auto;
+            background: white;
+            border-radius: 30px;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+            padding: 30px;
+        }
+
+        .dr-profile-row {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #f1f5f9;
+            padding-bottom: 20px;
+        }.profile-pic {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 4px solid var(--secondary);
+            object-fit: cover;
+        }
+
+        .dr-info h2 { margin: 0; font-size: 1.3rem; color: var(--primary); }
+        .dr-info p { margin: 5px 0; color: #64748b; font-size: 0.9rem; }
+
+        /* FORM ELEMENTS */
+        label { display: block; margin: 20px 0 10px; font-weight: bold; font-size: 1rem; }
+        input, select { 
+            width: 100%; padding: 15px; border: 2px solid #f1f5f9; border-radius: 12px; 
+            font-size: 1rem; box-sizing: border-box; background: #f8fafc;
+        }
+
+        /* TIME GRID */
+        .time-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
+        .time-btn { 
+            padding: 12px; border: 1px solid var(--primary); color: var(--primary); 
+            border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 0.8rem; text-align: center;
+            transition: 0.3s;
+        }
+        .time-btn.booked { background: #f1f5f9; border-color: #cbd5e1; color: #94a3b8; cursor: not-allowed; text-decoration: line-through; }
+        .time-btn.selected { background: var(--primary); color: white; transform: translateY(-3px); }
+
+        .confirm-btn { 
+            background: var(--primary); color: white; border: none; padding: 20px; width: 100%; 
+            border-radius: 15px; font-size: 1.2rem; font-weight: bold; cursor: pointer; margin-top: 30px;
+            box-shadow: 0 10px 20px rgba(0, 95, 141, 0.2);
+        }
+        .confirm-btn:disabled { background: #cbd5e1; box-shadow: none; }
+
+        #success { display: none; text-align: center; }
+        .success-icon { font-size: 60px; color: var(--accent); margin-bottom: 20px; }
+
+        @media (max-width: 450px) {
+            .time-grid { grid-template-columns: repeat(2, 1fr); }
+            .dr-profile-row { flex-direction: column; text-align: center; }
+        }
     </style>
 </head>
 <body>
 
-    <header>
+    <!-- HERO SECTION -->
+    <div class="hero">
         <h1>عيادة الدكتور محمد برهان</h1>
-        <p>نظام حجز المواعيد الإلكتروني</p>
-    </header>
-
-    <div class="container" id="bookingForm">
-        <div class="info-box">📍 كركوك | 📞 07709126081</div>
-
-        <label>الاسم الكامل للمريض:</label>
-        <input type="text" id="patientName" placeholder="اكتب اسمك هنا...">
-
-        <label>اختر التاريخ:</label>
-        <input type="date" id="bookingDate">
-
-        <label>اختر الوقت:</label>
-        <input type="time" id="bookingTime">
-
-        <button class="btn-confirm" id="submitBtn" onclick="sendToSheet()">تأكيد الحجز الآن ✅</button>
+        <p>أسنان جميلة بدقائق معدودة</p>
     </div>
 
-    <div class="container" id="successMsg">
-        <div class="success-icon">✔️</div>
-        <h2>تم استلام طلبك!</h2>
-        <p>شكراً لك. لقد تم تسجيل موعدك في نظام العيادة بنجاح.</p>
-        <button class="btn-confirm" onclick="location.reload()">حجز موعد آخر</button>
+    <h3 class="services-title">خدماتنا التخصصية</h3>
+    <div class="services-grid">
+        <div class="service-card">🦷 فحص دوري</div>
+        <div class="service-card">✨ تبييض</div>
+        <div class="service-card">💎 حشوات</div>
+        <div class="service-card">⚙️ تقويم</div>
+    </div>
+
+    <!-- MAIN BOOKING CARD -->
+    <div class="booking-section">
+        <div id="formContent">
+            <div class="dr-profile-row">
+                <img src="doctor.jpg" alt="دكتور محمد" class="profile-pic">
+                <div class="dr-info">
+                    <h2>ابدأ رحلتك لابتسامة أفضل</h2>
+                    <p>الموقع: كركوك، العراق</p>
+                    <p>الوقت: 2:00 م - 8:00 م</p>
+                </div>
+            </div><label>1. اسم المريض:</label>
+            <input type="text" id="pName" placeholder="أدخل اسمك الكامل">
+
+            <label>2. سبب الزيارة:</label>
+            <select id="pReason">
+                <option value="فحص عام">فحص عام</option>
+                <option value="تنظيف أسنان">تنظيف أسنان</option>
+                <option value="زراعة اسنان">زراعة اسنان</option>
+                <option value="حشوات">حشوات تجميلية</option>
+            </select>
+
+            <label>3. اختر التاريخ:</label>
+            <input type="date" id="pDate" onchange="loadTimes()">
+
+            <label>4. الأوقات المتاحة:</label>
+            <div id="timeGrid" class="time-grid">
+                <p style="grid-column: span 3; color: #94a3b8; font-size: 0.85rem; text-align: center; padding: 20px;">يرجى اختيار التاريخ أولاً...</p>
+            </div>
+
+            <button class="confirm-btn" id="subBtn" onclick="submitBooking()" disabled>حجز الموعد الآن ✅</button>
+        </div>
+
+        <!-- SUCCESS SCREEN -->
+        <div id="success">
+            <div class="success-icon">✔️</div>
+            <h2>تم استلام طلبك!</h2>
+            <p>شكراً لثقتكم. لقد تم تسجيل الموعد في جدول العيادة.</p>
+            <button class="confirm-btn" onclick="location.reload()">حجز موعد آخر</button>
+        </div>
     </div>
 
     <script>
-        function sendToSheet() {
-            const btn = document.getElementById('submitBtn');
-            const scriptURL = 'https://script.google.com/macros/s/AKfycbyUCzbHB1XxxSNGUTHqJxVYOtkc9adNo2lO4eLGT2MNXimzpLKZ8H4cOAj6_89DRDdVUQ/exec';
+        // PASTE YOUR GOOGLE SCRIPT URL HERE
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbx66y8fc7iBTUwVY3TuBGm1-0PI3VMNT1XwAuyLjYAzJYRQozoJH-m2MuFzYW9F09OMgg/exec';
+        
+        let selectedTime = "";
+        let bookedData = [];
 
-            const name = document.getElementById('patientName').value;
-            const date = document.getElementById('bookingDate').value;
-            const time = document.getElementById('bookingTime').value;
+        fetch(scriptURL).then(res => res.json()).then(data => { bookedData = data; });
 
-            if (!name || !date || !time) {
-                alert("يرجى ملء جميع الحقول");
-                return;
+        function loadTimes() {
+            const date = document.getElementById('pDate').value;
+            const grid = document.getElementById('timeGrid');
+            grid.innerHTML = "";
+            for (let hour = 14; hour < 20; hour++) {
+                for (let min of ["00", "15", "30", "45"]) {
+                    let displayHour = hour > 12 ? hour - 12 : hour;
+                    let timeLabel = `${displayHour}:${min} م`;
+                    let isBooked = bookedData.some(b => b.date.includes(date) && b.time === timeLabel);
+                    let btn = document.createElement('div');
+                    btn.className = "time-btn" + (isBooked ? " booked" : "");
+                    btn.innerText = timeLabel;
+                    if (!isBooked) {
+                        btn.onclick = function() { 
+                            document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('selected'));
+                            this.classList.add('selected');
+                            selectedTime = timeLabel;
+                            document.getElementById('subBtn').disabled = false;
+                        };
+                    }
+                    grid.appendChild(btn);
+                }
             }
+        }
 
-            btn.innerText = "جاري الحفظ...";
-            btn.disabled = true;
-
-            const data = { name: name, date: date, time: time };
-
-            fetch(scriptURL, {
-                method: 'POST',
-                mode: 'no-cors',
-                cache: 'no-cache',
-                body: JSON.stringify(data)
-            })
-            .then(() => {
-                document.getElementById('bookingForm').style.display = 'none';
-                document.getElementById('successMsg').style.display = 'block';
-            })
-            .catch(() => {
-                alert("حدث خطأ. يرجى المحاولة مرة أخرى.");
-                btn.disabled = false;
-                btn.innerText = "تأكيد الحجز الآن ✅";  }); }
+        function submitBooking() {
+            const name = document.getElementById('pName').value;
+            const date = document.getElementById('pDate').value;
+            const reason = document.getElementById('pReason').value;
+            if (!name || !date || !selectedTime) return;
+            document.getElementById('subBtn').innerText = "جاري الحجز...";
+            document.getElementById('subBtn').disabled = true;
+            fetch(scriptURL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ name, date, time: selectedTime, reason }) })
+                        .then(() => {
+                document.getElementById('formContent').style.display = 'none';
+                document.getElementById('success').style.display = 'block';
+            });
+        }
     </script>
 </body>
 </html>
