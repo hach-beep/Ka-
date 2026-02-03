@@ -5,81 +5,76 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>حجز موعد - عيادة د. محمد برهان</title>
     <style>
-        :root { --primary: #0077b6; --gradient: linear-gradient(135deg, #00b4db 0%, #0083b0 100%); }
+        :root { --primary: #0077b6; --gradient: linear-gradient(135deg, #00b4db 0%, #0077b6 100%); }
         body { font-family: 'Segoe UI', sans-serif; margin: 0; background-color: #f4f7f9; direction: rtl; }
         
-        /* MODERN HERO BOX (Pinterest Style) */
-        .hero-box {
-            background: var(--gradient);
-            padding: 40px 20px;
-            color: white;
-            text-align: right;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .hero-content {
-            display: flex;
-            align-items: center;
-            gap: 30px;
-            max-width: 700px;
-            width: 100%;
-        }
-
+        /* HERO BOX (Pinterest + Professional Combo) */
+        .hero-header { background: var(--gradient); padding: 40px 20px; color: white; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+        .hero-container { display: flex; align-items: center; justify-content: center; gap: 25px; max-width: 800px; margin: 0 auto; }
+        
         .profile-pic {
-            width: 130px; /* Bigger photo */
-            height: 130px;
-            border-radius: 50%;
-            border: 5px solid rgba(255,255,255,0.3);
-            object-fit: cover;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            width: 150px; height: 150px;
+            border-radius: 50%; border: 5px solid rgba(255,255,255,0.3);
+            object-fit: cover; object-position: center; /* Ensures head isn't cut */
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
         }
 
+        .hero-text { text-align: right; }
         .hero-text h1 { margin: 0; font-size: 2rem; font-weight: 800; }
-        .hero-text .slogan { font-size: 1.2rem; margin-top: 5px; opacity: 0.9; font-style: italic; color: #e0f2fe; }
+        .specialty { font-size: 1.1rem; margin: 5px 0; opacity: 0.9; }
+        .slogan { font-size: 1rem; color: #e0f2fe; font-style: italic; margin: 0; }
 
-        /* FORM CONTAINER */
-        .container { max-width: 550px; margin: -30px auto 40px auto; background: white; padding: 30px; border-radius: 25px; box-shadow: 0 15px 40px rgba(0,0,0,0.1); }
-        
-        .info-strip { text-align: center; color: var(--primary); font-weight: bold; margin-bottom: 25px; font-size: 0.9rem; }
-        
-        label { display: block; margin: 20px 0 8px; font-weight: bold; color: #333; }
-        input, select { width: 100%; padding: 14px; border: 1px solid #e2e8f0; border-radius: 12px; font-size: 1rem; box-sizing: border-box; background: #fbfcfd; }
+        /* CLINIC INFO STRIP */
+        .info-strip {
+            background: white; max-width: 550px; margin: -25px auto 30px auto;
+            padding: 15px; border-radius: 15px; display: flex; justify-content: space-around;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1); font-weight: bold; color: var(--primary); font-size: 0.9rem;
+        }
+
+        /* BOOKING FORM */
+        .container { max-width: 550px; margin: 0 auto 50px auto; background: white; padding: 30px; border-radius: 25px; box-shadow: 0 20px 50px rgba(0,0,0,0.1); box-sizing: border-box; }
+        label { display: block; margin: 20px 0 8px; font-weight: bold; color: #333; text-align: right; }
+        input, select { width: 100%; padding: 15px; border: 1px solid #e2e8f0; border-radius: 12px; font-size: 1rem; box-sizing: border-box; }
         
         /* TIME GRID */
-        .time-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 10px; }
-        .time-btn { padding: 12px; border: 1px solid var(--primary); color: var(--primary); border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 0.85rem; text-align: center; }
-        .time-btn.booked { background: #f1f5f9; border-color: #cbd5e1; color: #94a3b8; cursor: not-allowed; text-decoration: line-through; opacity: 0.6; }
+        .time-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
+        .time-btn { padding: 12px; border: 1px solid var(--primary); color: var(--primary); border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 0.85rem; text-align: center; transition: 0.2s; }
+        .time-btn.booked { background: #f1f5f9; border-color: #cbd5e1; color: #94a3b8; cursor: not-allowed; text-decoration: line-through; opacity: 0.5; }
         .time-btn.selected { background: var(--primary); color: white; }
 
-        .btn-main { background: var(--primary); color: white; border: none; padding: 18px; width: 100%; border-radius: 15px; font-size: 1.2rem; font-weight: bold; cursor: pointer; margin-top: 30px; box-shadow: 0 10px 20px rgba(0, 119, 182, 0.2); }
-        .btn-main:disabled { background: #cbd5e1; box-shadow: none; cursor: not-allowed; }
+        .btn-confirm { background: var(--primary); color: white; border: none; padding: 18px; width: 100%; border-radius: 15px; font-size: 1.2rem; font-weight: bold; cursor: pointer; margin-top: 30px; }
+        .btn-confirm:disabled { background: #cbd5e1; cursor: not-allowed; }
 
-        @media (max-width: 500px) {
-            .hero-content { flex-direction: column; text-align: center; gap: 15px; }
-            .time-grid { grid-template-columns: 1fr 1fr; }
-                 }
+        #success { display: none; text-align: center; }
+@media (max-width: 600px) {
+            .hero-container { flex-direction: column; text-align: center; }
+            .hero-text { text-align: center; }
+            .time-grid { grid-template-columns: repeat(2, 1fr); }
+            .profile-pic { width: 120px; height: 120px; }
+        }
     </style>
 </head>
 <body>
 
-    <div class="hero-box">
-        <div class="hero-content">
-            <!-- Replace doctor.jpg with your photo name if different -->
-            <img src="IMG_20260203_233626_888.jpg" alt="دكتور محمد" class="profile-pic">
+    <div class="hero-header">
+        <div class="hero-container">
+            <img src="صورة" alt="دكتور محمد" class="profile-pic">
             <div class="hero-text">
                 <h1>عيادة الدكتور محمد برهان</h1>
+                <p class="specialty">طب وجراحة وتجميل الأسنان</p>
                 <p class="slogan">أسنان جميلة بدقائق معدودة</p>
             </div>
         </div>
     </div>
 
-    <div class="container">
-        <div class="info-strip">📍 كركوك | 🕒 2:00 م - 8:00 م</div>
+    <div class="info-strip">
+        <span>📍 كركوك</span>
+        <span>📞 07709126081</span>
+        <span>🕒 2:00 م - 8:00 م</span>
+    </div>
 
-        <div id="bookingForm">
+    <div class="container">
+        <div id="formBody">
             <label>اسم المريض الكامل:</label>
             <input type="text" id="pName" placeholder="أدخل اسمك هنا...">
 
@@ -87,56 +82,59 @@
             <select id="pReason">
                 <option value="فحص عام">فحص عام</option>
                 <option value="تنظيف أسنان">تنظيف أسنان</option>
-                <option value="تقويم">استشارة تقويم</option>
-                <option value="حشوات">حشوات تجميلية</option>
+                <option value="حشوات تجميلية">حشوات تجميلية</option>
                 <option value="قلع أسنان">قلع أسنان</option>
                 <option value="تركيب أسنان">تركيب أسنان</option>
                 <option value="برد أسنان (جسر)">برد أسنان (جسر)</option>
+                <option value="تقويم">استشارة تقويم</option>
             </select>
 
             <label>اختر التاريخ:</label>
-            <input type="date" id="pDate" onchange="loadTimes()">
+            <input type="date" id="pDate" onchange="refreshSlots()">
 
             <label>الأوقات المتاحة:</label>
             <div id="timeGrid" class="time-grid">
-                <p style="grid-column: span 3; color: #94a3b8; font-size: 0.85rem; text-align: center; padding: 20px;">يرجى اختيار التاريخ أولاً...</p>
+                <p style="grid-column: span 3; color: #94a3b8; font-size: 0.85rem; text-align: center; padding: 10px;">يرجى اختيار التاريخ أولاً...</p>
             </div>
 
-            <button class="btn-main" id="subBtn" onclick="submitBooking()" disabled>حجز الموعد الآن ✅</button>
+            <button class="btn-confirm" id="subBtn" onclick="submitBooking()" disabled>تأكيد الحجز الآن ✅</button>
         </div>
 
-        <div id="success" style="display:none; text-align:center;">
-            <div style="font-size: 60px; color: #25D366;">✔️</div>
-            <h2>تم الحجز بنجاح!</h2>
-            <p>تم تسجيل موعدك في نظام العيادة. نراك قريباً.</p>
-            <button class="btn-main" onclick="location.reload()">حجز موعد جديد</button>
+        <div id="success">
+            <div style="font-size: 60px; color: #25D366; margin-bottom: 15px;">✔️</div>
+            <h2>تم استلام طلبك!</h2>
+            <p>شكراً لثقتكم. لقد تم تسجيل الموعد في نظام العيادة بنجاح.</p>
+            <button class="btn-confirm" onclick="location.reload()">حجز موعد آخر</button>
         </div>
     </div>
 
     <script>
-        const scriptURL = 'https://script.google.com/macros/s/AKfycbyzc-qi0proYZ_oNu1AU9hj2Sjp4K6PPdUwz4njECQuBcH8XSuQO3s0sm0CrDxVAJAh-Q/exec';
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbxznhwb2kNn5ym6yn5W75mHs3gJMl2TB7xi0XPoHyRftYRXPH5xOqRItidAfrjYN5kL-w/exec'; // <--- PUT YOUR NEW DEPLOYMENT LINK HERE
         let selectedTime = "";
         let bookedData = [];
 
-        // Load data from Sheet
         function fetchBookings() {
             fetch(scriptURL).then(res => res.json()).then(data => { 
-                bookedData = data; 
-                console.log("Booked Data Loaded:", bookedData);
+                bookedData = data;
+                console.log("Sheet Data:", bookedData);
             });
         }
-        fetchBookings();
-
-        function loadTimes() {
-            const date = document.getElementById('pDate').value;
+        fetchBookings();function refreshSlots() {
+            const dateInput = document.getElementById('pDate').value;
             const grid = document.getElementById('timeGrid');
             grid.innerHTML = "";
             
+            // Generate slots every 15 minutes
             for (let hour = 14; hour < 20; hour++) {
                 for (let min of ["00", "15", "30", "45"]) {
                     let h = hour > 12 ? hour - 12 : hour;
-                    let timeLabel = `${h}:${min} م`;// SMART CHECK: Compare to Google Sheet data
-                    let isBooked = bookedData.some(b => b.date.includes(date) && b.time.trim() === timeLabel.trim());
+                    let timeLabel = `${h}:${min} م`;
+                    
+                    // SMART CHECK: Normalize strings to ensure match
+                    let isBooked = bookedData.some(b => {
+                        let sheetDate = b.date.split('T')[0]; // Handles different date formats
+                        return (sheetDate === dateInput || b.date === dateInput) && b.time.trim() === timeLabel.trim();
+                    });
                     
                     let btn = document.createElement('div');
                     btn.className = "time-btn" + (isBooked ? " booked" : "");
@@ -159,16 +157,16 @@
             const date = document.getElementById('pDate').value;
             const reason = document.getElementById('pReason').value;
             if (!name || !date || !selectedTime) return;
+            
             document.getElementById('subBtn').innerText = "جاري الحفظ...";
             document.getElementById('subBtn').disabled = true;
 
             fetch(scriptURL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ name, date, time: selectedTime, reason }) })
             .then(() => {
-                document.getElementById('bookingForm').style.display = 'none';
+                document.getElementById('formBody').style.display = 'none';
                 document.getElementById('success').style.display = 'block';
             });
         }
     </script>
 </body>
 </html>
-        }
