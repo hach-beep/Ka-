@@ -185,6 +185,18 @@
             const dateInput = document.getElementById('pDate').value;
             const grid = document.getElementById('timeGrid');
             grid.innerHTML = "";
+            
+            // --- FRIDAY CHECK START ---
+            const selectedDate = new Date(dateInput);
+            const dayOfWeek = selectedDate.getDay(); // 5 = Friday
+
+            if (dayOfWeek === 5) {
+                grid.innerHTML = "<p style='grid-column: span 3; color: #ef4444; font-weight: bold; padding: 20px;'>العيادة مغلقة يوم الجمعة. يرجى اختيار يوم آخر.</p>";
+                document.getElementById('subBtn').disabled = true;
+                return; // Stop the code here so no times show up
+            }
+            // --- FRIDAY CHECK END ---
+
             for (let hour = 14; hour < 20; hour++) {
                 for (let min of ["00", "15", "30", "45"]) {
                     let h = hour > 12 ? hour - 12 : hour;
