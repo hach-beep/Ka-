@@ -8,49 +8,37 @@
         :root { --primary: #0077b6; --gradient: linear-gradient(135deg, #00b4db 0%, #0077b6 100%); }
         body { font-family: 'Segoe UI', sans-serif; margin: 0; background-color: #f4f7f9; direction: rtl; }
         
-        /* HERO BOX (Pinterest + Professional Combo) */
-        .hero-header { background: var(--gradient); padding: 40px 20px; color: white; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
-        .hero-container { display: flex; align-items: center; justify-content: center; gap: 25px; max-width: 800px; margin: 0 auto; }
+        .hero-header { background: var(--gradient); padding: 50px 20px; color: white; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+        .hero-container { display: flex; align-items: center; justify-content: center; gap: 30px; max-width: 800px; margin: 0 auto; }
         
         .profile-pic {
-            width: 150px; height: 150px;
-            border-radius: 50%; border: 5px solid rgba(255,255,255,0.3);
-            object-fit: cover; object-position: center; /* Ensures head isn't cut */
+            width: 160px; height: 160px; /* Even bigger */
+            border-radius: 50%; border: 6px solid rgba(255,255,255,0.3);
+            object-fit: cover; object-position: top; /* Keeps head in frame */
             box-shadow: 0 10px 25px rgba(0,0,0,0.2);
         }
 
-        .hero-text { text-align: right; }
-        .hero-text h1 { margin: 0; font-size: 2rem; font-weight: 800; }
-        .specialty { font-size: 1.1rem; margin: 5px 0; opacity: 0.9; }
+        .hero-text { text-align: right; flex: 1; }
+        .hero-text h1 { margin: 0; font-size: 2.2rem; font-weight: 800; }
+        .specialty { font-size: 1.2rem; margin: 5px 0; opacity: 0.9; font-weight: bold; }
         .slogan { font-size: 1rem; color: #e0f2fe; font-style: italic; margin: 0; }
 
-        /* CLINIC INFO STRIP */
-        .info-strip {
-            background: white; max-width: 550px; margin: -25px auto 30px auto;
-            padding: 15px; border-radius: 15px; display: flex; justify-content: space-around;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1); font-weight: bold; color: var(--primary); font-size: 0.9rem;
-        }
+        .info-strip { background: white; max-width: 550px; margin: -25px auto 30px auto; padding: 15px; border-radius: 15px; display: flex; justify-content: space-around; box-shadow: 0 10px 30px rgba(0,0,0,0.1); font-weight: bold; color: var(--primary); }
 
-        /* BOOKING FORM */
         .container { max-width: 550px; margin: 0 auto 50px auto; background: white; padding: 30px; border-radius: 25px; box-shadow: 0 20px 50px rgba(0,0,0,0.1); box-sizing: border-box; }
         label { display: block; margin: 20px 0 8px; font-weight: bold; color: #333; text-align: right; }
         input, select { width: 100%; padding: 15px; border: 1px solid #e2e8f0; border-radius: 12px; font-size: 1rem; box-sizing: border-box; }
         
-        /* TIME GRID */
         .time-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
-        .time-btn { padding: 12px; border: 1px solid var(--primary); color: var(--primary); border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 0.85rem; text-align: center; transition: 0.2s; }
-        .time-btn.booked { background: #f1f5f9; border-color: #cbd5e1; color: #94a3b8; cursor: not-allowed; text-decoration: line-through; opacity: 0.5; }
+        .time-btn { padding: 12px; border: 1px solid var(--primary); color: var(--primary); border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 0.85rem; text-align: center; }
         .time-btn.selected { background: var(--primary); color: white; }
 
-        .btn-confirm { background: var(--primary); color: white; border: none; padding: 18px; width: 100%; border-radius: 15px; font-size: 1.2rem; font-weight: bold; cursor: pointer; margin-top: 30px; }
-        .btn-confirm:disabled { background: #cbd5e1; cursor: not-allowed; }
-
+        .btn-confirm { background: var(--primary); color: white; border: none; padding: 20px; width: 100%; border-radius: 15px; font-size: 1.2rem; font-weight: bold; cursor: pointer; margin-top: 30px; }
         #success { display: none; text-align: center; }
 @media (max-width: 600px) {
-            .hero-container { flex-direction: column; text-align: center; }
+            .hero-container { flex-direction: column-reverse; text-align: center; }
             .hero-text { text-align: center; }
-            .time-grid { grid-template-columns: repeat(2, 1fr); }
-            .profile-pic { width: 120px; height: 120px; }
+            .profile-pic { width: 140px; height: 140px; }
         }
     </style>
 </head>
@@ -58,25 +46,24 @@
 
     <div class="hero-header">
         <div class="hero-container">
-            <img src="IMG_20260203_233626_888.jpg" alt="دكتور محمد" class="profile-pic">
             <div class="hero-text">
                 <h1>عيادة الدكتور محمد برهان</h1>
                 <p class="specialty">طب وجراحة وتجميل الأسنان</p>
                 <p class="slogan">أسنان جميلة بدقائق معدودة</p>
             </div>
+            <img src="doctor.jpg" alt="دكتور محمد" class="profile-pic">
         </div>
     </div>
 
     <div class="info-strip">
         <span>📍 كركوك</span>
         <span>📞 07709126081</span>
-        <span></span>12:00 pm 20:00-pm </span>
     </div>
 
     <div class="container">
         <div id="formBody">
             <label>اسم المريض الكامل:</label>
-            <input type="text" id="pName" placeholder="أدخل اسمك هنا...">
+            <input type="text" id="pName" placeholder="أدخل اسمك الكامل">
 
             <label>نوع المعالجة:</label>
             <select id="pReason">
@@ -92,64 +79,59 @@
             <label>اختر التاريخ:</label>
             <input type="date" id="pDate" onchange="refreshSlots()">
 
-            <label>الأوقات المتاحة:</label>
+            <label>الأوقات المتاحة (2م - 8م):</label>
             <div id="timeGrid" class="time-grid">
-                <p style="grid-column: span 3; color: #94a3b8; font-size: 0.85rem; text-align: center; padding: 10px;">يرجى اختيار التاريخ أولاً...</p>
+                <p style="grid-column: span 3; color: #94a3b8; font-size: 0.85rem; text-align: center;">يرجى اختيار التاريخ أولاً...</p>
             </div>
 
             <button class="btn-confirm" id="subBtn" onclick="submitBooking()" disabled>تأكيد الحجز الآن ✅</button>
         </div>
 
         <div id="success">
-            <div style="font-size: 60px; color: #25D366; margin-bottom: 15px;">✔️</div>
-            <h2>تم استلام طلبك!</h2>
-            <p>شكراً لثقتكم. لقد تم تسجيل الموعد في نظام العيادة بنجاح.</p>
-            <button class="btn-confirm" onclick="location.reload()">حجز موعد آخر</button>
+            <div style="font-size: 60px; color: #25D366;">✔️</div>
+            <h2>تم الحجز بنجاح!</h2>
+            <p>نراكم في العيادة قريباً.</p>
+            <button class="btn-confirm" onclick="location.reload()">حجز موعد جديد</button>
         </div>
     </div>
 
     <script>
-        const scriptURL = 'https://script.google.com/macros/s/AKfycbym0rRAp1T6G7cHAdROVxG_XFI5Me1S1lqKeRNDwh7tMEUy0NKwKDpmU1wHkCr9_neV7Q/exec'; // <--- PUT YOUR NEW DEPLOYMENT LINK HERE
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbzipyxVvENvlxr98FgpzSwo7rmE93O3T7IINJh79HE-F0j4f1Y_y_6Vz5jAT4t7JokrEw/exec'; // <--- PUT NEW DEPLOYMENT LINK HERE
         let selectedTime = "";
         let bookedData = [];
+        fetch(scriptURL).then(res => res.json()).then(data => { bookedData = data; });
 
-        function fetchBookings() {
-            fetch(scriptURL).then(res => res.json()).then(data => { 
-                bookedData = data;
-                console.log("Sheet Data:", bookedData);
-            });
-        }
-        fetchBookings();function refreshSlots() {
+        function refreshSlots() {
             const dateInput = document.getElementById('pDate').value;
             const grid = document.getElementById('timeGrid');
             grid.innerHTML = "";
             
-            // Generate slots every 15 minutes
             for (let hour = 14; hour < 20; hour++) {
                 for (let min of ["00", "15", "30", "45"]) {
                     let h = hour > 12 ? hour - 12 : hour;
                     let timeLabel = `${h}:${min} م`;
                     
-                    // SMART CHECK: Normalize strings to ensure match
+                    // Logic: Check if slot exists in sheet
                     let isBooked = bookedData.some(b => {
-                        let sheetDate = b.date.split('T')[0]; // Handles different date formats
-                        return (sheetDate === dateInput || b.date === dateInput) && b.time.trim() === timeLabel.trim();
+                        return b.date === dateInput && b.time.trim() === timeLabel.trim();
                     });
                     
-                    let btn = document.createElement('div');
-                    btn.className = "time-btn" + (isBooked ? " booked" : "");
-                    btn.innerText = timeLabel;
+                    // If it is NOT booked, show the button
                     if (!isBooked) {
+                        let btn = document.createElement('div');
+                        btn.className = "time-btn";
+                        btn.innerText = timeLabel;
                         btn.onclick = function() { 
                             document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('selected'));
                             this.classList.add('selected');
                             selectedTime = timeLabel;
                             document.getElementById('subBtn').disabled = false;
                         };
+                        grid.appendChild(btn);
                     }
-                    grid.appendChild(btn);
                 }
             }
+            if(grid.innerHTML === "") { grid.innerHTML = "<p style='grid-column:span 3;'>لا توجد أوقات متاحة لهذا اليوم</p>"; }
         }
 
         function submitBooking() {
@@ -157,10 +139,7 @@
             const date = document.getElementById('pDate').value;
             const reason = document.getElementById('pReason').value;
             if (!name || !date || !selectedTime) return;
-            
             document.getElementById('subBtn').innerText = "جاري الحفظ...";
-            document.getElementById('subBtn').disabled = true;
-
             fetch(scriptURL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ name, date, time: selectedTime, reason }) })
             .then(() => {
                 document.getElementById('formBody').style.display = 'none';
