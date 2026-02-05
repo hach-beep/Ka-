@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>حجز موعد - عيادة د. محمد برهان</title>
+    
+    <!-- LOAD FIREBASE LIBRARIES -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+    <style>
+        :root { 
+            --premium-blue: #003459; 
+            --accent-blue: #0077b6;
+            --soft-bg: #f8fafc;
+        }
+
+        body { 
+            font-family: 'Segoe UI', sans-serif; 
+            margin: 0; background-color: var(--soft-bg); direction: rtl; color: #1e293b;
+        }
+
+        .hero-section {
+            background: linear-gradient(135deg, var(--premium-blue) 0%, var(--accent-blue) 100%);
+            padding: 60px 20px 80px 20px; color: white; text-align: center;
+        }
+
+        .hero-container {
+            display: flex; align-items: center; justify-content: center; gap: 25px;
+            max-width: 650px; margin: 0 auto;
+        }
+
+        .profile-pic { 
+            width: 130px; height: 130px; border-radius: 50%; border: 4px solid rgba(255,255,255,0.4); 
+            object-fit: cover; object-position: center 15%; box-shadow: 0 10px 30px rgba(0,0,0,0.3); 
+        }
+
+        .hero-text { text-align: right; }
+        .hero-text h1 { margin: 0; font-size: 1.8rem; font-weight: 800; }
+        .slogan { font-size: 0.95rem; opacity: 0.8; font-style: italic; background: rgba(255,255,255,0.1); padding: 4px 12px; border-radius: 20px; display: inline-block; margin-top: 10px; }
+
+        .info-strip { background: white; max-width: 500px; margin: -35px auto 30px auto; padding: 18px; border-radius: 20px; display: flex; justify-content: space-around; box-shadow: 0 15px 35px rgba(0,0,0,0.1); font-weight: bold; color: var(--premium-blue); position: relative; z-index: 2; }
+
+        .container { max-width: 500px; margin: 0 auto 60px auto; background: white; padding: 35px; border-radius: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.05); box-sizing: border-box; }
+        label { display: block; margin: 25px 0 10px; font-weight: 700; color: #334155; }
+        input, select { width: 100%; padding: 16px; border: 2px solid #f1f5f9; border-radius: 15px; font-size: 1rem; box-sizing: border-box; }
+        
+        .time-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 15px; }
+        .time-btn { padding: 14px; border: 1px solid #e2e8f0; color: var(--premium-blue); border-radius: 12px; cursor: pointer; font-weight: 700; text-align: center; background: white; transition: 0.2s; }
+        .time-btn.selected { background: var(--accent-blue); color: white; border-color: var(--accent-blue); transform: scale(1.05); }
+
+        .btn-confirm { background: var(--premium-blue); color: white; border: none; padding: 20px; width: 100%; border-radius: 18px; font-size: 1.2rem; font-weight: 800; cursor: pointer; margin-top: 40px; }
+        .btn-confirm:disabled { background: #cbd5e1; cursor: not-allowed; }
+
+        #success { display: none; text-align: center; }
+
+        @media (max-width: 500px) { .hero-container { flex-direction: column; text-align: center; } .hero-text { text-align: center; } .time-grid { grid-template-columns: repeat(2, 1fr); } }
+    </style>
+</head>
+<body>
+  <div class="hero-section">
+        <div class="hero-container">
+            <img src="doctor.jpg" alt="دكتور محمد" class="profile-pic">
+            <div class="hero-text">
+                <h1>عيادة د. محمد برهان</h1>
+                <p style="margin:5px 0; color:#caf0f8;">جراحة وتجميل الأسنان</p>
+                <div class="slogan">أسنان جميلة بدقائق معدودة ✨</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="info-strip"><span>📍 كركوك</span><span>🕒 2:00 م - 8:00 م</span></div>
+
+    <div class="container">
+        <div id="formBody">
+            <label>اسم المريض الكامل:</label>
+            <input type="text" id="pName" placeholder="أدخل اسم المريض">
+
+            <label>نوع المعالجة:</label>
+            <select id="pReason">
+                <option value="فحص عام">فحص عام</option>
+                <option value="تنظيف أسنان">تنظيف أسنان</option>
+                <option value="تقويم">استشارة تقويم</option>
+                <option value="حشوات">حشوات تجميلية</option>
+                <option value="قلع">قلع أسنان</option>
+                <option value="تركيب">تركيب أسنان</option>
+                <option value="برد جسر">برد أسنان (جسر)</option>
+            </select>
+
+            <label>اختر التاريخ:</label>
+            <input type="date" id="pDate" onchange="checkAvailability()">
+
+            <label>الأوقات المتاحة:</label>
+            <div id="timeGrid" class="time-grid">
+                <p style="grid-column: span 3; color: #94a3b8; font-size: 0.85rem; text-align: center;">يرجى اختيار التاريخ أولاً...</p>
+            </div>
+
+            <button class="btn-confirm" id="subBtn" onclick="submitBooking()" disabled>تأكيد الحجز الآن ✅</button>
+        </div>
+
+        <div id="success">
+            <div style="font-size: 60px; color: #25D366; margin-bottom: 15px;">✔️</div>
+            <h2 style="color:var(--premium-blue)">تم الحجز بنجاح!</h2>
+            <p>لقد تم تسجيل موعدك في نظام العيادة.</p>
+            <button class="btn-confirm" onclick="location.reload()">حجز موعد جديد</button>
+        </div>
+    </div>
+
+    <script>
+        // YOUR FIREBASE CONFIG
+        const firebaseConfig = {
+            apiKey: "AIzaSyDqMEr5yKTjN3GV5osJmwW_2hdKVQOzFWs",
+            authDomain: "dentalclinicbooking-system.firebaseapp.com",
+            projectId: "dentalclinicbooking-system",
+            storageBucket: "dentalclinicbooking-system.firebasestorage.app",
+            messagingSenderId: "892853005967",
+            appId: "1:892853005967:web:1a5fb182c073eba1ee0afa"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        let selectedTime = "";
+
+        async function checkAvailability() {
+            const dateInput = document.getElementById('pDate').value;
+            const grid = document.getElementById('timeGrid');
+            grid.innerHTML = "جاري التحميل...";
+          // Friday Check
+            const day = new Date(dateInput).getDay();
+            if (day === 5) {
+                grid.innerHTML = "<p style='grid-column: span 3; color:red; font-weight:bold; padding:20px;'>العيادة مغلقة يوم الجمعة</p>";
+                document.getElementById('subBtn').disabled = true;
+                return;
+            }
+
+            // Get booked times from Firebase
+            const snapshot = await db.collection("bookings").where("date", "==", dateInput).get();
+            let bookedTimes = [];
+            snapshot.forEach(doc => bookedTimes.push(doc.data().time));
+
+            grid.innerHTML = "";
+            for (let hour = 14; hour < 20; hour++) {
+                for (let min of ["00", "15", "30", "45"]) {
+                    let h = hour > 12 ? hour - 12 : hour;
+                    let timeLabel = `${h}:${min} م`;
+                    
+                    if (!bookedTimes.includes(timeLabel)) {
+                        let btn = document.createElement('div');
+                        btn.className = "time-btn";
+                        btn.innerText = timeLabel;
+                        btn.onclick = function() {
+                            document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('selected'));
+                            this.classList.add('selected');
+                            selectedTime = timeLabel;
+                            document.getElementById('subBtn').disabled = false;
+                        };
+                        grid.appendChild(btn);
+                    }
+                }
+            }
+            if(grid.innerHTML === "") { grid.innerHTML = "<p style='grid-column:span 3;'>لا توجد أوقات متاحة لهذا اليوم</p>"; }
+        }
+
+        function submitBooking() {
+            const name = document.getElementById('pName').value;
+            const date = document.getElementById('pDate').value;
+            const reason = document.getElementById('pReason').value;
+            
+            document.getElementById('subBtn').innerText = "جاري الحفظ...";
+
+            db.collection("bookings").add({
+                name: name,
+                date: date,
+                time: selectedTime,
+                reason: reason,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => {
+                document.getElementById('formBody').style.display = 'none';
+                document.getElementById('success').style.display = 'block';
+            });
+        }
+    </script>
+</body>
+</html>
