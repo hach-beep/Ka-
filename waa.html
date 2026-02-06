@@ -7,12 +7,12 @@
     <style>
         :root { 
             --premium-blue: #003459; 
-            --accent-blue: #0077b6;
+            --accent-light-blue: #0077b6;
             --soft-bg: #f8fafc;
         }
 
         body { 
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+            font-family: Tahoma, Roboto, Helvetica, Arial, sans-serif; 
             margin: 0; 
             background-color: var(--soft-bg); 
             direction: rtl; 
@@ -125,13 +125,12 @@
     <div class="hero-section">
         <div class="hero-container">
             <!-- DOCTOR PHOTO -->
-            <img src="IMG_20260203_233626_888~2.jpg" alt="دكتور محمد" class="profile-pic">
+            <img src="IMG_20260203_233626_888~2.jpg" class="profile-pic">
             
             <!-- DOCTOR TEXT -->
             <div class="hero-text">
                 <h1>عيادة د. محمد برهان</h1>
-                <p class="specialty">زراعة و تجميل الأسنان</p>
-                <div class="slogan">أسنان جميلة بدقائق معدودة 😁</div>
+                <h2 class="specialty">زراعة و تجميل الأسنان</h2>
             </div>
         </div>
     </div>
@@ -170,7 +169,7 @@
         <div id="success">
             <div style="font-size: 60px; color: #25D366; margin-bottom: 15px;">✔️</div>
             <h2 style="color:var(--premium-blue)">تم الحجز بنجاح!</h2>
-            <p>لقد تم تسجيل موعدك في نظام العيادة. نراك قريباً.</p>
+            <p>لقد تم تسجيل موعدك في نظام العيادة.نراك قريباً.</p>
             <button class="btn-confirm" onclick="location.reload()">حجز موعد جديد</button>
         </div>
     </div>
