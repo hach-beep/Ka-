@@ -3,28 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة التحكم - عيادة د. محمد برهان</title>
+    <title>حجز موعد - عيادة د. محمد برهان</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #f0f4f8; margin: 0; direction: rtl; padding: 20px; }
-        header { background: #003459; color: white; padding: 20px; text-align: center; border-radius: 15px; margin-bottom: 20px; }
-        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th { background: #f8fafc; text-align: right; padding: 15px; color: #64748b; }
-        td { padding: 15px; border-bottom: 1px solid #f1f5f9; }
-        .btn-delete { background: #fee2e2; color: #ef4444; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; }
-        .tag { background: #e0f2fe; color: #0077b6; padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; }
+        :root { --premium-blue: #003459; --accent-blue: #0077b6; --soft-bg: #f8fafc; }
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background-color: var(--soft-bg); direction: rtl; }
+        
+        /* SIDE-BY-SIDE HERO BOX */
+        .hero-section { 
+            background: linear-gradient(rgba(0, 52, 89, 0.85), rgba(0, 119, 182, 0.85)), url('https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&q=80&w=1000');
+            background-size: cover; background-position: center; padding: 60px 20px; color: white;
+        }
+        .hero-container { display: flex; align-items: center; justify-content: center; gap: 30px; max-width: 750px; margin: 0 auto; }
+        
+        .profile-pic { 
+            width: 150px; height: 150px; border-radius: 50%; border: 5px solid rgba(255,255,255,0.4); 
+            object-fit: cover; 
+            object-position: center 15%; /* FACE FOCUS FIXED HERE */
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3); 
+        }
+
+        .hero-text { text-align: right; flex: 1; }
+        .hero-text h1 { margin: 0; font-size: 2rem; font-weight: 800; }
+        .slogan { font-size: 1rem; color: #e0f2fe; font-style: italic; margin-top: 10px; }
+
+        .info-strip { background: white; max-width: 550px; 
+        margin: -35px auto 30px auto; padding: 18px; border-radius: 20px; display: flex; justify-content: space-around; box-shadow: 0 15px 35px rgba(0,0,0,0.1); font-weight: bold; color: var(--premium-blue); }
+        .container { max-width: 550px; margin: 0 auto 60px auto; background: white; padding: 35px; border-radius: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.05); box-sizing: border-box; }
+        label { display: block; margin: 20px 0 10px; font-weight: 700; }
+        input, select { width: 100%; padding: 16px; border: 2px solid #f1f5f9; border-radius: 15px; font-size: 1rem; box-sizing: border-box; }
+        
+        .time-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 15px; }
+        .time-btn { padding: 14px; border: 1px solid #e2e8f0; color: var(--premium-blue); border-radius: 12px; cursor: pointer; font-weight: 700; text-align: center; background: white; }
+        .time-btn.selected { background: var(--accent-blue); color: white; }
+        .btn-confirm { background: var(--premium-blue); color: white; border: none; padding: 20px; width: 100%; border-radius: 18px; font-size: 1.2rem; font-weight: 800; cursor: pointer; margin-top: 40px; }
+        #success { display: none; text-align: center; }
+        @media (max-width: 600px) { .hero-container { flex-direction: column; text-align: center; } .hero-text { text-align: center; } .time-grid { grid-template-columns: repeat(2, 1fr); } }
     </style>
 </head>
 <body>
-    <header><h1>جدول مواعيد العيادة 🦷</h1></header>
-    <div class="card">
-        <table>
-            <thead><tr><th>المريض</th><th>التاريخ</th><th>الوقت</th><th>السبب</th><th>إجراء</th></tr></thead>
-            <tbody id="tableBody"></tbody>
-        </table>
+    <div class="hero-section">
+        <div class="hero-container">
+            <img src="doctor.jpg" class="profile-pic"> <!-- MAKE SURE PHOTO NAME IS CORRECT -->
+            <div class="hero-text">
+                <h1>عيادة د. محمد برهان</h1>
+                <p style="margin:5px 0; color:#caf0f8;">طب وجراحة وتجميل الأسنان</p>
+                <div class="slogan">أسنان جميلة بدقائق معدودة ✨</div>
+            </div>
+        </div>
     </div>
+    <div class="info-strip"><span>📍 كركوك</span><span>📞 07709126081</span></div>
+    <div class="container" id="formBody">
+        <label>اسم المريض الكامل:</label><input type="text" id="pName" placeholder="أدخل اسم المريض">
+        <label>نوع المعالجة:</label>
+        <select id="pReason">
+            <option value="فحص عام">فحص عام</option>
+            <option value="تنظيف">تنظيف</option>
+            <option value="تقويم">تقويم</option>
+            <option value="حشوات">حشوات</option>
+            <option value="قلع أسنان">قلع أسنان</option>
+            <option value="تركيب أسنان">تركيب أسنان</option>
+            <option value="برد أسنان (جسر)">برد أسنان (جسر)</option>
+        </select>
+        <label>اختر التاريخ:</label><input type="date" id="pDate" onchange="checkAvailability()">
+        <label>الأوقات المتاحة:</label><div id="timeGrid" class="time-grid"><p style="grid-column: span 3; text-align: center;">يرجى اختيار التاريخ أولاً...</p></div>
+        <button class="btn-confirm" id="subBtn" onclick="submitBooking()" disabled>تأكيد الحجز الآن ✅</button>
+    </div>
+    <div class="container" id="success"><div style="font-size: 60px; color: #25D366;">✔️</div><h2>تم الحجز بنجاح!</h2><button class="btn-confirm" onclick="location.reload()">حجز موعد جديد</button></div>
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyDqMEr5yKTjN3GV5osJmwW_2hdKVQOzFWs",
@@ -36,19 +82,44 @@
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
+        let selectedTime = "";
 
-        db.collection("bookings").orderBy("date").onSnapshot((querySnapshot) => {
-            const tableBody = document.getElementById('tableBody');
-            tableBody.innerHTML = "";
-            querySnapshot.forEach((doc) => {
-                const data = doc.data();
-                tableBody.innerHTML += `<tr><td>${data.name}</td><td>${data.date}</td><td>${data.time}</td><td><span class="tag">${data.reason}</span></td><td><button class="btn-delete" onclick="deleteBooking('${doc.id}')">إلغاء</button></td></tr>`;
-                </tr>`;
-            });
-        });
+        async function checkAvailability() {
+            const dateInput = document.getElementById('pDate').value;
+            const grid = document.getElementById('timeGrid');
+            grid.innerHTML = "جاري التحميل...";
+            
+            // FRIDAY HOLIDAY LOGIC FIXED HERE
+            if (new Date(dateInput).getDay() === 5) { 
+                grid.innerHTML = "<p style='grid-column: span 3; color:red; font-weight:bold;'>الجمعة عطلة العيادة</p>"; 
+                document.getElementById('subBtn').disabled = true;
+                return; 
+            }
 
-        function deleteBooking(id) {
-            if (confirm("هل أنت متأكد؟")) { db.collection("bookings").doc(id).delete(); }
+            const snapshot = await db.collection("bookings").where("date", "==", dateInput).get();
+            let bookedTimes = [];
+            snapshot.forEach(doc => bookedTimes.push(doc.data().time));
+            grid.innerHTML = "";
+            for (let hour = 14; hour < 20; hour++) {
+                for (let min of ["00", "15", "30", "45"]) {
+                    let h = hour > 12 ? hour - 12 : hour;
+                    let timeLabel = `${h}:${min} م`;
+                    if (!bookedTimes.includes(timeLabel)) {
+                        let btn = document.createElement('div'); btn.className = "time-btn"; btn.innerText = timeLabel;
+                        btn.onclick = function() { document.querySelectorAll('.time-btn').forEach(b => 
+                                                                                                  b.classList.remove('selected')); this.classList.add('selected'); selectedTime = timeLabel; document.getElementById('subBtn').disabled = false; };
+                        grid.appendChild(btn);
+                    }
+                }
+            }
+        }
+
+        function submitBooking() {
+            const name = document.getElementById('pName').value;
+            const date = document.getElementById('pDate').value;
+            const reason = document.getElementById('pReason').value;
+            db.collection("bookings").add({ name, date, time: selectedTime, reason, timestamp: firebase.firestore.FieldValue.serverTimestamp() })
+            .then(() => { document.getElementById('formBody').style.display = 'none'; document.getElementById('success').style.display = 'block'; });
         }
     </script>
 </body>
