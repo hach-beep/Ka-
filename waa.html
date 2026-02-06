@@ -70,14 +70,15 @@
                 querySnapshot.forEach((doc) => {
                     const data = doc.data();
                     const row = `
-                        <tr>
-                            <td><strong>${data.name}</strong></td>
-                            <td>${data.date}</td>
-                            <td>${data.time}</td>
-                            <td><span class="tag">${data.reason}</span></td>
-                            <td><button class="btn-delete" onclick="deleteBooking('${doc.id}')">إلغاء</button></td>
-                        </tr>
-                    `;
+   <tr>
+       <td><strong>${data.name}</strong></td>
+        <td><a href="tel:${data.phone}" style="color:#0077b6; text-decoration:none; font-weight:bold;">${data.phone}</a></td>
+        <td>${data.date}</td>
+        <td>${data.time}</td>
+        <td><span class="tag">${data.reason}</span></td>
+        <td><button class="btn-delete" onclick="deleteBooking('${doc.id}')">إلغاء</button></td>
+    </tr>
+`;
                     tableBody.innerHTML += row;
                 });
                 
