@@ -1,15 +1,23 @@
 {
-  "name": "Clinic Dashboard",
+  "name": "Clinic Schedule",
   "short_name": "Clinic",
+  "description": "Doctor Mohamed's Appointment Dashboard",
   "start_url": "dr.html",
   "display": "standalone",
   "background_color": "#003459",
   "theme_color": "#003459",
   "icons": [
     {
-      "src": "IMG_20260203_233626_888~2.jpg",
+      "src": "doctor.jpg",
       "sizes": "192x192",
-      "type": "image/jpeg"
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "doctor.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
     }
   ]
 }
