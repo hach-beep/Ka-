@@ -3,69 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة تحكم العيادة - د. محمد برهان</title>
+    <title>لوحة التحكم - عيادة د. محمد برهان</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <style>
         :root { --dark: #003459; --accent: #0077b6; --bg: #f4f9fb; }
         body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); margin: 0; direction: rtl; }
-        
-        /* HEADER SECTION */
-        header { 
-            background: var(--dark); color: white; padding: 20px; 
-            display: flex; align-items: center; justify-content: space-between;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-        .dr-info-header { display: flex; align-items: center; gap: 15px; }
-        .dr-photo { width: 60px; height: 60px; border-radius: 50%; border: 2px solid white; object-fit: cover; object-position: center 15%; }
-        .dr-title h1 { margin: 0; font-size: 1.2rem; }
-        .dr-title p { margin: 0; font-size: 0.8rem; opacity: 0.8; }
-
-        /* TOP ACTION BUTTONS */
+        header { background: var(--dark); color: white; padding: 20px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .dr-profile { display: flex; align-items: center; gap: 15px; }
+        .dr-photo { width: 55px; height: 55px; border-radius: 50%; border: 2px solid white; object-fit: cover; }
         .actions { display: flex; gap: 10px; }
-        .icon-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 10px; border-radius: 12px; cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; }
-        #adminHistoryIcon { display: none; } /* Hidden for Secretary */
-
-        /* TABLE CONTAINER */
+        .icon-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 10px; border-radius: 12px; cursor: pointer; font-size: 1.2rem; }
+        #adminHistoryIcon { display: none; }
         .container { padding: 15px; }
-        .table-card { background: white; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; min-width: 700px; } /* Ensures all columns fit */
-        th { background: #f8fafc; text-align: right; padding: 15px; color: #64748b; font-size: 0.85rem; border-bottom: 2px solid #f1f5f9; }
-        td { padding: 15px; border-bottom: 1px solid #f1f5f9; font-size: 0.95rem; }
-
+        .card { background: white; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 800px; }
+        th { background: #f8fafc; text-align: right; padding: 15px; color: #64748b; font-size: 0.85rem; }
+        td { padding: 15px; border-bottom: 1px solid #f1f5f9; }
         .patient-name { font-weight: bold; color: var(--dark); }
-        .patient-name.admin-link { color: var(--accent); cursor: pointer; text-decoration: underline; }
-        .phone-link { color: var(--accent); text-decoration: none; font-weight: bold; }
-        .tag { background: #e0f2fe; color: #0077b6; padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; }
-        .btn-delete { background: #fee2e2; color: #ef4444; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-weight: bold; }
-* MEDICAL HISTORY MODAL */
-        #historyModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 2000; }
+        .admin-link { color: var(--accent); cursor: pointer; text-decoration: underline; }
+        .btn-del { background: #fee2e2; color: #ef4444; border: none; padding: 8px; border-radius: 8px; cursor: pointer; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 2000; }
         .modal-content { background: white; width: 90%; max-width: 500px; margin: 30px auto; padding: 25px; border-radius: 25px; position: relative; }
         textarea { width: 100%; height: 100px; margin: 15px 0; border-radius: 12px; padding: 12px; border: 1px solid #ddd; box-sizing: border-box; font-size: 1rem; }
-        .save-btn { background: var(--accent); color: white; border: none; padding: 15px; width: 100%; border-radius: 12px; font-weight: bold; font-size: 1.1rem; cursor: pointer; }
     </style>
 </head>
 <body>
-
     <header>
-        <div class="dr-info-header">
-            <img src="doctor.jpg" class="dr-photo" alt="Doctor">
-            <div class="dr-title">
-                <h1>د. محمد برهان</h1>
-                <p>طب وجراحة وتجميل الأسنان</p>
-            </div>
+        <div class="dr-profile">
+            <img src="doctor.jpg" class="dr-photo">
+            <div class="dr-name"><h1>د. محمد برهان</h1><p>لوحة التحكم</p></div>
         </div>
         <div class="actions">
-            <!-- SECRET ICON FOR ADMINS ONLY -->
-            <button id="adminHistoryIcon" class="icon-btn" onclick="alert('لوحة السجلات الشاملة قيد التطوير')">📂</button>
+            <button id="adminHistoryIcon" class="icon-btn" onclick="openAllRecords()">📂</button>
             <button class="icon-btn" onclick="location.reload()">🔄</button>
             <button class="icon-btn" onclick="firebase.auth().signOut()">🚪</button>
         </div>
     </header>
 
     <div class="container">
-        <div class="table-card">
+        <div class="card">
             <table>
                 <thead>
                     <tr>
@@ -73,29 +51,30 @@
                         <th>رقم الهاتف</th>
                         <th>التاريخ</th>
                         <th>الوقت</th>
-                        <th>نوع المعالجة</th>
+                        <th>السبب</th>
                         <th>إجراء</th>
                     </tr>
                 </thead>
-                <tbody id="tableBody">
-                    <tr><td colspan="6" style="text-align:center; padding:50px;">جاري تحميل المواعيد...</td></tr>
-                </tbody>
+                <tbody id="tableBody"></tbody>
             </table>
         </div>
     </div>
 
-    <!-- MEDICAL HISTORY POPUP -->
-    <div id="historyModal">
-        <div class="modal-content">
-            <span onclick="closeHistory()" style="position:absolute; left:20px; top:15px; cursor:pointer; font-size:1.5rem;">&times;</span>
-            <h2 id="modalTitle" style="color:var(--dark);">السجل الطبي</h2>
-            <div id="historyList" style="max-height:200px; overflow-y:auto; background:#f8fafc; border-radius:12px; padding:15px; margin-bottom:10px;"></div>
-            <label>إضافة ملاحظة طبية (للطبيب فقط):</label>
-            <textarea id="historyNote" placeholder="اكتب التشخيص أو العلاج هنا..."></textarea>
-            <button class="save-btn" onclick="saveNote()">حفظ السجل 💾</button>
-        </div>
-    </div>
-    <script>
+    <!-- MODALS -->
+    <div id="historyModal" class="modal"><div class="modal-content">
+        <span onclick="closeModals()" style="float:left; cursor:pointer;">&times;</span>
+        <h2 id="modalTitle">السجل الطبي</h2>
+        <div id="historyList" style="max-height:200px; overflow-y:auto; background:#f8fafc; padding:10px; border-radius:10px;"></div>
+        <textarea id="historyNote" placeholder="أضف ملاحظة طبية..."></textarea>
+        <button style="background:var(--accent); color:white; width:100%; padding:15px; border:none; border-radius:12px;" onclick="saveNote()">حفظ 💾</button>
+    </div></div>
+
+    <div id="allRecordsModal" class="modal"><div class="modal-content">
+        <span onclick="closeModals()" style="float:left; cursor:pointer;">&times;</span>
+        <h2>كافة السجلات الطبية</h2>
+        <div id="allRecordsList" style="max-height:400px; overflow-y:auto;"></div>
+    </div></div>
+<script>
         const firebaseConfig = {
             apiKey: "AIzaSyDqMEr5yKTjN3GV5osJmwW_2hdKVQOzFWs",
             authDomain: "dentalclinicbooking-system.firebaseapp.com",
@@ -107,7 +86,6 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // --- CONFIG: ADMIN EMAILS ---
         const ADMINS = ["dr.mohamed@gmail.com", "YOUR_EMAIL@gmail.com"]; 
         let activePatientName = "";
         let userIsAdmin = false;
@@ -115,9 +93,7 @@
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
                 userIsAdmin = ADMINS.includes(user.email);
-                if (userIsAdmin) {
-                    document.getElementById('adminHistoryIcon').style.display = 'flex';
-                }
+                if (userIsAdmin) document.getElementById('adminHistoryIcon').style.display = 'flex';
                 loadBookings();
             } else {
                 window.location.href = "login.html";
@@ -130,21 +106,15 @@
                 tableBody.innerHTML = "";
                 snapshot.forEach((doc) => {
                     const data = doc.data();
-                    
-                    // Admin features: Name is clickable to see history
-                    const nameClass = userIsAdmin ? "patient-name admin-link" : "patient-name";
-                    const nameAction = userIsAdmin ? `onclick="openHistory('${data.name}')"` : "";
-
-                    tableBody.innerHTML += `
-                        <tr>
-                            <td class="${nameClass}" ${nameAction}>${data.name}</td>
-                            <td><a href="tel:${data.phone}" class="phone-link">${data.phone}</a></td>
-                            <td>${data.date}</td>
-                            <td>${data.time}</td>
-                            <td><span class="tag">${data.reason}</span></td>
-                            <td><button class="btn-delete" onclick="deleteBooking('${doc.id}')">حذف</button></td>
-                        </tr>
-                    `;
+                    const nameHTML = userIsAdmin ? `<span class="admin-link" onclick="openHistory('${data.name}')">${data.name}</span>` : `<strong>${data.name}</strong>`;
+                    tableBody.innerHTML += `<tr>
+                        <td>${nameHTML}</td>
+                        <td><a href="tel:${data.phone}" style="text-decoration:none; color:var(--accent);">📞 ${data.phone}</a></td>
+                        <td>${data.date}</td>
+                        <td>${data.time}</td>
+                        <td><span style="font-size:0.8rem; background:#e0f2fe; padding:4px 8px; border-radius:10px;">${data.reason}</span></td>
+                        <td><button class="btn-del" onclick="deleteBooking('${doc.id}')">🗑️</button></td>
+                    </tr>`;
                 });
             });
         }
@@ -153,11 +123,20 @@
             activePatientName = name;
             document.getElementById('modalTitle').innerText = "سجل: " + name;
             document.getElementById('historyModal').style.display = 'block';
-            const notes = await db.collection("medicalHistory").where("patientName", "==", name).orderBy("timestamp", "desc").get();
+            const snapshot = await db.collection("medicalHistory").where("patientName", "==", name).orderBy("timestamp", "desc").get();
             const list = document.getElementById('historyList');
-            list.innerHTML = notes.empty ? "لا يوجد سجل سابق" : "";
-            notes.forEach(doc => {
-                list.innerHTML += `<div style="padding:10px; border-bottom:1px solid #eee;"><small>${doc.data().date}</small><br>${doc.data().note}</div>`;
+            list.innerHTML = snapshot.empty ? "لا يوجد سجل" : "";
+            snapshot.forEach(doc => { list.innerHTML += `<div style="padding:10px; border-bottom:1px solid #eee;"><small>${doc.data().date}</small><br>${doc.data().note}</div>`; });
+        }
+
+        async function openAllRecords() {
+            document.getElementById('allRecordsModal').style.display = 'block';
+            const snapshot = await db.collection("medicalHistory").orderBy("timestamp", "desc").get();
+            const list = document.getElementById('allRecordsList');
+            list.innerHTML = "";
+            snapshot.forEach(doc => {
+                const d = doc.data();
+                list.innerHTML += `<div style="padding:15px; border-bottom:1px solid #eee;"><strong style="color:var(--accent);">${d.patientName}</strong> <small>(${d.date})</small><br>${d.note}</div>`;
             });
         }
 
@@ -166,11 +145,11 @@
             if(!note) return;
             db.collection("medicalHistory").add({
                 patientName: activePatientName, note: note, date: new Date().toLocaleDateString('ar-EG'), timestamp: firebase.firestore.FieldValue.serverTimestamp()
-            }).then(() => { document.getElementById('historyNote').value = ""; openHistory(activePatientName); });
+            }).then(() => { document.getElementById('historyNote').value = ""; closeModals(); });
         }
 
-        function closeHistory() { document.getElementById('historyModal').style.display = 'none'; }
-        function deleteBooking(id) { if(confirm("حذف الموعد؟")) db.collection("bookings").doc(id).delete(); }
+        function closeModals() { document.getElementById('historyModal').style.display = 'none'; document.getElementById('allRecordsModal').style.display = 'none'; }
+        function deleteBooking(id) { if(confirm("حذف؟")) db.collection("bookings").doc(id).delete(); }
     </script>
 </body>
 </html>
