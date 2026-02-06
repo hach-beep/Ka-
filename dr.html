@@ -88,10 +88,17 @@
             });
         }
 
-        // DELETE FUNCTION
+                // THE FIXED DELETE FUNCTION
         function deleteBooking(id) {
             if (confirm("هل أنت متأكد من إلغاء هذا الموعد؟")) {
-                db.collection("bookings").doc(id).delete();
+                db.collection("bookings").doc(id).delete()
+                .then(() => {
+                    // The page will update automatically because of onSnapshot
+                    alert("تم إلغاء الموعد بنجاح");
+                })
+                .catch((error) => {
+                    alert("خطأ في الإلغاء: " + error);
+                });
             }
         }
 
