@@ -48,7 +48,7 @@
             <img src="IMG_20260203_233626_888~2.jpg" class="profile-pic"> <!-- MAKE SURE PHOTO NAME IS CORRECT -->
             <div class="hero-text">
                 <h1>عيادة د. محمد برهان</h1>
-                <p style="margin:5px 0; color:#caf0f8;">طب وجراحة وتجميل الأسنان</p>
+                <p style="margin:5px 0; color:#caf0f8;">طب زراعة و تجميل الأسنان</p>
                 <div class="slogan">أسنان جميلة بدقائق معدودة ✨</div>
             </div>
         </div>
@@ -56,6 +56,7 @@
     <div class="info-strip"><span>📍 كركوك</span><span>📞 07709126081</span></div>
     <div class="container" id="formBody">
         <label>اسم المريض الكامل:</label><input type="text" id="pName" placeholder="أدخل اسم المريض">
+        <label>رقم الهاتف:</label><input type="text" id="pNumper">
         <label>نوع المعالجة:</label>
         <select id="pReason">
             <option value="فحص عام">فحص عام</option>
@@ -91,7 +92,7 @@
             
             // FRIDAY HOLIDAY LOGIC FIXED HERE
             if (new Date(dateInput).getDay() === 5) { 
-                grid.innerHTML = "<p style='grid-column: span 3; color:red; font-weight:bold;'>الجمعة عطلة العيادة</p>"; 
+                grid.innerHTML = "<p style='grid-column: span 3; color:red; font-weight:bold;'> . العيادة مغلقة يوم الجمعة ، يرجى اختيار يوم اخر  </p>"; 
                 document.getElementById('subBtn').disabled = true;
                 return; 
             }
