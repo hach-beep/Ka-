@@ -33,6 +33,11 @@
 firebase.auth().signInWithEmailAndPassword(email, password)
     .then(() => { 
         window.location.href = "waa.html"; // Sends you to the dashboard
+        document.addEventListener('keypress', function (e) {
+    if (e.key === 'Enter') {
+        login();
+    }
+});
     })
         };
         firebase.initializeApp(firebaseConfig);
