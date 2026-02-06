@@ -29,6 +29,11 @@
             storageBucket: "dentalclinicbooking-system.firebasestorage.app",
             messagingSenderId: "892853005967",
             appId: "1:892853005967:web:1a5fb182c073eba1ee0afa"
+            // ... (inside the login function)
+firebase.auth().signInWithEmailAndPassword(email, password)
+    .then(() => { 
+        window.location.href = "waa.html"; // Sends you to the dashboard
+    })
         };
         firebase.initializeApp(firebaseConfig);
 
