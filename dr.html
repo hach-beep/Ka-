@@ -56,8 +56,8 @@
     <div class="info-strip"><span>📍 كركوك</span><span>📞 07709126081</span></div>
     <div class="container" id="formBody">
         <label>اسم المريض الكامل:</label><input type="text" id="pName" placeholder="أدخل اسم المريض">
-        <label>رقم الهاتف:</label><input type="text" id="pNumper">
-        <label>نوع المعالجة:</label>
+        <label>رقم الهاتف:</label><input type="tel" id="pPhone" placeholder="أدخل رقم الهاتف">
+        <label>سبب الزيارة :</label>
         <select id="pReason">
             <option value="فحص عام">فحص عام</option>
             <option value="تنظيف">تنظيف</option>
@@ -117,9 +117,10 @@
 
         function submitBooking() {
             const name = document.getElementById('pName').value;
+           const phone = document.getElementById('pPhone').value;
             const date = document.getElementById('pDate').value;
             const reason = document.getElementById('pReason').value;
-            db.collection("bookings").add({ name, date, time: selectedTime, reason, timestamp: firebase.firestore.FieldValue.serverTimestamp() })
+            db.collection("bookings").add({ name, phone, date, time: selectedTime, reason, timestamp: firebase.firestore.FieldValue.serverTimestamp() })
             .then(() => { document.getElementById('formBody').style.display = 'none'; document.getElementById('success').style.display = 'block'; });
         }
     </script>
