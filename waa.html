@@ -89,17 +89,23 @@
             <button class="save-btn" onclick="saveNote()">حفظ في السجل 💾</button>
         </div>
     </div>
-
-    <!-- ALL RECORDS MODAL -->
-    <div id="allRecordsModal" class="modal">
-        <div class="modal-content" style="max-width: 600px;">
-            <span onclick="closeModals()" style="float:left; cursor:pointer;">&times;</span>
-            <h2>كافة السجلات الطبية للعيادة</h2>
-            <div id="allRecordsList" style="max-height:450px; overflow-y:auto;"></div>
-        </div>
-    </div>
-
     <script>
+            async function openAllRecords() {
+                        document.getElementById('allRecordsModal').style.display = 'block';
+                        const list = document.getElementById('allRecordsList');
+                        list.innerHTML = "جاري التحميل...";
+
+                        const snapshot = await db.collection("medicalHistory").get();
+                        list.innerHTML = "";
+                        
+                        snapshot.forEach(doc => {
+                            const d = doc.data();
+                            list.innerHTML += `
+                                <div style="padding:15px; border-bottom:1px solid #eee;">
+                                    <strong style="color:var(--accent);">${d.patientName}</strong> <small>(${d.date})</small><br>${d.note}
+                                </div>`;
+                        });
+            }
         const firebaseConfig = {
             apiKey: "AIzaSyDqMEr5yKTjN3GV5osJmwW_2hdKVQOzFWs",
             authDomain: "dentalclinicbooking-system.firebaseapp.com",
@@ -174,48 +180,55 @@ function loadBookings() {
                 rows[i].style.display = name.includes(input) ? "" : "none";
             }
         }
-
-        // OPEN SPECIFIC HISTORY
-        async function openHistory(name) {
+async function openHistory(name) {
             activePatientName = name;
             document.getElementById('modalTitle').innerText = "سجل: " + name;
             document.getElementById('historyModal').style.display = 'block';
             const list = document.getElementById('historyList');
             list.innerHTML = "جاري التحميل...";
 
-            const snapshot = await db.collection("medicalHistory").where("patientName", "==", name).orderBy("timestamp", "desc").get();
-            list.innerHTML = snapshot.empty ? "لا يوجد سجل سابق لهذا المريض" : "";
-            snapshot.forEach(doc => {
-                const d = doc.data();
-                list.innerHTML += `<div style="padding:10px; border-bottom:1px solid #eee; margin-bottom:5px;">
-                    <small style="color:#64748b;">${d.date}</small><br>
-                    <strong>${d.note}</strong>
-                </div>`;
+            const snapshot = await db.collection("medicalHistory").where("patientName", "==", name).get();
+            let notes = [];
+            snapshot.forEach(doc => notes.push({id: doc.id, ...doc.data()}));
+            notes.sort((a, b) => b.timestamp - a.timestamp);
+
+            list.innerHTML = notes.length === 0 ? "لا يوجد سجل سابق" : "";
+            notes.forEach(n => {
+                list.innerHTML += `
+                    <div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #eee;">
+                        <div><small style="color:#64748b;">${n.date}</small><br><strong>${n.note}</strong></div>
+                        <button onclick="deleteNote('${n.id}')" style="color:red; background:none; border:none; cursor:pointer;">✕</button>
+                    </div>`;
             });
         }
-
-        async function openAllRecords() {
-            document.getElementById('allRecordsModal').style.display = 'block';
-            const snapshot = await db.collection("medicalHistory").orderBy("timestamp", "desc").get();
-            const list = document.getElementById('allRecordsList');
-            list.innerHTML = "";
-            snapshot.forEach(doc => {
-                const d = doc.data();
-                list.innerHTML += `<div style="padding:15px; border-bottom:1px solid #eee;">
-                    <strong style="color:var(--accent);">${d.patientName}</strong> <small>(${d.date})</small><br>${d.note}
-                </div>`;
-            });
-        }
-
         function saveNote() {
-            const note = document.getElementById('historyNote').value;
-            if(!note) return;
+            const noteText = document.getElementById('historyNote').value;
+            if(!noteText) return;
             db.collection("medicalHistory").add({
-                patientName: activePatientName, note: note, date: new Date().toLocaleDateString('ar-EG'), timestamp: firebase.firestore.FieldValue.serverTimestamp()
-            }).then(() => { document.getElementById('historyNote').value = ""; openHistory(activePatientName); });
+                patientName: activePatientName,
+                note: noteText,
+                date: new Date().toLocaleDateString('ar-EG'),
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => {
+                document.getElementById('historyNote').value = "";
+                openHistory(activePatientName);
+            });
         }
-        function closeModals() { document.getElementById('historyModal').style.display = 'none'; document.getElementById('allRecordsModal').style.display = 'none'; }
-        function deleteBooking(id) { if(confirm("حذف الموعد؟")) db.collection("bookings").doc(id).delete(); }
+
+        function deleteNote(id) {
+            if(confirm("حذف هذه الملاحظة؟")) {
+                db.collection("medicalHistory").doc(id).delete().then(() => openHistory(activePatientName));
+            }
+        }
+
+        function closeModals() { 
+            document.getElementById('historyModal').style.display = 'none'; 
+            document.getElementById('allRecordsModal').style.display = 'none'; 
+        }
+
+        function deleteBooking(id) { 
+            if(confirm("حذف الموعد؟")) db.collection("bookings").doc(id).delete(); 
+            }
     </script>
 </body>
 </html>
