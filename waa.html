@@ -89,6 +89,14 @@
             <button class="save-btn" onclick="saveNote()">حفظ في السجل 💾</button>
         </div>
     </div>
+        <!-- ALL RECORDS MODAL (The Hidden Room for the Folder Icon) -->
+    <div id="allRecordsModal" class="modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <span onclick="closeModals()" style="float:left; cursor:pointer; font-size:1.5rem;">&times;</span>
+            <h2 style="color:var(--dark);">كافة السجلات الطبية</h2>
+            <div id="allRecordsList" style="max-height:450px; overflow-y:auto;"></div>
+        </div>
+    </div>
     <script>
             async function openAllRecords() {
                         document.getElementById('allRecordsModal').style.display = 'block';
@@ -154,15 +162,16 @@ function loadBookings() {
                 // 3. Display the sorted list
                 allBookings.forEach((data) => {
                     const nameHTML = userIsAdmin ? `<span class="admin-link" onclick="openHistory('${data.name}')">${data.name}</span>` : `<strong>${data.name}</strong>`;
-                    
-                    tableBody.innerHTML += `<tr>
-                        <td>${nameHTML}</td>
-                        <td><a href="tel:${data.phone}" style="text-decoration:none; color:var(--accent);">📞 ${data.phone}</a></td>
-                        <td>${data.date}</td>
-                        <td>${data.time}</td>
-                        <td><span style="font-size:0.8rem; background:#e0f2fe; padding:4px 8px; border-radius:10px;">${data.reason}</span></td>
-                        <td><button class="btn-del" onclick="deleteBooking('${data.id}')">🗑️</button></td>
-                    </tr>`;
+                        const pPhone = data.phone || "لا يوجد رقم";
+            tableBody.innerHTML += `
+                <tr>
+                    <td>${nameHTML}</td>
+                    <td><a href="tel:${pPhone}" style="text-decoration:none; color:var(--accent); font-weight:bold;">📞 ${pPhone}</a></td>
+                    <td>${data.date}</td>
+                    <td>${data.time}</td>
+                    <td><span style="font-size:0.8rem; background:#e0f2fe; padding:4px 8px; border-radius:10px;">${data.reason}</span></td>
+                    <td><button class="btn-del" onclick="deleteBooking('${data.id}')">🗑️</button></td>
+                </tr>`;
                 });
 
                 if (allBookings.length === 0) {
