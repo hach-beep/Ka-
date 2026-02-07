@@ -111,7 +111,7 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        const ADMINS = ["dr.mohamed@gmail.com", "YOUR_EMAIL@gmail.com"]; 
+        const ADMINS = ["dr.mohamed@gmail.com", "haiyamkhalid@gmail.com"]; 
         let activePatientName = "";
         let userIsAdmin = false;
 
@@ -124,23 +124,44 @@
                 window.location.href = "login.html";
             }
         });
-
-        function loadBookings() {
-            db.collection("bookings").orderBy("timestamp", "desc").onSnapshot((snapshot) => {
+function loadBookings() {
+            db.collection("bookings").onSnapshot((snapshot) => {
                 const tableBody = document.getElementById('tableBody');
                 tableBody.innerHTML = "";
-                snapshot.forEach((doc) => {
-                    const data = doc.data();
+
+                // 1. Convert snapshot to an array so we can sort it
+                let allBookings = [];
+                snapshot.forEach(doc => {
+                    allBookings.push({ id: doc.id, ...doc.data() });
+                });
+
+                // 2. THE SMART SORT (Date first, then Time)
+                allBookings.sort((a, b) => {
+                    // Compare Dates (YYYY-MM-DD)
+                    if (a.date !== b.date) {
+                        return a.date.localeCompare(b.date);
+                    }
+                    // If dates are the same, compare Times (02:00 م)
+                    return a.time.localeCompare(b.time);
+                });
+
+                // 3. Display the sorted list
+                allBookings.forEach((data) => {
                     const nameHTML = userIsAdmin ? `<span class="admin-link" onclick="openHistory('${data.name}')">${data.name}</span>` : `<strong>${data.name}</strong>`;
+                    
                     tableBody.innerHTML += `<tr>
                         <td>${nameHTML}</td>
                         <td><a href="tel:${data.phone}" style="text-decoration:none; color:var(--accent);">📞 ${data.phone}</a></td>
                         <td>${data.date}</td>
                         <td>${data.time}</td>
                         <td><span style="font-size:0.8rem; background:#e0f2fe; padding:4px 8px; border-radius:10px;">${data.reason}</span></td>
-                        <td><button class="btn-del" onclick="deleteBooking('${doc.id}')">🗑️</button></td>
+                        <td><button class="btn-del" onclick="deleteBooking('${data.id}')">🗑️</button></td>
                     </tr>`;
                 });
+
+                if (allBookings.length === 0) {
+                    tableBody.innerHTML = "<tr><td colspan='6' style='text-align:center;'>لا توجد مواعيد</td></tr>";
+                }
             });
         }
 
