@@ -179,16 +179,25 @@ function loadBookings() {
                 }
             });
         }
+           function searchTable() {
+    // 1. Get what the user typed
+    let input = document.getElementById("searchInput").value.toLowerCase().trim();
+    // 2. Get all the rows in the table
+    let rows = document.getElementById("tableBody").getElementsByTagName("tr");
 
-        // SEARCH FUNCTION
-        function searchTable() {
-            let input = document.getElementById("searchInput").value.toLowerCase();
-            let rows = document.getElementById("tableBody").getElementsByTagName("tr");
-            for (let i = 0; i < rows.length; i++) {
-                let name = rows[i].getElementsByTagName("td")[0].textContent.toLowerCase();
-                rows[i].style.display = name.includes(input) ? "" : "none";
-            }
+    for (let i = 0; i < rows.length; i++) {
+        // 3. Look at all the text in the WHOLE row
+        let rowText = rows[i].textContent.toLowerCase();
+        
+        // 4. If the text matches, show the row. If not, hide it.
+        if (rowText.includes(input)) {
+            rows[i].style.display = "";
+        } else {
+            rows[i].style.display = "none";
         }
+    }
+}
+        
 async function openHistory(name) {
             activePatientName = name;
             document.getElementById('modalTitle').innerText = "سجل: " + name;
