@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dental Cloud Pro - الإدارة الطبية</title>
+    
+    <!-- LIBRARIES -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <style>
+        :root { 
+            --navy: #001d3d; 
+            --blue: #003566; 
+            --gold: #ffc300; 
+            --soft-bg: #f8fafc;
+            --glass: rgba(255, 255, 255, 0.9);
+        }
+
+        body { 
+            font-family: 'Segoe UI', sans-serif; margin: 0; 
+            background-color: var(--soft-bg); direction: rtl; color: var(--navy);
+        }
+
+        /* PREMIUM TOP BAR */
+        header { 
+            background: var(--navy); color: white; padding: 15px 25px; 
+            display: flex; align-items: center; justify-content: space-between;
+            position: sticky; top: 0; z-index: 100;
+        }
+        .dr-brand { display: flex; align-items: center; gap: 12px; }
+        .dr-brand img { width: 45px; height: 45px; border-radius: 50%; border: 2px solid var(--gold); }
+        /* DASHBOARD STATS */
+        .stats-bar { 
+            display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; 
+            padding: 20px; max-width: 1000px; margin: 0 auto;
+        }
+        .stat-card { 
+            background: white; padding: 20px; border-radius: 20px; 
+            text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+            border-bottom: 4px solid var(--gold);
+        }
+        .stat-card span { font-size: 0.8rem; color: #64748b; }
+        .stat-card div { font-size: 1.5rem; font-weight: 800; color: var(--navy); }
+
+        /* SEARCH & TABLE */
+        .main-content { max-width: 1000px; margin: 0 auto; padding: 0 20px 50px 20px; }
+        .search-area { 
+            background: white; padding: 15px; border-radius: 15px; 
+            margin-bottom: 20px; display: flex; align-items: center; gap: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.02);
+        }
+        .search-area input { border: none; outline: none; width: 100%; font-size: 1rem; }
+
+        .table-card { background: white; border-radius: 25px; box-shadow: 0 20px 50px rgba(0,0,0,0.05); overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 800px; }
+        th { background: #f1f5f9; padding: 18px; text-align: right; font-size: 0.85rem; color: #475569; }
+        td { padding: 18px; border-bottom: 1px solid #f1f5f9; }
+
+        .patient-name { font-weight: 700; color: var(--blue); cursor: pointer; text-decoration: underline; }
+        .tag { background: var(--soft-bg); color: var(--blue); padding: 5px 12px; border-radius: 10px; font-size: 0.8rem; font-weight: bold; }
+
+        /* THE MEDICAL PASSPORT MODAL */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,29,61,0.8); z-index: 1000; backdrop-filter: blur(8px); }
+        .modal-content { 
+            background: white; width: 95%; max-width: 600px; margin: 20px auto; 
+            border-radius: 30px; padding: 30px; position: relative; max-height: 90vh; overflow-y: auto;
+        }
+        
+        .qr-section { text-align: center; background: var(--navy); color: white; padding: 20px; border-radius: 20px; margin-bottom: 20px; }
+        #qrcode { background: white; padding: 10px; display: inline-block; border-radius: 10px; margin-top: 10px; }
+
+        .history-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
+        .history-box { background: #f8fafc; padding: 15px; border-radius: 15px; border: 1px solid #e2e8f0; }
+        .history-box h4 { margin: 0 0 10px 0; font-size: 0.9rem; display: flex; align-items: center; gap: 5px; }
+        
+        textarea { width: 100%; height: 80px; border-radius: 15px; border: 1px solid #ddd; padding: 12px; margin-top: 10px; box-sizing: border-box; }
+        .btn-save { background: var(--navy); color: white; border: none; padding: 15px; width: 100%; border-radius: 15px; font-weight: bold; margin-top: 15px
+                   @media (max-width: 600px) { .history-grid { grid-template-columns: 1fr; } .stats-bar { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="dr-brand">
+            <img src="doctor.jpg" alt="Dr">
+            <div><strong>د. محمد برهان</strong><br><small style="opacity:0.7">المنظومة الاحترافية</small></div>
+        </div>
+        <div style="display:flex; gap:10px;">
+            <button class="btn-save" style="margin:0; padding:8px 15px;" onclick="location.reload()">🔄</button>
+            <button class="btn-save" style="margin:0; padding:8px 15px; background:#ef4444;" onclick="firebase.auth().signOut()">🚪</button>
+        </div>
+    </header>
+
+    <div class="stats-bar">
+        <div class="stat-card"><span>إجمالي المرضى</span><div id="statTotal">0</div></div>
+        <div class="stat-card"><span>مواعيد اليوم</span><div id="statToday">0</div></div>
+        <div class="stat-card"><span>السجلات الطبية</span><div id="statRecords">0</div></div>
+    </div>
+
+    <div class="main-content">
+        <div class="search-area">
+            <span>🔍</span>
+            <input type="text" id="searchInput" onkeyup="searchTable()" placeholder="ابحث عن مريض بالاسم أو الهاتف...">
+        </div>
+
+        <div class="table-card">
+            <table>
+                <thead>
+                    <tr>
+                        <th>المريض</th>
+                        <th>التاريخ</th>
+                        <th>الوقت</th>
+                        <th>الحالة</th>
+                        <th>إجراء</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- PATIENT PASSPORT MODAL -->
+    <div id="historyModal" class="modal">
+        <div class="modal-content">
+            <span onclick="closeModal()" style="float:left; cursor:pointer; font-weight:bold;">إغلاق ×</span>
+            
+            <div class="qr-section">
+                <h3>جواز المريض الرقمي</h3>
+                <p style="font-size:0.8rem; opacity:0.8;">هذا الرمز يسمح بمشاركة السجل العام مع المستشفيات</p>
+                <div id="qrcode"></div>
+                <h2 id="modalPatientName" style="margin-top:15px;"></h2>
+            </div>
+
+            <div class="history-grid">
+                <div class="history-box">
+                    <h4 style="color:var(--accent-blue)">📜 السجل العام (المشترك)</h4>
+                    <div id="publicList" style="font-size:0.85rem; max-height:150px; overflow-y:auto;"></div>
+                </div>
+                <div class="history-box">
+                  <h4 style="color:#ef4444">🔒 ملاحظات خاصة (للعيادة)</h4>
+                    <div id="privateList" style="font-size:0.85rem; max-height:150px; overflow-y:auto;"></div>
+                </div>
+            </div>
+
+            <label style="display:block; margin-top:20px; font-weight:bold;">إضافة ملاحظة طبية جديدة:</label>
+            <textarea id="newNote" placeholder="اكتب تفاصيل العلاج هنا..."></textarea>
+            <button class="btn-save" onclick="saveMedicalEntry()">حفظ في السجل الرقمي 💾</button>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDqMEr5yKTjN3GV5osJmwW_2hdKVQOzFWs",
+            authDomain: "dentalclinicbooking-system.firebaseapp.com",
+            projectId: "dentalclinicbooking-system",
+            storageBucket: "dentalclinicbooking-system.firebasestorage.app",
+            messagingSenderId: "892853005967",
+            appId: "1:892853005967:web:1a5fb182c073eba1ee0afa"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        let activeName = "";
+
+        // AUTH CHECK
+        firebase.auth().onAuthStateChanged(user => {
+            if (!user) window.location.href = "login.html";
+            else loadData();
+        });
+
+        function loadData() {
+            db.collection("bookings").onSnapshot(snap => {
+                const body = document.getElementById('tableBody');
+                body.innerHTML = "";
+                document.getElementById('statTotal').innerText = snap.size;
+                
+                let bookings = [];
+                snap.forEach(doc => bookings.push({id: doc.id, ...doc.data()}));
+                bookings.sort((a,b) => a.date.localeCompare(b.date));
+
+                bookings.forEach(data => {
+                    body.innerHTML += `
+                        <tr>
+                            <td><span class="patient-name" onclick="openPassport('${data.name}')">${data.name}</span><br><small>📞 ${data.phone}</small></td>
+                            <td>${data.date}</td>
+                            <td>${data.time}</td>
+                            <td><span class="tag">${data.reason}</span></td>
+                            <td><button onclick="deleteBooking('${data.id}')" style="border:none; background:none; cursor:pointer;">🗑️</button></td>
+                        </tr>
+                    `;
+                });
+            });
+          db.collection("publicRecords").onSnapshot(snap => document.getElementById('statRecords').innerText = snap.size);
+        }
+
+        async function openPassport(name) {
+            activeName = name;
+            document.getElementById('modalPatientName').innerText = name;
+            document.getElementById('historyModal').style.display = 'block';
+            
+            // Generate QR
+            document.getElementById('qrcode').innerHTML = "";
+            new QRCode(document.getElementById("qrcode"), { text: name, width: 100, height: 100 });
+
+            // Load Public
+            const pub = await db.collection("publicRecords").where("name", "==", name).get();
+            const pubList = document.getElementById('publicList');
+            pubList.innerHTML = pub.empty ? "لا يوجد سجل عام" : "";
+            pub.forEach(doc => pubList.innerHTML += `<div>• ${doc.data().date}: ${doc.data().treatment}</div>`);
+
+            // Load Private
+            const priv = await db.collection("privateNotes").where("name", "==", name).get();
+            const privList = document.getElementById('privateList');
+            privList.innerHTML = priv.empty ? "لا توجد ملاحظات" : "";
+            priv.forEach(doc => privList.innerHTML += `<div>• ${doc.data().note}</div>`);
+        }
+
+        function saveMedicalEntry() {
+            const note = document.getElementById('newNote').value;
+            if(!note) return;
+            const date = new Date().toLocaleDateString('ar-EG');
+
+            // Save to Public (Date + Generic Treatment)
+            db.collection("publicRecords").add({ name: activeName, date: date, treatment: "فحص/معالجة أسنان", timestamp: firebase.firestore.FieldValue.serverTimestamp() });
+
+            // Save to Private (Specific Note)
+            db.collection("privateNotes").add({ name: activeName, note: note, timestamp: firebase.firestore.FieldValue.serverTimestamp() })
+            .then(() => { document.getElementById('newNote').value = ""; openPassport(activeName); });
+                              }
+      function searchTable() {
+            let val = document.getElementById('searchInput').value.toLowerCase();
+            let rows = document.getElementById('tableBody').rows;
+            for (let row of rows) { row.style.display = row.innerText.toLowerCase().includes(val) ? "" : "none"; }
+        }
+
+        function closeModal() { document.getElementById('historyModal').style.display = 'none'; }
+        function deleteBooking(id) { if(confirm("حذف الموعد؟")) db.collection("bookings").doc(id).delete(); }
+    </script>
+</body>
+</html>
