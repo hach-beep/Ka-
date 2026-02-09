@@ -96,6 +96,7 @@
         <div style="color:white; font-weight:900; letter-spacing:1px;">MEDICAL ID</div>
         <!-- Link to the full documentation file -->
         <a href="tableh_pro.html" class="btn-full-history">السجل الكامل (الطبلة) ←</a>
+        <a id="fullHistoryBtn" href="tableh_pro.html" class="btn-full-history">السجل الكامل (الطبلة) ←</a>
     </nav>
         <div class="container">
         <!-- HEADER -->
@@ -159,10 +160,50 @@
 
         </div>
     </div>
+<script>
+    // 1. YOUR FIREBASE CONFIG
+    const firebaseConfig = {
+        apiKey: "AIzaSyDqMEr5yKTjN3GV5osJmwW_2hdKVQOzFWs",
+        authDomain: "dentalclinicbooking-system.firebaseapp.com",
+        projectId: "dentalclinicbooking-system",
+        storageBucket: "dentalclinicbooking-system.firebasestorage.app",
+        messagingSenderId: "892853005967",
+        appId: "1:892853005967:web:1a5fb182c073eba1ee0afa"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
 
-    <script>
-        // FIREBASE CONFIG (Optional: If you want to pull real data from your sheet)
-        // For now, this is a static template you can show at Tech Week!
-    </script>
+    // 2. GET THE PATIENT NAME FROM THE URL
+    // Example link: emergency_id.html?name=Ahmed_Ali
+    const urlParams = new URLSearchParams(window.location.search);
+    const patientName = urlParams.get('name');
+
+    if (patientName) {
+        loadEmergencyData(patientName);
+    } else {
+        alert("يرجى مسح رمز المريض أولاً");
+    }
+
+    async function loadEmergencyData(name) {
+        // Look in the "hospitalTableh" folder we created earlier
+        const doc = await db.collection("hospitalTableh").doc(name).get();
+        
+        if (doc.exists) {
+            const data = doc.data();
+            
+            // Fill the Apple-style card with REAL data from the Tableh
+            document.getElementById('pName').innerText = data.personal.name;
+            document.getElementById('pBlood').innerText = data.clinical.bloodType || "O+";
+            document.getElementById('pAllergy').innerText = data.clinical.allergy;
+document.getElementById('pChronic').innerText = data.clinical.chronic;
+            document.getElementById('pBirth').innerText = "تاريخ الميلاد: " + data.personal.dob;
+            
+            // Update the "Full History" button to link to this specific patient
+            document.getElementById('fullHistoryBtn').href = `tableh_pro.html?name=${name}`;
+        } else {
+            alert("لم يتم العثور على سجل لهذا المريض");
+        }
+    }
+</script>
 </body>
 </html>
