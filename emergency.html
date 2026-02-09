@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medical ID - الهوية الطبية</title>
+    
+    <!-- Fonts & Libraries -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;500;700;900&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+    <style>
+        :root {
+            --emergency-red: #d90429;
+            --navy: #0a192f;
+            --gold: #ffc300;
+            --white: #ffffff;
+            --bg: #f0f2f5;
+        }
+
+        body { 
+            font-family: 'Noto Sans Arabic', sans-serif; 
+            margin: 0; background-color: var(--bg); color: var(--navy); padding-bottom: 40px;
+        }
+
+        /* TOP NAVIGATION */
+        .top-nav {
+            background: var(--navy); padding: 15px 20px;
+            display: flex; justify-content: space-between; align-items: center;
+            position: sticky; top: 0; z-index: 1000;
+        }
+        .btn-full-history {
+            background: var(--gold); color: var(--navy); border: none;
+            padding: 10px 20px; border-radius: 12px; font-weight: 800;
+            cursor: pointer; text-decoration: none; font-size: 0.85rem;
+        }
+
+        .container { max-width: 500px; margin: 20px auto; padding: 0 15px; }
+
+        /* HEADER SECTION */
+        .id-header {
+            background: var(--white); border-radius: 30px 30px 0 0;
+            padding: 30px; text-align: center; border-bottom: 1px solid #eee;
+        }
+        .profile-img { 
+            width: 110px; height: 110px; border-radius: 50%; 
+            object-fit: cover; object-position: center 15%; /* Focus on face */
+            border: 4px solid var(--bg); margin-bottom: 15px; 
+        }
+        .blood-badge {
+            background: var(--emergency-red); color: white;
+            display: inline-block; padding: 5px 25px; border-radius: 15px;
+            font-size: 1.6rem; font-weight: 900; margin-top: 10px;
+        }
+/* INFO CARD BODY */
+        .info-card {
+            background: var(--white); border-radius: 0 0 30px 30px;
+            padding: 20px 30px 40px 30px; box-shadow: 0 20px 40px rgba(0,0,0,0.05);
+        }
+
+        /* CRITICAL ALERT SECTION */
+        .alert-section {
+            background: #fff1f2; border: 2px solid var(--emergency-red);
+            border-radius: 20px; padding: 20px; margin-bottom: 25px;
+        }
+        .alert-title { color: var(--emergency-red); font-weight: 900; font-size: 1.1rem; margin-bottom: 5px; display: block; }
+        .alert-text { font-size: 1.2rem; font-weight: 700; }
+
+        .data-block { margin-bottom: 25px; }
+        .data-label { display: block; color: #64748b; font-size: 0.85rem; font-weight: bold; margin-bottom: 5px; }
+        .data-value { font-size: 1.1rem; font-weight: 700; line-height: 1.6; }
+
+        /* EMERGENCY CONTACTS */
+        .emergency-contacts {
+            background: #f8fafc; border-radius: 20px; padding: 20px;
+            margin-top: 20px; border: 1px solid #e2e8f0;
+        }
+        .contact-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; }
+        .contact-row:not(:last-child) { border-bottom: 1px solid #e2e8f0; }
+        .btn-call {
+            background: #25D366; color: white; padding: 10px 20px;
+            border-radius: 10px; text-decoration: none; font-weight: bold; font-size: 0.85rem;
+        }
+
+        /* PREMIUM ADDITIONS */
+        .extra-badge {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-top: 20px; color: var(--navy); font-weight: bold;
+            background: #eef2ff; padding: 15px; border-radius: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="top-nav">
+        <div style="color:white; font-weight:900; letter-spacing:1px;">MEDICAL ID</div>
+        <!-- Link to the full documentation file -->
+        <a href="tableh_pro.html" class="btn-full-history">السجل الكامل (الطبلة) ←</a>
+    </nav>
+
+    <div class="container">
+        <!-- HEADER -->
+        <div class="id-header">
+            <img src="doctor.jpg" class="profile-img" alt="Patient Face">
+            <h1 id="pName" style="margin:0; font-size: 1.8rem;">علي حسن محمد</h1>
+            <p id="pBirth" style="margin:5px 0; color:#64748b;">تاريخ الميلاد: 12 مايو 1996 (28 سنة)</p>
+            <div class="blood-badge" id="pBlood">O+</div>
+        </div>
+
+        <!-- CLINICAL DETAILS -->
+        <div class="info-card">
+          <!-- 1. ALLERGIES (Top Priority) -->
+            <div class="alert-section">
+                <span class="alert-title">⚠️ الحساسية (Allergies)</span>
+                <div class="alert-text" id="pAllergy">البنسلين (Penicillin)، المكسرات</div>
+            </div>
+
+            <!-- 2. CHRONIC CONDITIONS -->
+            <div class="data-block">
+                <span class="data-label">الأمراض المزمنة (Medical Conditions)</span>
+                <div class="data-value" id="pChronic">السكري (النوع الثاني)، الربو الشعبي (Asthma)</div>
+            </div>
+
+            <!-- 3. MEDICATIONS -->
+            <div class="data-block">
+                <span class="data-label">الأدوية المستمرة (Medications)</span>
+                <div class="data-value" id="pMeds">ميتفورمين (500mg)، بخاخ فنتولين عند الحاجة</div>
+            </div>
+
+            <!-- 4. SPECIAL NOTES (Implants, Pacemakers, etc.) -->
+            <div class="data-block">
+                <span class="data-label">ملاحظات طبية هامة</span>
+                <div class="data-value">مركب صمام قلبي اصطناعي (2021). يرجى الحذر عند استخدام أجهزة الرنين المغناطيسي.</div>
+            </div>
+
+            <!-- 5. EMERGENCY CONTACTS -->
+            <h3 style="margin-top:30px; font-size:1.1rem;">🚨 جهات اتصال الطوارئ</h3>
+            <div class="emergency-contacts">
+                <div class="contact-row">
+                    <div>
+                        <div style="font-weight:bold;">حسن محمد (الأب)</div>
+                        <small style="color:#64748b;">07701234567</small>
+                    </div>
+                    <a href="tel:07701234567" class="btn-call">اتصال 📞</a>
+                </div>
+                <div class="contact-row">
+                    <div>
+                        <div style="font-weight:bold;">سارة علي (الزوجة)</div>
+                        <small style="color:#64748b;">07509876543</small>
+                    </div>
+                    <a href="tel:07509876543" class="btn-call">اتصال 📞</a>
+                </div>
+            </div>
+
+            <!-- 6. ORGAN DONOR STATUS -->
+            <div class="extra-badge">
+                <span>🫀 متبرع بالأعضاء (Organ Donor)</span>
+                <span style="color:#25D366;">نعم</span>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // FIREBASE CONFIG (Optional: If you want to pull real data from your sheet)
+        // For now, this is a static template you can show at Tech Week!
+    </script>
+</body>
+</html>
