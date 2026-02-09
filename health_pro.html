@@ -211,11 +211,9 @@ function renderNotes() {
     });
 }
         function saveFullTableh(status) {
-            // 1. Get the patient name
             const name = document.getElementById('pName').value;
             if (!name) { alert("⚠️ يرجى إدخال اسم المريض"); return; }
 
-            // 2. Collect all the data from the boxes
             const finalData = {
                 patientName: name,
                 status: status, 
@@ -223,7 +221,7 @@ function renderNotes() {
                     dob: document.getElementById('pDob').value,
                     gender: document.getElementById('pGender').value,
                     job: document.getElementById('pJob').value,
-                    address: document.getElementById('addr_gov').value + " / " + document.getElementById('addr_dist').value + " / " + document.getElementById('addr_details').value,
+                    address: document.getElementById('addr_gov').value + " / " + document.getElementById('addr_dist').value,
                     emergency: document.getElementById('pEmergency').value
                 },
                 clinical: {
@@ -234,67 +232,32 @@ function renderNotes() {
                     bloodType: document.getElementById('h_blood').value
                 },
                 vitals: {
-                    bp: document.getElementById('vBP').value || "",
-                    pulse: document.getElementById('vPulse').value || "",
-                    temp: document.getElementById('vTemp').value || "",
-                    resp: document.getElementById('vResp').value || "",
-                    o2: document.getElementById('vO2').value || ""
+                    bp: document.getElementById('vBP') ? document.getElementById('vBP').value : "",
+                    pulse: document.getElementById('vPulse') ? document.getElementById('vPulse').value : "",
+                    temp: document.getElementById('vTemp') ? document.getElementById('vTemp').value : "",
+                    resp: document.getElementById('vResp') ? document.getElementById('vResp').value : "",
+                    o2: document.getElementById('vO2') ? document.getElementById('vO2').value : ""
                 },
                 observations: notesArray,
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
             };
 
-            // 3. Save to Firebase
             db.collection("hospitalTableh").doc(name).set(finalData)
             .then(() => {
-                alert(status === 'archived' ? "✅ تم أرشفة الملف نهائياً بنجاح!" : "💾 تم حفظ التحديثات في السجل");
+                alert(status === 'archived' ? "✅ تم أرشفة الملف نهائياً" : "💾 تم حفظ التحديثات");
                 if(status === 'archived') location.reload();
             })
             .catch((error) => {
                 alert("❌ خطأ في الحفظ: " + error.message);
             });
         }
-    // 1. Get the patient name
-    const name = document.getElementById('pName').value;
-    
-    if (!name) {
-        alert("⚠️ يرجى إدخال اسم المريض");
-        return;
-    }
 
-    // 2. Collect all the data from the boxes
-    const finalData = {
-        patientName: name,
-        status: status, 
-        personal: {
-            dob: document.getElementById('pDob').value,
-            gender: document.getElementById('pGender').value,
-            job: document.getElementById('pJob').value,
-            address: document.getElementById('addr_gov').value + " / " + document.getElementById('addr_dist').value,
-            emergency: document.getElementById('pEmergency').value
-        },
-        clinical: {
-            complaint: document.getElementById('h_complaint').value,
-            history: document.getElementById('h_present').value,
-            allergy: document.getElementById('h_allergy').value,
-            chronic: document.getElementById('h_chronic').value,
-            bloodType: document.getElementById('h_blood').value
-        },
-        vitals: {
-            bp: document.getElementById('vBP') ? document.getElementById('vBP').value : "",
-            pulse: document.getElementById('vPulse') ? document.getElementById('vPulse').value : "",
-            temp: document.getElementById('vTemp') ? document.getElementById('vTemp').value : ""
-        },
-        observations: notesArray,
-        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-    };
-         function deleteNoteRow(index) {
-    if(confirm("هل أنت متأكد من حذف هذه الملاحظة؟")) {
-        notesArray.splice(index, 1); // Removes the note from the list
-        renderNotes(); // Refreshes the table on the screen
-    }
-       }
-    </script> 
- </body>
+        function deleteNoteRow(index) {
+            if(confirm("هل أنت متأكد من حذف هذه الملاحظة؟")) {
+                notesArray.splice(index, 1);
+                renderNotes();
+            }
+        }
+    </script>
+</body>
 </html>
-            
