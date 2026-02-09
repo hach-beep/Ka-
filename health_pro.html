@@ -79,7 +79,14 @@
             box-shadow: 0 15px 35px rgba(0, 95, 141, 0.3);
             margin-top: 40px;
         }
-
+       .btn-delete-row {
+    color: #ef4444;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 1.1rem;
+       }
         @media (max-width: 800px) { .grid { grid-template-columns: 1fr; } .full, .half { grid-column: span 1; } }
     </style>
 </head>
@@ -128,7 +135,17 @@
                 <div class="input-group"><label>فصيلة الدم</label><input type="text" id="h_blood"></div>
             </div>
         </div>
-
+<!-- SECTION: VITAL SIGNS (العلامات الحيوية) -->
+        <div class="section-card">
+            <div class="section-title">🌡️ العلامات الحيوية (Vital Signs)</div>
+            <div class="grid">
+                <div class="input-group"><label>ضغط الدم (BP)</label><input type="text" id="vBP" placeholder="120/80"></div>
+                <div class="input-group"><label>النبض (Pulse)</label><input type="number" id="vPulse" placeholder="72"></div>
+                <div class="input-group"><label>الحرارة (Temp)</label><input type="text" id="vTemp" placeholder="37.0"></div>
+                <div class="input-group"><label>التنفس (Resp)</label><input type="number" id="vResp" placeholder="18"></div>
+                <div class="input-group"><label>الأوكسجين (SpO2)</label><input type="number" id="vO2" placeholder="98%"></div>
+            </div>
+        </div>
         <!-- SECTION 3: OBSERVATION NOTES (Images 2, 3, 5) -->
         <div class="section-card">
             <div class="section-title">✍️ سجل الملاحظات والعلاجات (Observation & Treatment)</div>
@@ -151,11 +168,10 @@
                 <button onclick="addNoteRow()" class="btn-add-note">إضافة ملاحظة إلى الجدول ➕</button>
             </div>
         </div>
-
-        <button class="btn-save-all" onclick="saveFullTableh()">حفظ وإغلاق الطبلة الطبية نهائياً 💾</button>
-
-    </div>
-
+<div style="display:flex; gap:15px; margin-top:30px;">
+            <button class="btn-save-all" onclick="saveFullTableh()">حفظ الملاحظات 💾</button>
+            <button class="btn-save-all" style="background:#1e293b;" onclick="dischargePatient()">خروج/أرشفة المريض 🔒</button>
+        </div>
     <script>
         // Use your existing Firebase Config
         const firebaseConfig = {
@@ -182,15 +198,19 @@
             renderNotes();
             document.getElementById('newNote').value = "";
         }
-
-        function renderNotes() {
-            const body = document.getElementById('obsBody');
-            body.innerHTML = "";
-            notesArray.forEach(n => {
-                body.innerHTML += `<tr><td>${n.time}</td><td>${n.text}</td><td>${n.sign}</td></tr>`;
-            });
-        }
-
+function renderNotes() {
+    const body = document.getElementById('obsBody');
+    body.innerHTML = "";
+    notesArray.forEach((n, index) => {
+        body.innerHTML += `<tr>
+            <td>${n.time}</td>
+            <td>${n.text}</td>
+            <td style="text-align:center;">
+                <button onclick="deleteNoteRow(${index})" class="btn-delete-row">🗑️</button>
+            </td>
+        </tr>`;
+    });
+}
         // Saves the entire "Tableh" to Firebase
         function saveFullTableh() {
             const name = document.getElementById('pName').value;
@@ -221,6 +241,12 @@
                 location.reload();
             });
         }
+       function deleteNoteRow(index) {
+    if(confirm("هل أنت متأكد من حذف هذه الملاحظة؟")) {
+        notesArray.splice(index, 1); // Removes the note from the list
+        renderNotes(); // Refreshes the table on the screen
+    }
+       }
     </script>
 </body>
 </html>
