@@ -288,25 +288,13 @@ function renderNotes() {
         observations: notesArray,
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
     };
-
-    // 3. Save to Firebase
-    db.collection("hospitalTableh").doc(name).set(finalData)
-    .then(() => {
-        alert(status === 'archived' ? "✅ تم أرشفة الملف نهائياً" : "💾 تم حفظ التحديثات");
-        if(status === 'archived') location.reload();
-    })
-           .catch((error) => {
-        alert("❌ خطأ في الحفظ: " + error.message);
-    });
-        }
-         
-       function deleteNoteRow(index) {
+         function deleteNoteRow(index) {
     if(confirm("هل أنت متأكد من حذف هذه الملاحظة؟")) {
         notesArray.splice(index, 1); // Removes the note from the list
         renderNotes(); // Refreshes the table on the screen
     }
        }
-    </script>
-</body>
+    </script> 
+ </body>
 </html>
             
