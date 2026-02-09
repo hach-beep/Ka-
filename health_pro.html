@@ -167,11 +167,10 @@
                 <textarea id="newNote" placeholder="اكتب الملاحظة أو العلاج المعطى هنا..."></textarea>
                 <button onclick="addNoteRow()" class="btn-add-note">إضافة ملاحظة إلى الجدول ➕</button>
             </div>
-        </div>
-<div style="display:flex; gap:15px; margin-top:30px;">
-            <button class="btn-save-all" onclick="saveFullTableh()">حفظ الملاحظات 💾</button>
-            <button class="btn-save-all" style="background:#1e293b;" onclick="dischargePatient()">خروج/أرشفة المريض 🔒</button>
-        </div>
+           <div style="display:flex; gap:15px; margin-top:30px;">
+    <button class="btn-save-all" onclick="saveFullTableh('active')">حفظ التحديثات الحالية 💾</button>
+    <button class="btn-save-all" style="background:#1e293b;" onclick="saveFullTableh('archived')">أرشفة نهائية (خروج المريض) 🔒</button>
+           </div>
     <script>
         // Use your existing Firebase Config
         const firebaseConfig = {
