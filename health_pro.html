@@ -210,29 +210,50 @@ function renderNotes() {
         </tr>`;
     });
 }
-        // Saves the entire "Tableh" to Firebase
-        function saveFullTableh() {
+        function saveFullTableh(status) {
+            // 1. Get the patient name
             const name = document.getElementById('pName').value;
-            if(!name) { alert("Please enter patient name"); return; }
+            if (!name) { alert("⚠️ يرجى إدخال اسم المريض"); return; }
 
+            // 2. Collect all the data from the boxes
             const finalData = {
-                patientInfo: {
-                    name: name,
+                patientName: name,
+                status: status, 
+                personal: {
                     dob: document.getElementById('pDob').value,
                     gender: document.getElementById('pGender').value,
+                    job: document.getElementById('pJob').value,
                     address: document.getElementById('addr_gov').value + " / " + document.getElementById('addr_dist').value + " / " + document.getElementById('addr_details').value,
                     emergency: document.getElementById('pEmergency').value
                 },
-                clinicalHistory: {
+                clinical: {
                     complaint: document.getElementById('h_complaint').value,
-                    presentIllness: document.getElementById('h_present').value,
+                    history: document.getElementById('h_present').value,
                     allergy: document.getElementById('h_allergy').value,
                     chronic: document.getElementById('h_chronic').value,
                     bloodType: document.getElementById('h_blood').value
                 },
+                vitals: {
+                    bp: document.getElementById('vBP').value || "",
+                    pulse: document.getElementById('vPulse').value || "",
+                    temp: document.getElementById('vTemp').value || "",
+                    resp: document.getElementById('vResp').value || "",
+                    o2: document.getElementById('vO2').value || ""
+                },
                 observations: notesArray,
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
             };
+
+            // 3. Save to Firebase
+            db.collection("hospitalTableh").doc(name).set(finalData)
+            .then(() => {
+                alert(status === 'archived' ? "✅ تم أرشفة الملف نهائياً بنجاح!" : "💾 تم حفظ التحديثات في السجل");
+                if(status === 'archived') location.reload();
+            })
+            .catch((error) => {
+                alert("❌ خطأ في الحفظ: " + error.message);
+            });
+        }
     // 1. Get the patient name
     const name = document.getElementById('pName').value;
     
