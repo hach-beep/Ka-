@@ -233,13 +233,52 @@ function renderNotes() {
                 observations: notesArray,
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
             };
+    // 1. Get the patient name
+    const name = document.getElementById('pName').value;
+    
+    if (!name) {
+        alert("⚠️ يرجى إدخال اسم المريض");
+        return;
+    }
 
-            // Saving to a new collection called "hospitalTableh"
-            db.collection("hospitalTableh").doc(name).set(finalData).then(() => {
-                alert("Tableh saved successfully to the National Cloud Database!");
-                location.reload();
-            });
+    // 2. Collect all the data from the boxes
+    const finalData = {
+        patientName: name,
+        status: status, 
+        personal: {
+            dob: document.getElementById('pDob').value,
+            gender: document.getElementById('pGender').value,
+            job: document.getElementById('pJob').value,
+            address: document.getElementById('addr_gov').value + " / " + document.getElementById('addr_dist').value,
+            emergency: document.getElementById('pEmergency').value
+        },
+        clinical: {
+            complaint: document.getElementById('h_complaint').value,
+            history: document.getElementById('h_present').value,
+            allergy: document.getElementById('h_allergy').value,
+            chronic: document.getElementById('h_chronic').value,
+            bloodType: document.getElementById('h_blood').value
+        },
+        vitals: {
+            bp: document.getElementById('vBP') ? document.getElementById('vBP').value : "",
+            pulse: document.getElementById('vPulse') ? document.getElementById('vPulse').value : "",
+            temp: document.getElementById('vTemp') ? document.getElementById('vTemp').value : ""
+        },
+        observations: notesArray,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    };
+
+    // 3. Save to Firebase
+    db.collection("hospitalTableh").doc(name).set(finalData)
+    .then(() => {
+        alert(status === 'archived' ? "✅ تم أرشفة الملف نهائياً" : "💾 تم حفظ التحديثات");
+        if(status === 'archived') location.reload();
+    })
+           .catch((error) => {
+        alert("❌ خطأ في الحفظ: " + error.message);
+    });
         }
+         
        function deleteNoteRow(index) {
     if(confirm("هل أنت متأكد من حذف هذه الملاحظة؟")) {
         notesArray.splice(index, 1); // Removes the note from the list
