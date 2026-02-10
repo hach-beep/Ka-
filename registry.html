@@ -112,35 +112,34 @@ if (urlName) {
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
-
-        // LOAD REGISTRY
-        function loadRegistry() {
+function loadRegistry() {
             db.collection("patients").onSnapshot(snap => {
                 const body = document.getElementById('registryBody');
                 body.innerHTML = "";
                 snap.forEach(doc => {
                     const d = doc.data();
+                    // FIXED: No spaces in the regex
                     const qrId = "qr_" + doc.id.replace(/\s/g, '');
                     
+                    // FIXED: Removed the extra backslash at the end
                     body.innerHTML += `
-                <tr>
-                    <td><div id="${qrId}" class="qr-cell"></div></td>
-                    <td><span class="patient-name" onclick="goToPatient(`${d.name}`)">${d.name}</span></td>
-                    <td>${d.phone}</td>
-                    <td><span style="color:red; font-weight:bold;">${d.bloodType}</span></td>
-                    <td><button onclick="addAdmission(`${d.name}`)" style="border:1px solid var(--blue); background:none; color:var(--blue); padding:5px 10px; border-radius:8px; cursor:pointer;">دخول جديد +</button></td>
-                </tr>;
-
-            // Generate QR for the table
-            setTimeout(() => {
-                new QRCode(document.getElementById(qrId), {
-                    text: `https://hach-beep.github.io/Ka-/emergency_id.html?name=${encodeURIComponent(d.name)}`,
-                    width: 50, height: 50
-                });
-            }, 100);
+                        <tr>
+                            <td><div id="${qrId}" class="qr-cell"></div></td>
+                            <td><span class="patient-name" onclick="goToPatient('${d.name}')">${d.name}</span></td>
+                            <td>${d.phone}</td>
+                            <td><span style="color:red; font-weight:bold;">${d.bloodType}</span></td>
+                            <td><button onclick="addAdmission('${d.name}')" style="border:1px solid var(--blue); background:none; color:var(--blue); padding:5px 10px; border-radius:8px; cursor:pointer;">دخول جديد +</button></td>
+                        </tr>`;
+                    
+                    setTimeout(() => {
+                        new QRCode(document.getElementById(qrId), {
+                            text: `https://hach-beep.github.io/Ka-/emergency_id.html?name=${encodeURIComponent(d.name)}`,
+                            width: 50, height: 50
+                        });
+                    }, 100);
                 });
             });
-        }
+
 
         function saveNewPatient() {
             const name = document.getElementById('regName').value;
