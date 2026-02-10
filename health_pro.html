@@ -220,25 +220,6 @@
             db.collection("hospitalTableh").add(data).then(() => alert("تم إنشاء دخول جديد"));
         }
     }
-    
-    // ... keep your addNoteRow and renderNotes functions ...
-
-            db.collection("hospitalTableh").doc(name).set(finalData)
-            .then(() => {
-                alert(status === 'archived' ? "✅ تم أرشفة الملف نهائياً" : "💾 تم حفظ التحديثات");
-                if(status === 'archived') location.reload();
-            })
-            .catch((error) => {
-                alert("❌ خطأ في الحفظ: " + error.message);
-            });
-        }
-
-        function deleteNoteRow(index) {
-            if(confirm("هل أنت متأكد من حذف هذه الملاحظة؟")) {
-                notesArray.splice(index, 1);
-                renderNotes();
-            }
-        }
     </script>
 </body>
 </html>
