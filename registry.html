@@ -96,6 +96,11 @@
     </div>
 
     <script>
+        const urlParams = new URLSearchParams(window.location.search);
+const urlName = urlParams.get('name');
+if (urlName) {
+    document.getElementById('pName').value = urlName;
+}
         // YOUR FIREBASE CONFIG
         const firebaseConfig = {
             apiKey: "AIzaSyDqMEr5yKTjN3GV5osJmwW_2hdKVQOzFWs",
@@ -118,22 +123,21 @@
                     const qrId = "qr_" + doc.id.replace(/\s/g, '');
                     
                     body.innerHTML += `
-                        <tr>
-                            <td><div id="${qrId}" class="qr-cell"></div></td>
-                            <td><span class="patient-name" onclick="goToPatient('${d.name}')">${d.name}</span></td>
-                            <td>${d.phone}</td>
-                            <td><span style="color:red; font-weight:bold;">${d.bloodType}</span></td>
-                            <td><button onclick="addAdmission('${d.name}')" style="border:1px solid var(--blue); background:none; color:var(--blue); padding:5px 10px; border-radius:8px; cursor:pointer;">دخول جديد +</button></td>
-                        </tr>
-                    `;
-                    
-                    // Generate QR for the table
-                    setTimeout(() => {
-                        new QRCode(document.getElementById(qrId), {
-                            text: `https://hach-beep.github.io/Ka-/emergency_id.html?name=${encodeURIComponent(d.name)}`,
-                            width: 50, height: 50
-                        });
-                    }, 100);
+                <tr>
+                    <td><div id="${qrId}" class="qr-cell"></div></td>
+                    <td><span class="patient-name" onclick="goToPatient(`${d.name}`)">${d.name}</span></td>
+                    <td>${d.phone}</td>
+                    <td><span style="color:red; font-weight:bold;">${d.bloodType}</span></td>
+                    <td><button onclick="addAdmission(`${d.name}`)" style="border:1px solid var(--blue); background:none; color:var(--blue); padding:5px 10px; border-radius:8px; cursor:pointer;">دخول جديد +</button></td>
+                </tr>;
+
+            // Generate QR for the table
+            setTimeout(() => {
+                new QRCode(document.getElementById(qrId), {
+                    text: `https://hach-beep.github.io/Ka-/emergency_id.html?name=${encodeURIComponent(d.name)}`,
+                    width: 50, height: 50
+                });
+            }, 100);
                 });
             });
         }
