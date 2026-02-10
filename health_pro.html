@@ -171,76 +171,57 @@
     <button class="btn-save-all" onclick="saveFullTableh('active')">حفظ التحديثات الحالية 💾</button>
     <button class="btn-save-all" style="background:#1e293b;" onclick="saveFullTableh('archived')">أرشفة نهائية (خروج المريض) 🔒</button>
            </div>
-    <script>
-        // Use your existing Firebase Config
-        const firebaseConfig = {
-            apiKey: "AIzaSyDqMEr5yKTjN3GV5osJmwW_2hdKVQOzFWs",
-            authDomain: "dentalclinicbooking-system.firebaseapp.com",
-            projectId: "dentalclinicbooking-system",
-            storageBucket: "dentalclinicbooking-system.firebasestorage.app",
-            messagingSenderId: "892853005967",
-            appId: "1:892853005967:web:1a5fb182c073eba1ee0afa"};
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
+           
 
-        let notesArray = [];
+<script>
+    const firebaseConfig = { /* PASTE YOUR KEYS HERE */ };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
 
-        // Adds a row to the local table before saving to database
-        function addNoteRow() {
-            const noteText = document.getElementById('newNote').value;
-            if(!noteText) return;
-            
-            const now = new Date();
-            const dateTime = now.toLocaleDateString('ar-EG') + " | " + now.toLocaleTimeString('ar-EG', {hour: '2-digit', minute:'2-digit'});
-            
-            notesArray.push({ time: dateTime, text: noteText, sign: "Nurse/Dr" });
-            renderNotes();
-            document.getElementById('newNote').value = "";
+    const urlParams = new URLSearchParams(window.location.search);
+    const patientName = urlParams.get('name');
+    const admissionId = urlParams.get('id'); // NEW: Get specific visit ID
+
+    let notesArray = [];
+
+    // 1. AUTO-LOAD DATA
+    if (patientName) {
+        document.getElementById('pName').value = patientName;
+        if (admissionId) {
+            // LOAD EXISTING ADMISSION FOR EDITING
+            db.collection("hospitalTableh").doc(admissionId).get().then(doc => {
+                const d = doc.data();
+                document.getElementById('h_complaint').value = d.clinical.complaint;
+                document.getElementById('h_present').value = d.clinical.history;
+                notesArray = d.observations || [];
+                renderNotes();
+            });
         }
-function renderNotes() {
-    const body = document.getElementById('obsBody');
-    body.innerHTML = "";
-    notesArray.forEach((n, index) => {
-        body.innerHTML += `<tr>
-            <td>${n.time}</td>
-            <td>${n.text}</td>
-            <td style="text-align:center;">
-                <button onclick="deleteNoteRow(${index})" class="btn-delete-row">🗑️</button>
-            </td>
-        </tr>`;
-    });
-}
-        function saveFullTableh(status) {
-            const name = document.getElementById('pName').value;
-            if (!name) { alert("⚠️ يرجى إدخال اسم المريض"); return; }
+    }
 
-            const finalData = {
-                patientName: name,
-                status: status, 
-                personal: {
-                    dob: document.getElementById('pDob').value,
-                    gender: document.getElementById('pGender').value,
-                    job: document.getElementById('pJob').value,
-                    address: document.getElementById('addr_gov').value + " / " + document.getElementById('addr_dist').value,
-                    emergency: document.getElementById('pEmergency').value
-                },
-                clinical: {
-                    complaint: document.getElementById('h_complaint').value,
-                    history: document.getElementById('h_present').value,
-                    allergy: document.getElementById('h_allergy').value,
-                    chronic: document.getElementById('h_chronic').value,
-                    bloodType: document.getElementById('h_blood').value
-                },
-                vitals: {
-                    bp: document.getElementById('vBP') ? document.getElementById('vBP').value : "",
-                    pulse: document.getElementById('vPulse') ? document.getElementById('vPulse').value : "",
-                    temp: document.getElementById('vTemp') ? document.getElementById('vTemp').value : "",
-                    resp: document.getElementById('vResp') ? document.getElementById('vResp').value : "",
-                    o2: document.getElementById('vO2') ? document.getElementById('vO2').value : ""
-                },
-                observations: notesArray,
-                timestamp: firebase.firestore.FieldValue.serverTimestamp()
-            };
+    function saveFullTableh(status) {
+        const name = document.getElementById('pName').value;
+        const data = {
+            patientName: name,
+            status: status,
+            clinical: {
+                complaint: document.getElementById('h_complaint').value,
+                history: document.getElementById('h_present').value,
+            },
+            observations: notesArray,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        };
+
+        if (admissionId) {
+            // UPDATE EXISTING VISIT
+            db.collection("hospitalTableh").doc(admissionId).update(data).then(() => alert("تم تحديث السجل"));
+        } else {
+            // CREATE NEW VISIT
+            db.collection("hospitalTableh").add(data).then(() => alert("تم إنشاء دخول جديد"));
+        }
+    }
+    
+    // ... keep your addNoteRow and renderNotes functions ...
 
             db.collection("hospitalTableh").doc(name).set(finalData)
             .then(() => {
