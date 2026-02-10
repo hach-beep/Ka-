@@ -94,6 +94,14 @@ l<!DOCTYPE html>
             <button class="btn-save" onclick="saveNewPatient()">إنشاء ملف دائم 💾</button>
         </div>
     </div>
+    <div id="visitModal" class="modal">
+    <div class="modal-content">
+        <span onclick="document.getElementById('visitModal').style.display='none'" style="float:left; cursor:pointer;">×</span>
+        <h2 id="visitModalTitle">سجل الزيارات</h2>
+        <div id="visitList"></div>
+        <button class="btn-save" onclick="createNewAdmission()">+ فتح دخول جديد للمستشفى</button>
+    </div>
+    </div>
 <script>
     // 1. YOUR FIREBASE CONFIG
     const firebaseConfig = {
