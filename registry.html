@@ -163,17 +163,37 @@ l<!DOCTYPE html>
         });
     }
 
-    // 4. NAVIGATION FUNCTIONS
-    let selectedPatientForVisit = "";
+async function openVisitHistory(name) {
+            activePatientName = name;
+            document.getElementById('visitModalTitle').innerText = "سجل الزيارات: " + name;
+            document.getElementById('visitModal').style.display = 'block';
+            
+            // THE FIX: This button sends the name but NO ID, so it creates a NEW file
+            document.getElementById('newAdmissionBtn').onclick = function() {
+                window.location.href = `health_pro.html?name=${encodeURIComponent(name)}`;
+            };
 
-async function goToPatient(name) {
-    selectedPatientForVisit = name;
-    document.getElementById('visitModalTitle').innerText = "زيارات المريض: " + name;
-    document.getElementById('visitModal').style.display = 'block';
-    
-    const list = document.getElementById('visitList');
-    list.innerHTML = "جاري تحميل الزيارات...";
+            const list = document.getElementById('visitList');
+            list.innerHTML = "جاري التحميل...";
 
+            const snap = await db.collection("hospitalTableh").where("patientName", "==", name).get();
+            list.innerHTML = snap.empty ? "<p>لا توجد زيارات سابقة</p>" : "";
+            
+            snap.forEach(doc => {
+                const d = doc.data();
+                // Check if the record is "Closed" or "Active"
+                const statusBadge = d.status === 'archived' ? '🔒 مغلق' : '🟢 قيد المتابعة';
+                
+                list.innerHTML += `
+                    <div style="padding:15px; border:1px solid #eee; border-radius:15px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; background:white;">
+                        <div>
+                            <strong>${d.clinical.complaint || "زيارة طبية"}</strong><br>
+                            <small>${statusBadge} | ${d.timestamp ? d.timestamp.toDate().toLocaleDateString('ar-EG') : ''}</small>
+                        </div>
+                        <button onclick="window.location.href='health_pro.html?id=${doc.id}'" style="background:var(--navy); color:white; border:none; padding:8px 12px; border-radius:8px; cursor:pointer;">فتح الملف</button>
+                    </div>`;
+            });
+        }
     // Fetch all visits for this patient
     const snap = await db.collection("hospitalTableh").where("patientName", "==", name).get();
     list.innerHTML = snap.empty ? "لا توجد زيارات سابقة" : "";
