@@ -164,10 +164,36 @@ l<!DOCTYPE html>
     }
 
     // 4. NAVIGATION FUNCTIONS
-    function goToPatient(name) {
-        window.location.href = `emergency_id.html?name=${encodeURIComponent(name)}`;
-    }
+    let selectedPatientForVisit = "";
 
+async function goToPatient(name) {
+    selectedPatientForVisit = name;
+    document.getElementById('visitModalTitle').innerText = "زيارات المريض: " + name;
+    document.getElementById('visitModal').style.display = 'block';
+    
+    const list = document.getElementById('visitList');
+    list.innerHTML = "جاري تحميل الزيارات...";
+
+    // Fetch all visits for this patient
+    const snap = await db.collection("hospitalTableh").where("patientName", "==", name).get();
+    list.innerHTML = snap.empty ? "لا توجد زيارات سابقة" : "";
+    
+    snap.forEach(doc => {
+        const d = doc.data();
+        list.innerHTML += `
+            <div style="padding:15px; border:1px solid #eee; border-radius:15px; margin-bottom:10px; display:flex; justify-content:space-between;">
+                <div>
+                    <strong>${d.clinical.complaint}</strong><br>
+                    <small>${d.timestamp ? d.timestamp.toDate().toLocaleDateString('ar-EG') : 'تاريخ قديم'}</small>
+                </div>
+                <button onclick="window.location.href='health_pro.html?name=${name}&id=${doc.id}'" style="background:var(--blue); color:white; border:none; padding:5px 10px; border-radius:8px;">تعديل/متابعة</button>
+            </div>`;
+    });
+}
+
+function createNewAdmission() {
+    window.location.href = `health_pro.html?name=${encodeURIComponent(selectedPatientForVisit)}`;
+}
     function addAdmission(name) {
         window.location.href = `health_pro.html?name=${encodeURIComponent(name)}`;
     }
