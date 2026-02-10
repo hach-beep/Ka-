@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+l<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -96,86 +96,84 @@
     </div>
 
     <script>
-        const urlParams = new URLSearchParams(window.location.search);
-const urlName = urlParams.get('name');
-if (urlName) {
-    document.getElementById('pName').value = urlName;
-}
-        // YOUR FIREBASE CONFIG
-        const firebaseConfig = {
-            apiKey: "AIzaSyDqMEr5yKTjN3GV5osJmwW_2hdKVQOzFWs",
-            authDomain: "dentalclinicbooking-system.firebaseapp.com",
-            projectId: "dentalclinicbooking-system",
-            storageBucket: "dentalclinicbooking-system.firebasestorage.app",
-            messagingSenderId: "892853005967",
-            appId: "1:892853005967:web:1a5fb182c073eba1ee0afa"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-function loadRegistry() {
-            db.collection("patients").onSnapshot(snap => {
-                const body = document.getElementById('registryBody');
-                body.innerHTML = "";
-                snap.forEach(doc => {
-                    const d = doc.data();
-                    // FIXED: No spaces in the regex
-                    const qrId = "qr_" + doc.id.replace(/\s/g, '');
-                    
-                    // FIXED: Removed the extra backslash at the end
-                    body.innerHTML += `
-                        <tr>
-                            <td><div id="${qrId}" class="qr-cell"></div></td>
-                            <td><span class="patient-name" onclick="goToPatient('${d.name}')">${d.name}</span></td>
-                            <td>${d.phone}</td>
-                            <td><span style="color:red; font-weight:bold;">${d.bloodType}</span></td>
-                            <td><button onclick="addAdmission('${d.name}')" style="border:1px solid var(--blue); background:none; color:var(--blue); padding:5px 10px; border-radius:8px; cursor:pointer;">دخول جديد +</button></td>
-                        </tr>`;
-                    
-                    setTimeout(() => {
-                        new QRCode(document.getElementById(qrId), {
+           // 1. YOUR FIREBASE CONFIG
+    const firebaseConfig = {
+        apiKey: "AIzaSyDqMEr5yKTjN3GV5osJmwW_2hdKVQOzFWs",
+        authDomain: "dentalclinicbooking-system.firebaseapp.com",
+        projectId: "dentalclinicbooking-system",
+        storageBucket: "dentalclinicbooking-system.firebasestorage.app",
+        messagingSenderId: "892853005967",
+        appId: "1:892853005967:web:1a5fb182c073eba1ee0afa"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    // 2. LOAD REGISTRY
+    function loadRegistry() {
+        db.collection("patients").onSnapshot(snap => {
+            const body = document.getElementById('registryBody');
+            body.innerHTML = "";
+            snap.forEach(doc => {
+                const d = doc.data();
+                const qrId = "qr_" + doc.id.replace(/\s/g, '');
+                
+                body.innerHTML += `
+                    <tr>
+                        <td><div id="${qrId}" class="qr-cell"></div></td>
+                        <td><span class="patient-name" onclick="goToPatient('${d.name}')">${d.name}</span></td>
+                        <td>${d.phone}</td>
+                        <td><span style="color:red; font-weight:bold;">${d.bloodType}</span></td>
+                        <td><button onclick="addAdmission('${d.name}')" style="border:1px solid var(--blue); background:none; color:var(--blue); padding:5px 10px; border-radius:8px; cursor:pointer;">دخول جديد +</button></td>
+                    </tr>`;
+                
+                setTimeout(() => {
+                    const qrContainer = document.getElementById(qrId);
+                    if (qrContainer) {
+                        new QRCode(qrContainer, {
                             text: `https://hach-beep.github.io/Ka-/emergency_id.html?name=${encodeURIComponent(d.name)}`,
                             width: 50, height: 50
                         });
-                    }, 100);
-                });
+                    }
+                }, 200);
             });
+        });
+    }
+        // 3. SAVE NEW PATIENT
+    function saveNewPatient() {
+        const name = document.getElementById('regName').value;
+        const phone = document.getElementById('regPhone').value;
+        const blood = document.getElementById('regBlood').value;
+        const dob = document.getElementById('regDob').value;
 
+        if(!name || !phone) return alert("يرجى ملء البيانات الأساسية");
 
-        function saveNewPatient() {
-            const name = document.getElementById('regName').value;
-            const phone = document.getElementById('regPhone').value;
-            const blood = document.getElementById('regBlood').value;
-            const dob = document.getElementById('regDob').value;
-          if(!name || !phone) return alert("يرجى ملء البيانات الأساسية");
+        db.collection("patients").doc(name).set({
+            name, phone, bloodType: blood, dob, timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        }).then(() => {
+            alert("تم إنشاء الملف الطبي الدائم");
+            closeModal();
+        });
+    }
 
-            db.collection("patients").doc(name).set({
-                name, phone, bloodType: blood, dob, timestamp: firebase.firestore.FieldValue.serverTimestamp()
-            }).then(() => {
-                alert("تم إنشاء الملف الطبي الدائم");
-                closeModal();
-            });
-        }
+    // 4. NAVIGATION FUNCTIONS
+    function goToPatient(name) {
+        window.location.href = `emergency_id.html?name=${encodeURIComponent(name)}`;
+    }
 
-        function goToPatient(name) {
-            // Redirect to the Emergency ID / Brief view
-            window.location.href = `emergency_id.html?name=${encodeURIComponent(name)}`;
-        }
+    function addAdmission(name) {
+        window.location.href = `health_pro.html?name=${encodeURIComponent(name)}`;
+    }
 
-        function addAdmission(name) {
-            // Redirect to the Tableh (Documentation) page
-            window.location.href = `health_pro.html?name=${encodeURIComponent(name)}`;
-        }
+    function filterTable() {
+        let val = document.getElementById('searchBar').value.toLowerCase();
+        let rows = document.getElementById('registryBody').rows;
+        for (let row of rows) { row.style.display = row.innerText.toLowerCase().includes(val) ? "" : "none"; }
+    }
 
-        function filterTable() {
-            let val = document.getElementById('searchBar').value.toLowerCase();
-            let rows = document.getElementById('registryBody').rows;
-            for (let row of rows) { row.style.display = row.innerText.toLowerCase().includes(val) ? "" : "none"; }
-        }
-
-        function openRegModal() { document.getElementById('regModal').style.display = 'block'; }
-        function closeModal() { document.getElementById('regModal').style.display = 'none'; }
-        
-        loadRegistry();
-    </script>
+    function openRegModal() { document.getElementById('regModal').style.display = 'block'; }
+    function closeModal() { document.getElementById('regModal').style.display = 'none'; }
+    
+    loadRegistry();
+</script>
 </body>
 </html>
