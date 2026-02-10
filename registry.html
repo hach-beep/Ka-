@@ -94,9 +94,8 @@ l<!DOCTYPE html>
             <button class="btn-save" onclick="saveNewPatient()">إنشاء ملف دائم 💾</button>
         </div>
     </div>
-
-    <script>
-           // 1. YOUR FIREBASE CONFIG
+<script>
+    // 1. YOUR FIREBASE CONFIG
     const firebaseConfig = {
         apiKey: "AIzaSyDqMEr5yKTjN3GV5osJmwW_2hdKVQOzFWs",
         authDomain: "dentalclinicbooking-system.firebaseapp.com",
@@ -138,7 +137,8 @@ l<!DOCTYPE html>
             });
         });
     }
-        // 3. SAVE NEW PATIENT
+    
+    // 3. SAVE NEW PATIENT
     function saveNewPatient() {
         const name = document.getElementById('regName').value;
         const phone = document.getElementById('regPhone').value;
@@ -177,3 +177,4 @@ l<!DOCTYPE html>
 </script>
 </body>
 </html>
+    
