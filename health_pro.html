@@ -247,10 +247,8 @@
             body.innerHTML += `<tr><td>${n.time}</td><td>${n.text}</td><td><button onclick="deleteNoteRow(${i})" style="color:red; background:none; border:none;">🗑️</button></td></tr>`;
         });
     }
-
     function deleteNoteRow(i) { notesArray.splice(i, 1); renderNotes(); }
 </script>
         </div>
-    </div>
 </body>
 </html>
