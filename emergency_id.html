@@ -123,15 +123,10 @@
 
             <!-- 3. MEDICATIONS -->
             <div class="data-block">
-                <span class="data-label">الأدوية المستمرة (Medications)</span>
+                <span class="data-label">الأدوية  (Medications)</span>
                 <div class="data-value" id="pMeds">ميتفورمين (500mg)، بخاخ فنتولين عند الحاجة</div>
             </div>
 
-            <!-- 4. SPECIAL NOTES (Implants, Pacemakers, etc.) -->
-            <div class="data-block">
-                <span class="data-label">ملاحظات طبية هامة</span>
-                <div class="data-value">مركب صمام قلبي اصطناعي (2021). يرجى الحذر عند استخدام أجهزة الرنين المغناطيسي.</div>
-            </div>
 
             <!-- 5. EMERGENCY CONTACTS -->
             <h3 style="margin-top:30px; font-size:1.1rem;">🚨 جهات اتصال الطوارئ</h3>
@@ -143,24 +138,10 @@
                     </div>
                     <a href="tel:07701234567" class="btn-call">اتصال 📞</a>
                 </div>
-                <div class="contact-row">
-                    <div>
-                        <div style="font-weight:bold;">سارة علي (الزوجة)</div>
-                        <small style="color:#64748b;">07509876543</small>
-                    </div>
-                    <a href="tel:07509876543" class="btn-call">اتصال 📞</a>
-                </div>
-            </div>
-                        <!-- 6. ORGAN DONOR STATUS -->
-            <div class="extra-badge">
-                <span>🫀 متبرع بالأعضاء (Organ Donor)</span>
-                <span style="color:#25D366;">نعم</span>
-            </div>
-
-        </div>
     </div>
     <script>
-     const firebaseConfig = {
+    // 1. INITIALIZE FIREBASE
+    const firebaseConfig = {
         apiKey: "AIzaSyDqMEr5yKTjN3GV5osJmwW_2hdKVQOzFWs",
         authDomain: "dentalclinicbooking-system.firebaseapp.com",
         projectId: "dentalclinicbooking-system",
@@ -171,58 +152,66 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
+    // 2. GET THE NAME FROM THE QR LINK
     const urlParams = new URLSearchParams(window.location.search);
-    const patientName = urlParams.get('name');
+    const patientNameFromURL = urlParams.get('name');
 
-    if (patientName) {
-        loadEmergencyData(patientName);
+    if (patientNameFromURL) {
+        loadPatientData(patientNameFromURL);
+    } else {
+        alert("يرجى مسح رمز المريض من السجل أولاً");
     }
 
-    async function loadEmergencyData(name) {
-        try {
-            const snapshot = await db.collection("hospitalTableh")
-                                     .where("patientName", "==", name)
-                                     .get();
+    async function loadPatientData(name) {
+        // 3. SEARCH DATABASE FOR THE LATEST RECORD
+        const snapshot = await db.collection("hospitalTableh")
+                                 .where("patientName", "==", name)
+                                 .get();
+        
+        if (!snapshot.empty) {
+            // Get all visits and sort to find the newest one
+            let records = [];
+            snapshot.forEach(doc => records.push({id: doc.id, ...doc.data()}));
+            records.sort((a, b) => b.timestamp - a.timestamp);
             
-            if (!snapshot.empty) {
-                let records = [];
-                snapshot.forEach(doc => records.push({id: doc.id, ...doc.data()}));
-                records.sort((a, b) => b.timestamp - a.timestamp);
-                
-                const data = records[0];
+            const data = records[0];
 
-                // --- SAFETY GUARDS START ---
-                // We use (data.clinical ? data.clinical.allergy : "...") 
-                // This checks if the folder exists before looking inside it.
+            // 4. UPDATE THE "MILLION DOLLAR" UI WITH REAL DATA
+            
+            // Set the Patient Name
+            document.getElementById('pName').innerText = data.patientName || name;
+            
+            // Set the Blood Group (The Red Badge)
+            document.getElementById('pBlood').innerText = 
+                (data.clinical && data.clinical.bloodType) ? data.clinical.bloodType : "O+";
 
-                document.getElementById('pName').innerText = data.patientName || name;
-                
-                document.getElementById('pBlood').innerText = 
-                    (data.clinical && data.clinical.bloodType) ? data.clinical.bloodType : "O+";
+            // Set the Allergies (The Alert Box)
+            document.getElementById('pAllergy').innerText = 
+                (data.clinical && data.clinical.allergy) ? data.clinical.allergy : "لا يوجد حساسية مسجلة";
 
-                document.getElementById('pAllergy').innerText = 
-                    (data.clinical && data.clinical.allergy) ? data.clinical.allergy : "لا يوجد بيانات";
+            // Set Chronic Diseases
+            document.getElementById('pChronic').innerText = 
+                (data.clinical && data.clinical.chronic) ? data.clinical.chronic : "لا يوجد";
 
-                document.getElementById('pChronic').innerText = 
-                    (data.clinical && data.clinical.chronic) ? data.clinical.chronic : "لا يوجد بيانات";
+            // Set Medications
+            document.getElementById('pMeds').innerText = 
+                (data.clinical && data.clinical.history) ? data.clinical.history : "لا يوجد";
 
-                document.getElementById('pMeds').innerText = 
-                    (data.clinical && data.clinical.history) ? data.clinical.history : "لا يوجد بيانات";
-
-                document.getElementById('pBirth').innerText = 
-                    (data.personal && data.personal.dob) ? "تاريخ الميلاد: " + data.personal.dob : "تاريخ الميلاد: غير مسجل";
-                
-                // Link the gold button
-                document.getElementById('fullHistoryBtn').href = `health_pro.html?id=${records[0].id}`;
-                // --- SAFETY GUARDS END ---
-
-            } else {
-                console.log("No record found for: " + name);
+            // Set Emergency Contact
+            document.getElementById('pEmergency').innerText = 
+                (data.personal && data.personal.emergency) ? data.personal.emergency : "غير مسجل";
+            // Set Birth Info
+            if (data.personal && data.personal.dob) {
+                document.getElementById('pBirth').innerText = "تاريخ الميلاد: " + data.personal.dob;
             }
-        } catch (error) {
-            console.error("Error loading data: ", error);
+
+            // 5. UPDATE THE GOLD BUTTON LINK
+            document.getElementById('fullHistoryBtn').href = `health_pro.html?id=${records[0].id}`;
+            
+        } else {
+            alert("لم يتم العثور على بيانات لهذا المريض في قاعدة البيانات.");
         }
     }
-
+</script>
 </body>
 </html>
