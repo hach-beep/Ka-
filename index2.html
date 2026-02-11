@@ -1,0 +1,229 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HealthCloud OS - المنظومة الوطنية الموحدة</title>
+    
+    <!-- Libraries -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;500;700;900&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <style>
+        :root {
+            --navy: #0a192f;
+            --blue: #003566;
+            --gold: #ffc300;
+            --white: #ffffff;
+            --bg: #f8fafc;
+            --accent: #0077b6;
+        }
+
+        body { 
+            font-family: 'Noto Sans Arabic', sans-serif; 
+            margin: 0; background-color: var(--bg); direction: rtl; scroll-behavior: smooth;
+        }
+
+        /* --- 1. THE PREFACE (HERO) --- */
+        .hero {
+            background: var(--navy);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 5%;
+            position: relative;
+            color: white;
+            overflow: hidden;
+        }
+
+        .hero-content {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            align-items: center;
+            max-width: 1200px;
+            z-index: 10;
+        }
+
+        .hero-text h1 {
+            font-size: 3.5rem;
+            font-weight: 900;
+            color: var(--gold);
+            margin: 0;
+            line-height: 1.1;
+        }
+      .hero-text p {
+            font-size: 1.3rem;
+            margin-top: 25px;
+            opacity: 0.8;
+            max-width: 600px;
+            line-height: 1.8;
+        }
+
+        /* Moving Flag Logo */
+        .logo-container { position: relative; display: flex; justify-content: center; }
+        .moving-logo {
+            width: 380px; height: 380px;
+            border-radius: 40px;
+            border: 10px solid rgba(255, 255, 255, 0.1);
+            object-fit: cover;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+            animation: flagWave 6s ease-in-out infinite;
+        }
+
+        @keyframes flagWave {
+            0%, 100% { transform: perspective(1000px) rotateY(-5deg) translateY(0); }
+            50% { transform: perspective(1000px) rotateY(5deg) translateY(-20px); }
+        }
+
+        /* --- 2. STATISTICS SECTION --- */
+        .section-stats { padding: 80px 5%; background: white; text-align: center; }
+        .stats-grid { 
+            display: grid; 
+            grid-template-columns: repeat(3, 1fr); 
+            gap: 25px; 
+            max-width: 1100px; 
+            margin: 40px auto; 
+        }
+        .stat-card {
+            padding: 30px;
+            border-radius: 25px;
+            background: var(--bg);
+            border-bottom: 5px solid var(--accent);
+            transition: 0.3s;
+        }
+        .stat-card:hover { transform: translateY(-10px); background: white; box-shadow: 0 15px 30px rgba(0,0,0,0.05); }
+        .stat-card h4 { margin: 0; color: #64748b; font-size: 0.9rem; }
+        .stat-card div { font-size: 2.5rem; font-weight: 900; color: var(--navy); margin-top: 10px; }
+
+        /* --- 3. EXPLANATION & HOW TO USE --- */
+        .section-info { padding: 80px 5%; background: var(--navy); color: white; text-align: center; }
+        .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px; margin-top: 50px; }
+        .info-step { padding: 20px; }
+        .info-step span { font-size: 3rem; color: var(--gold); font-weight: 900; display: block; margin-bottom: 15px; }
+
+        /* --- 4. LAUNCH BUTTON --- */
+        .launch-area { padding: 100px 5%; text-align: center; background: white; }
+        .btn-launch {
+            background: var(--gold);
+            color: var(--navy);
+            padding: 25px 80px;
+            border-radius: 25px;
+            font-size: 1.8rem;
+            font-weight: 900;
+            text-decoration: none;
+            display: inline-block;
+            box-shadow: 0 20px 40px rgba(255, 195, 0, 0.3);
+            transition: 0.3s;
+        }
+        .btn-launch:hover { transform: scale(1.05); background: var(--navy); color: white; }
+      /* --- 5. QR SCAN RESULT MODAL (Emergency ID) --- */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10, 25, 47, 0.95); z-index: 5000; backdrop-filter: blur(10px); }
+        .modal-content { background: white; width: 90%; max-width: 500px; margin: 50px auto; border-radius: 35px; overflow: hidden; position: relative; }
+        .modal-header { background: #d90429; color: white; padding: 30px; text-align: center; }
+        .modal-body { padding: 30px; }
+        .data-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f1f5f9; }
+        .data-row label { font-weight: bold; color: #64748b; }
+        .data-row span { font-weight: 800; color: var(--navy); }
+
+        @media (max-width: 900px) {
+            .hero-content { grid-template-columns: 1fr; text-align: center; }
+            .moving-logo { width: 280px; height: 280px; margin-top: 40px; }
+            .hero-text h1 { font-size: 2.5rem; }
+            .stats-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 1. PREFACE -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-text">
+                <h1>المنظومة الوطنية الموحدة<br>للسجلات الصحية</h1>
+                <p>نظام رقمي متكامل يربط حياة المريض الطبية في سجل واحد آمن. من العيادة الخاصة إلى المستشفى الحكومي، بياناتك معك دائماً.</p>
+                <button onclick="document.getElementById('stats').scrollIntoView({behavior:'smooth'})" style="background:none; border:2px solid var(--gold); color:var(--gold); padding:12px 30px; border-radius:15px; font-weight:bold; cursor:pointer; margin-top:20px;">استكشاف المنظومة ↓</button>
+            </div>
+            <div class="logo-container">
+                <img src="doctor.jpg" class="moving-logo" alt="Logo">
+            </div>
+        </div>
+    </section>
+
+    <!-- 2. STATISTICS -->
+    <section class="section-stats" id="stats">
+        <h2>إحصائيات الاستخدام المباشرة</h2>
+        <div class="stats-grid">
+            <div class="stat-card"><h4>زيارات اليوم</h4><div id="statToday">142</div></div>
+            <div class="stat-card"><h4>إجمالي الشهر</h4><div id="statMonth">3,840</div></div>
+            <div class="stat-card"><h4>السجلات السنوية</h4><div id="statYear">45,200</div></div>
+        </div>
+    </section>
+
+    <!-- 3. EXPLANATION -->
+    <section class="section-info">
+        <h2>كيف تعمل المنظومة؟</h2>
+        <div class="info-grid">
+            <div class="info-step"><span>01</span><h3>التوثيق الموحد</h3><p>يتم تسجيل المريض في قاعدة البيانات الوطنية لمرة واحدة فقط.</p></div>
+            <div class="info-step"><span>02</span><h3>الجواز الطبي</h3><p>يحصل كل مريض على رمز QR يحتوي على معلوماته الحرجة المنقذة للحياة.</p></div>
+            <div class="info-step"><span>03</span><h3>الوصول الفوري</h3><p>في حالات الطوارئ، يمسح الطبيب الرمز ليعرف الحساسية وفصيلة الدم في ثانية واحدة.</p></div>
+        </div>
+        </section>
+
+    <!-- 4. LAUNCH APP -->
+    <section class="launch-area">
+        <h2>جاهز لبدء العمل؟</h2>
+        <p style="margin-bottom:40px; color:#64748b;">ادخل إلى لوحة التحكم الطبية لإدارة المرضى والسجلات.</p>
+        <a href="registry.html" class="btn-launch">فتح سجل المرضى 🔐</a>
+    </section>
+
+    <!-- 5. EMERGENCY BRIEF MODAL (Simulation) -->
+    <div id="emergencyModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span onclick="closeModal()" style="float:left; cursor:pointer;">×</span>
+                <h2 style="margin:0;">⚠️ تنبيه طبي طارئ</h2>
+            </div>
+            <div class="modal-body">
+                <div style="text-align:center; margin-bottom:20px;">
+                    <h3 id="emName" style="margin:0;">-</h3>
+                    <div style="font-size:2.5rem; font-weight:900; color:#d90429;" id="emBlood">O+</div>
+                </div>
+                <div class="data-row"><label>الحساسية</label><span id="emAllergy" style="color:#d90429;">البنسلين</span></div>
+                <div class="data-row"><label>أمراض مزمنة</label><span id="emChronic">السكري، الربو</span></div>
+                <div class="data-row"><label>أمراض وراثية</label><span id="emHereditary">لا يوجد</span></div>
+                <div class="data-row"><label>علاجات مستمرة</label><span id="emMeds">ميتفورمين</span></div>
+                <div class="data-row" style="border:none; margin-top:15px; background:#f8fafc; padding:15px; border-radius:15px;">
+                    <label>للطوارئ</label><span id="emContact">الأب: 07701234567</span>
+                </div>
+                <button class="btn-launch" style="font-size:1rem; padding:15px; width:100%; margin-top:20px;" onclick="window.location.href='health_pro.html'">فتح السجل الكامل</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Use your existing Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyDqMEr5yKTjN3GV5osJmwW_2hdKVQOzFWs",
+            authDomain: "dentalclinicbooking-system.firebaseapp.com",
+            projectId: "dentalclinicbooking-system",
+            storageBucket: "dentalclinicbooking-system.firebasestorage.app",
+            messagingSenderId: "892853005967",
+            appId: "1:892853005967:web:1a5fb182c073eba1ee0afa"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // REAL-TIME STATS FROM FIREBASE
+        db.collection("hospitalTableh").onSnapshot(snap => {
+            document.getElementById('statToday').innerText = snap.size; // Simulated for demo
+            document.getElementById('statMonth').innerText = snap.size * 12;
+            document.getElementById('statYear').innerText = snap.size * 140;
+        });
+function closeModal() { document.getElementById('emergencyModal').style.display = 'none'; }
+    </script>
+</body>
+</html>
