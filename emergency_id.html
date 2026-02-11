@@ -160,8 +160,7 @@
         </div>
     </div>
     <script>
-    // 1. YOUR FIREBASE CONFIG
-    const firebaseConfig = {
+     const firebaseConfig = {
         apiKey: "AIzaSyDqMEr5yKTjN3GV5osJmwW_2hdKVQOzFWs",
         authDomain: "dentalclinicbooking-system.firebaseapp.com",
         projectId: "dentalclinicbooking-system",
@@ -172,7 +171,6 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // 2. GET NAME FROM URL
     const urlParams = new URLSearchParams(window.location.search);
     const patientName = urlParams.get('name');
 
@@ -181,29 +179,48 @@
     }
 
     async function loadEmergencyData(name) {
-        // THE FIX: We search the collection for the name instead of looking for a specific ID
-        const snapshot = await db.collection("hospitalTableh")
-                                 .where("patientName", "==", name)
-                                 .get();
-        
-        if (!snapshot.empty) {
-            // Get the most recent record (the last one in the list)
-            const docs = snapshot.docs;
-            const latestDoc = docs[docs.length - 1];
-            const data = latestDoc.data();
+        try {
+            const snapshot = await db.collection("hospitalTableh")
+                                     .where("patientName", "==", name)
+                                     .get();
             
-            // Map the data to your Apple-style UI
-            document.getElementById('pName').innerText = data.patientName;
-            document.getElementById('pBlood').innerText = data.clinical.bloodType || "O+";
-            document.getElementById('pAllergy').innerText = data.clinical.allergy || "لا يوجد";
-            document.getElementById('pChronic').innerText = data.clinical.chronic || "لا يوجد";
-            document.getElementById('pMeds').innerText = data.clinical.history || "لا يوجد";
-            document.getElementById('pBirth').innerText = "تاريخ الميلاد: " + (data.personal.dob || "غير مسجل");
-            
-            // Link the gold button to the full documentation
-            document.getElementById('fullHistoryBtn').href = `health_pro.html?id=${latestDoc.id}`;
-        } else {
-            alert("لم يتم العثور على سجل طبي لهذا الاسم. يرجى التأكد من ملء الطبلة أولاً.");
+            if (!snapshot.empty) {
+                let records = [];
+                snapshot.forEach(doc => records.push({id: doc.id, ...doc.data()}));
+                records.sort((a, b) => b.timestamp - a.timestamp);
+                
+                const data = records[0];
+
+                // --- SAFETY GUARDS START ---
+                // We use (data.clinical ? data.clinical.allergy : "...") 
+                // This checks if the folder exists before looking inside it.
+
+                document.getElementById('pName').innerText = data.patientName || name;
+                
+                document.getElementById('pBlood').innerText = 
+                    (data.clinical && data.clinical.bloodType) ? data.clinical.bloodType : "O+";
+
+                document.getElementById('pAllergy').innerText = 
+                    (data.clinical && data.clinical.allergy) ? data.clinical.allergy : "لا يوجد بيانات";
+
+                document.getElementById('pChronic').innerText = 
+                    (data.clinical && data.clinical.chronic) ? data.clinical.chronic : "لا يوجد بيانات";
+
+                document.getElementById('pMeds').innerText = 
+                    (data.clinical && data.clinical.history) ? data.clinical.history : "لا يوجد بيانات";
+
+                document.getElementById('pBirth').innerText = 
+                    (data.personal && data.personal.dob) ? "تاريخ الميلاد: " + data.personal.dob : "تاريخ الميلاد: غير مسجل";
+                
+                // Link the gold button
+                document.getElementById('fullHistoryBtn').href = `health_pro.html?id=${records[0].id}`;
+                // --- SAFETY GUARDS END ---
+
+            } else {
+                console.log("No record found for: " + name);
+            }
+        } catch (error) {
+            console.error("Error loading data: ", error);
         }
     }
 
