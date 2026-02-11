@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>الطبلة الإلكترونية - HealthCloud Pro</title>
+    <title>الطبلة الطبية المتكاملة - HealthCloud Pro</title>
     
     <!-- Libraries -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
@@ -12,109 +12,145 @@
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;500;700;900&display=swap');
-        :root { --navy: #0a192f; --blue: #0077b6; --gold: #ffc300; --bg: #f4f7fa; }
+        :root { --navy: #1e293b; --blue: #005f8d; --bg: #f4f7fa; --header-blue: #e9f5f8; --green: #10b981; }
+        
         body { font-family: 'Noto Sans Arabic', sans-serif; margin: 0; background: var(--bg); direction: rtl; padding-bottom: 50px; }
+        .container { max-width: 900px; margin: 20px auto; padding: 0 15px; }
         
-        header { background: var(--navy); color: white; padding: 20px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        .container { max-width: 800px; margin: 20px auto; padding: 0 15px; }
-        header { background: var(--navy); color: white; padding: 20px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        .container { max-width: 800px; margin: 20px auto; padding: 0 15px; }
+        /* THE DESIGN STYLE */
+        .section-card { background: white; border-radius: 15px; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); overflow: hidden; border: 1px solid #e2e8f0; }
+        .section-header { background: var(--header-blue); padding: 12px 20px; color: var(--blue); font-weight: 900; border-bottom: 1px solid #d1e9f0; }
+        .card-body { padding: 25px; }
         
-        .section-card { background: white; border-radius: 20px; padding: 25px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
-        .section-title { font-weight: 900; color: var(--blue); border-right: 5px solid var(--gold); padding-right: 15px; margin-bottom: 20px; background: #f8fafc; padding: 10px; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; }
+        .input-group { display: flex; flex-direction: column; gap: 5px; margin-bottom: 15px; }
+        label { font-size: 0.75rem; font-weight: bold; color: #64748b; }
+        input, textarea, select { padding: 12px; border: 1px solid #e2e8f0; border-radius: 10px; font-size: 0.95rem; background: #fcfcfc; outline: none; }
 
-        .grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; }
-        .input-group { display: flex; flex-direction: column; gap: 5px; }
-        label { font-size: 0.8rem; font-weight: bold; color: #64748b; }
-        input, textarea, select { padding: 12px; border: 1px solid #e2e8f0; border-radius: 10px; font-size: 1rem; outline: none; }
+        /* Tables */
+        .med-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        .med-table th { background: var(--blue); color: white; padding: 10px; font-size: 0.8rem; }
+        .med-table td { border: 1px solid #e2e8f0; padding: 10px; font-size: 0.85rem; text-align: center; }
 
-        /* Table */
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th { background: var(--blue); color: white; padding: 10px; font-size: 0.8rem; text-align: right; }
-        td { border: 1px solid #e2e8f0; padding: 10px; font-size: 0.9rem; }
+        .add-row-area { margin-top: 15px; padding: 15px; border: 1px dashed var(--blue); border-radius: 12px; background: #f8fafc; }
+        .btn-add { background: var(--green); color: white; border: none; padding: 8px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .add-row-area { margin-top: 15px; padding: 15px; border: 1px dashed var(--blue); border-radius: 12px; background: #f8fafc; }
+        .btn-add { background: var(--green); color: white; border: none; padding: 8px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; }
 
-        .btn-save { background: var(--blue); color: white; border: none; padding: 18px; border-radius: 15px; font-weight: bold; cursor: pointer; flex: 1; }
-        .btn-add-note { background: #2a9d8f; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; margin-top: 10px; }
+        /* Footer Buttons */
+        .footer-btns { display: flex; gap: 15px; margin-top: 30px; }
+        .btn-save { flex: 1; padding: 20px; border-radius: 15px; border: none; color: white; font-weight: 900; font-size: 1.2rem; cursor: pointer; }
 
-        /* QR Modal */
         #qrModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 5000; text-align: center; color: white; padding-top: 50px; }
         #qrcode { background: white; padding: 20px; display: inline-block; border-radius: 20px; margin: 20px; }
 
-        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
+        @media (max-width: 600px) { .grid-3 { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
 
-    <header>
-        <h1>الطبلة الطبية الرقمية</h1>
-        <button onclick="window.location.href='registry.html'" style="background:none; border:1px solid white; color:white; padding:5px 10px; border-radius:8px; cursor:pointer;">العودة للسجل ←</button>
-    </header>
-
     <div class="container">
-        <!-- 1. PATIENT INFO -->
+        <!-- 1. DEMOGRAPHICS -->
         <div class="section-card">
-            <div class="section-title">👤 معلومات المريض</div>
-            <div class="input-group">
-                <label>الاسم الثلاثي</label>
-                <input type="text" id="pName" placeholder="أدخل الاسم">
-            </div>
-        </div>
-<!-- 2. MEDICAL HISTORY -->
-        <div class="section-card">
-            <div class="section-title">📋 التاريخ الطبي</div>
-            <div class="input-group">
-                <label>الشكوى الرئيسية</label>
-                <input type="text" id="h_complaint">
-            </div>
-            <div class="input-group" style="margin-top:15px;">
-                <label>تاريخ المرض الحالي</label>
-                <textarea id="h_present"></textarea>
-            </div>
-            <div class="grid" style="margin-top:15px;">
-                <div class="input-group"><label>الأمراض المزمنة</label><input type="text" id="h_chronic"></div>
-                <div class="input-group"><label>الحساسية</label><input type="text" id="h_allergy" style="color:red;"></div>
-                <div class="input-group"><label>فصيلة الدم</label><input type="text" id="h_blood"></div>
+            <div class="section-header">👤 المعلومات الديموغرافية (Demographics)</div>
+            <div class="card-body">
+                <div class="input-group">
+                    <label>الاسم الثلاثي واللقب:</label>
+                    <input type="text" id="pName" placeholder="أدخل الاسم الكامل">
+                </div>
+                <div class="grid-3">
+                    <div class="input-group"><label>تاريخ الميلاد</label><input type="date" id="pDob"></div>
+                    <div class="input-group"><label>الجنس</label><select id="pGender"><option>ذكر</option><option>أنثى</option></select></div>
+                    <div class="input-group"><label>المهنة</label><input type="text" id="pJob"></div>
+                </div>
+                <div class="input-group">
+                    <label>العنوان الكامل (محافظة/قضاء/ناحية):</label>
+                    <input type="text" id="pAddress">
+                </div>
+                <div class="input-group">
+                    <label>جهة الاتصال للطوارئ (الاسم والهاتف):</label>
+                    <input type="text" id="pEmergency">
+                </div>
             </div>
         </div>
 
-        <!-- 3. VITALS -->
+        <!-- 2. CLINICAL HISTORY -->
         <div class="section-card">
-            <div class="section-title">🌡️ العلامات الحيوية</div>
-            <div class="grid">
-                <div class="input-group"><label>ضغط الدم</label><input type="text" id="vBP"></div>
-                <div class="input-group"><label>النبض</label><input type="text" id="vPulse"></div>
-                <div class="input-group"><label>الحرارة</label><input type="text" id="vTemp"></div>
+            <div class="section-header">📋 التاريخ الطبي (Medical History)</div>
+            <div class="card-body">
+                <div class="input-group"><label>الشكوى الرئيسية (Chief Complaint)</label><input type="text" id="h_complaint"></div>
+                <div class="input-group"><label>تاريخ المرض الحالي (HPI)</label><textarea id="h_present"></textarea></div>
+                <div class="grid-3">
+                    <div class="input-group"><label>الأمراض المزمنة</label><input type="text" id="h_chronic"></div>
+                    <div class="input-group"><label>الحساسية</label><input type="text" id="h_allergy" style="color:red;"></div>
+                    <div class="input-group"><label>فصيلة الدم</label><input type="text" id="h_blood"></div>
+                </div>
+            </div>
+        </div><!-- 3. VITALS TABLE -->
+        <div class="section-card">
+            <div class="section-header">🌡️ جدول العلامات الحيوية (Vitals Table)</div>
+            <div class="card-body">
+                <table class="med-table">
+                    <thead><tr><th>الوقت</th><th>BP</th><th>Pulse</th><th>Temp</th><th>O2</th><th>حذف</th></tr></thead>
+                    <tbody id="vitalsBody"></tbody>
+                </table>
+                <div class="add-row-area">
+                    <div class="grid-3">
+                        <input type="text" id="inBP" placeholder="BP (120/80)">
+                        <input type="text" id="inPulse" placeholder="Pulse">
+                        <input type="text" id="inTemp" placeholder="Temp">
+                    </div>
+                    <button class="btn-add" style="margin-top:10px;" onclick="addVitalsRow()">إضافة قياس ➕</button>
+                </div>
             </div>
         </div>
 
-        <!-- 4. OBSERVATIONS -->
+        <!-- 4. DRUG TABLE -->
         <div class="section-card">
-            <div class="section-title">✍️ سجل الملاحظات</div>
-            <table>
-                <thead><tr><th>الوقت</th><th>الملاحظة</th><th>حذف</th></tr></thead>
-                <tbody id="obsBody"></tbody>
-            </table>
-            <div style="margin-top:15px; background:#f8fafc; padding:15px; border-radius:10px;">
-                <textarea id="newNote" placeholder="اكتب الملاحظة هنا..."></textarea>
-                <button class="btn-add-note" onclick="addNoteRow()">إضافة ملاحظة ➕</button>
+            <div class="section-header">💊 جدول الأدوية والعلاجات (Medication Table)</div>
+            <div class="card-body">
+                <table class="med-table">
+                    <thead><tr><th>الوقت</th><th>العلاج</th><th>الجرعة</th><th>الطريقة</th><th>حذف</th></tr></thead>
+                    <tbody id="drugsBody"></tbody>
+                </table>
+                <div class="add-row-area">
+                    <div class="grid-3">
+                        <input type="text" id="inDrug" placeholder="اسم الدواء">
+                        <input type="text" id="inDose" placeholder="الجرعة">
+                        <input type="text" id="inRoute" placeholder="الطريقة (IV/IM/Oral)">
+                    </div>
+                    <button class="btn-add" style="margin-top:10px;" onclick="addDrugRow()">إضافة علاج ➕</button>
+                </div>
             </div>
         </div>
 
-        <!-- SAVE BUTTONS -->
-        <div style="display:flex; gap:15px;">
-            <button class="btn-save" id="subBtn" onclick="saveFullTableh('active')">حفظ التحديثات 💾</button>
-            <button class="btn-save" style="background:#1e293b;" onclick="saveFullTableh('archived')">أرشفة وخروج 🔒</button>
+        <!-- 5. OBSERVATIONS -->
+        <div class="section-card">
+            <div class="section-header">✍️ الملاحظات التمريضية والطبية (Observations)</div>
+            <div class="card-body">
+                <table class="med-table">
+                    <thead><tr><th>التاريخ والوقت</th><th>الملاحظة</th><th>حذف</th></tr></thead>
+                    <tbody id="obsBody"></tbody>
+                </table>
+                <div class="add-row-area">
+                    <textarea id="newNote" placeholder="اكتب الملاحظة هنا..."></textarea>
+                    <button class="btn-add" onclick="addNoteRow()">إضافة ملاحظة ➕</button>
+                </div>
+            </div>
+        </div>
+        <div class="footer-btns">
+            <button class="btn-save" style="background:var(--blue);" id="subBtn" onclick="saveFullTableh('active')">حفظ التحديثات 💾</button>
+            <button class="btn-save" style="background:var(--navy);" onclick="saveFullTableh('archived')">أرشفة نهائية 🔒</button>
         </div>
     </div>
 
-    <!-- QR MODAL -->
     <div id="qrModal">
         <h2>✅ تم الحفظ بنجاح</h2>
-        <p>الجواز الطبي الرقمي للمريض:</p>
         <div id="qrcode"></div><br>
-        <button onclick="window.location.href='registry.html'" style="background:var(--gold); padding:15px 30px; border-radius:10px; border:none; font-weight:bold;">العودة للسجل</button>
+        <button onclick="window.location.href='registry.html'" style="background:var(--gold); padding:15px 30px; border-radius:10px; border:none; font-weight:bold; cursor:pointer;">العودة للسجل</button>
     </div>
-<script>
+
+    <script>
         const firebaseConfig = {
             apiKey: "AIzaSyDqMEr5yKTjN3GV5osJmwW_2hdKVQOzFWs",
             authDomain: "dentalclinicbooking-system.firebaseapp.com",
@@ -131,79 +167,76 @@
         const admissionId = urlParams.get('id'); 
 
         let notesArray = [];
+        let vitalsArray = [];
+        let drugsArray = [];
 
-        // 1. AUTO-LOAD DATA
         if (urlName) document.getElementById('pName').value = urlName;
         if (admissionId) {
             db.collection("hospitalTableh").doc(admissionId).get().then(doc => {
                 const d = doc.data();
                 document.getElementById('pName').value = d.patientName;
+                document.getElementById('pDob').value = d.personal.dob;
+                document.getElementById('pGender').value = d.personal.gender;
+                document.getElementById('pJob').value = d.personal.job;
+                document.getElementById('pAddress').value = d.personal.address;
+                document.getElementById('pEmergency').value = d.personal.emergency;
                 document.getElementById('h_complaint').value = d.clinical.complaint;
                 document.getElementById('h_present').value = d.clinical.history;
-                document.getElementById('h_blood').value = d.clinical.bloodType || "";
-                document.getElementById('h_allergy').value = d.clinical.allergy || "";
-                document.getElementById('h_chronic').value = d.clinical.chronic || "";
+                document.getElementById('h_blood').value = d.clinical.bloodType;
+                document.getElementById('h_allergy').value = d.clinical.allergy;
+                document.getElementById('h_chronic').value = d.clinical.chronic;
                 notesArray = d.observations || [];
-                renderNotes();
+                vitalsArray = d.vitalsHistory || [];
+                drugsArray = d.drugsHistory || [];
+                renderAll();
             });
+        }function addVitalsRow() {
+            vitalsArray.push({ time: new Date().toLocaleTimeString('ar-EG'), bp: document.getElementById('inBP').value, pulse: document.getElementById('inPulse').value, temp: document.getElementById('inTemp').value, o2: document.getElementById('vO2').value });
+            renderAll();
         }
 
-        // 2. ADD NOTE TO TABLE
+        function addDrugRow() {
+            drugsArray.push({ time: new Date().toLocaleTimeString('ar-EG'), name: document.getElementById('inDrug').value, dose: document.getElementById('inDose').value, route: document.getElementById('inRoute').value });
+            renderAll();
+        }
+
         function addNoteRow() {
-            const text = document.getElementById('newNote').value;
-            if(!text) return;
-            notesArray.push({ time: new Date().toLocaleString('ar-EG'), text: text });
-            renderNotes();
-            document.getElementById('newNote').value = "";
+            notesArray.push({ time: new Date().toLocaleString('ar-EG'), text: document.getElementById('newNote').value });
+            renderAll();
         }
 
-        function renderNotes() {
-            const body = document.getElementById('obsBody');
-            body.innerHTML = "";
-            notesArray.forEach((n, i) => {
-                body.innerHTML += `<tr><td>${n.time}</td><td>${n.text}</td><td><button onclick="deleteNoteRow(${i})" style="color:red; background:none; border:none; cursor:pointer;">🗑️</button></td></tr>`;
-            });
+        function renderAll() {
+            const vBody = document.getElementById('vitalsBody'); vBody.innerHTML = "";
+            vitalsArray.forEach((v, i) => { vBody.innerHTML += `<tr><td>${v.time}</td><td>${v.bp}</td><td>${v.pulse}</td><td>${v.temp}</td><td>${v.o2 || ''}</td><td><button onclick="vitalsArray.splice(${i},1);renderAll();">✕</button></td></tr>`; });
+            
+            const dBody = document.getElementById('drugsBody'); dBody.innerHTML = "";
+            drugsArray.forEach((d, i) => { dBody.innerHTML += `<tr><td>${d.time}</td><td>${d.name}</td><td>${d.dose}</td><td>${d.route}</td><td><button onclick="drugsArray.splice(${i},1);renderAll();">✕</button></td></tr>`; });
+
+            const nBody = document.getElementById('obsBody'); nBody.innerHTML = "";
+            notesArray.forEach((n, i) => { nBody.innerHTML += `<tr><td>${n.time}</td><td>${n.text}</td><td><button onclick="notesArray.splice(${i},1);renderAll();">✕</button></td></tr>`; });
         }
 
-        function deleteNoteRow(i) { notesArray.splice(i, 1); renderNotes(); }
-   // 3. THE MASTER SAVE LOGIC
         function saveFullTableh(status) {
             const name = document.getElementById('pName').value;
-            if (!name) return alert("يرجى إدخال الاسم");
-
             const data = {
-                patientName: name,
-                status: status,
-                clinical: {
-                    complaint: document.getElementById('h_complaint').value,
-                    history: document.getElementById('h_present').value,
-                    bloodType: document.getElementById('h_blood').value,
-                    allergy: document.getElementById('h_allergy').value,
-                    chronic: document.getElementById('h_chronic').value
-                },
-                vitals: {
-                    bp: document.getElementById('vBP').value,
-                    pulse: document.getElementById('vPulse').value,
-                    temp: document.getElementById('vTemp').value
-                },
-                observations: notesArray,
-                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                patientName: name, status: status,
+                personal: { dob: document.getElementById('pDob').value, gender: document.getElementById('pGender').value, job: document.getElementById('pJob').value, address: document.getElementById('pAddress').value, emergency: document.getElementById('pEmergency').value },
+                clinical: { complaint: document.getElementById('h_complaint').value, history: document.getElementById('h_present').value, bloodType: document.getElementById('h_blood').value, allergy: document.getElementById('h_allergy').value, chronic: document.getElementById('h_chronic').value },
+                vitalsHistory: vitalsArray, drugsHistory: drugsArray, observations: notesArray, timestamp: firebase.firestore.FieldValue.serverTimestamp()
             };
 
             if (admissionId) {
-                db.collection("hospitalTableh").doc(admissionId).update(data).then(() => {
-                    alert("✅ تم تحديث السجل بنجاح");
-                    if(status === 'archived') window.location.href = "registry.html";
-                });
+                
+        db.collection("hospitalTableh").doc(admissionId).update(data).then(() => { alert("✅ تم التحديث"); if(status==='archived') window.location.href="registry.html"; });
             } else {
-                db.collection("hospitalTableh").add(data).then((docRef) => {
-                    document.getElementById('qrModal').style.display = 'block';
-                    document.getElementById('qrcode').innerHTML = "";
-                    const passportLink = `https://hach-beep.github.io/Ka-/emergency_id.html?name=${encodeURIComponent(name)}`;
-                    new QRCode(document.getElementById("qrcode"), { text: passportLink, width: 200, height: 200 });
+                db.collection("hospitalTableh").add(data).then(() => {
+                    document.getElementById('qrModal').style.display='block';
+                    document.getElementById('qrcode').innerHTML="";
+                    new QRCode(document.getElementById("qrcode"), { text: "https://hach-beep.github.io/Ka-/emergency_id.html?name="+encodeURIComponent(name), width: 200, height: 200 });
                 });
             }
         }
     </script>
 </body>
 </html>
+        
