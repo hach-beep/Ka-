@@ -152,99 +152,118 @@
     </div>
 
     <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyDqMEr5yKTjN3GV5osJmwW_2hdKVQOzFWs",
-            authDomain: "dentalclinicbooking-system.firebaseapp.com",
-            projectId: "dentalclinicbooking-system",
-            storageBucket: "dentalclinicbooking-system.firebasestorage.app",
-            messagingSenderId: "892853005967",
-            appId: "1:892853005967:web:1a5fb182c073eba1ee0afa"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
+    // 1. INITIALIZE FIREBASE
+    const firebaseConfig = {
+        apiKey: "AIzaSyDqMEr5yKTjN3GV5osJmwW_2hdKVQOzFWs",
+        authDomain: "dentalclinicbooking-system.firebaseapp.com",
+        projectId: "dentalclinicbooking-system",
+        storageBucket: "dentalclinicbooking-system.firebasestorage.app",
+        messagingSenderId: "892853005967",
+        appId: "1:892853005967:web:1a5fb182c073eba1ee0afa"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
 
-        const urlParams = new URLSearchParams(window.location.search);
-        const urlName = urlParams.get('name');
-        const admissionId = urlParams.get('id'); 
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlName = urlParams.get('name');
+    const admissionId = urlParams.get('id'); 
 
-        let notesArray = [];
-        let vitalsArray = [];
-        let drugsArray = [];
+    let notesArray = [];
+    let vitalsArray = [];
+    let drugsArray = [];
 
-        if (urlName) document.getElementById('pName').value = urlName;
-        if (admissionId) {
-            db.collection("hospitalTableh").doc(admissionId).get().then(doc => {
+    // 2. AUTO-LOAD OLD DATA
+    if (urlName) document.getElementById('pName').value = urlName;
+    if (admissionId) {
+        db.collection("hospitalTableh").doc(admissionId).get().then(doc => {
+            if (doc.exists) {
                 const d = doc.data();
-                document.getElementById('pName').value = d.patientName;
-                document.getElementById('pDob').value = d.personal.dob;
-                document.getElementById('pGender').value = d.personal.gender;
-                document.getElementById('pJob').value = d.personal.job;
-                document.getElementById('pAddress').value = d.personal.address;
-                document.getElementById('pEmergency').value = d.personal.emergency;
-                document.getElementById('h_complaint').value = d.clinical.complaint;
-                document.getElementById('h_present').value = d.clinical.history;
-                document.getElementById('h_blood').value = d.clinical.bloodType;
-                document.getElementById('h_allergy').value = d.clinical.allergy;
-                document.getElementById('h_chronic').value = d.clinical.chronic;
+                document.getElementById('pName').value = d.patientName || "";
+                document.getElementById('h_complaint').value = d.clinical?.complaint || "";
+                document.getElementById('h_present').value = d.clinical?.history || "";
+                document.getElementById('h_blood').value = d.clinical?.bloodType || "";
+                document.getElementById('h_allergy').value = d.clinical?.allergy || "";
+                document.getElementById('h_chronic').value = d.clinical?.chronic || "";
+                document.getElementById('pAddress').value = d.personal?.address || "";
+                document.getElementById('pEmergency').value = d.personal?.emergency || "";
                 notesArray = d.observations || [];
                 vitalsArray = d.vitalsHistory || [];
                 drugsArray = d.drugsHistory || [];
                 renderAll();
-            });
-            function addVitalsRow() {
+            }
+        });
+    }
+
+    // 3. ADD ROW FUNCTIONS
+    function addVitalsRow() {
         const bp = document.getElementById('inBP').value || "-";
         const pulse = document.getElementById('inPulse').value || "-";
         const temp = document.getElementById('inTemp').value || "-";
         const o2 = document.getElementById('ino2').value || "-"; // Fixed ID
-
         vitalsArray.push({ time: new Date().toLocaleTimeString('ar-EG'), bp, pulse, temp, o2 });
         renderAll();
         document.getElementById('inBP').value = ""; document.getElementById('inPulse').value = ""; 
         document.getElementById('inTemp').value = ""; document.getElementById('ino2').value = "";
-            }
+    }
 
-        function addDrugRow() {
-            drugsArray.push({ time: new Date().toLocaleTimeString('ar-EG'), name: document.getElementById('inDrug').value, dose: document.getElementById('inDose').value, route: document.getElementById('inRoute').value });
-            renderAll();
-        }
+    function addDrugRow() {
+        const name = document.getElementById('inDrug').value;
+        const dose = document.getElementById('inDose').value || "-";
+        const route = document.getElementById('inRoute').value || "-";
+        if(!name) return alert("يرجى كتابة اسم الدواء");
+        drugsArray.push({ time: new Date().toLocaleTimeString('ar-EG'), name, dose, route });
+        renderAll();
+        document.getElementById('inDrug').value = ""; document.getElementById('inDose').value = ""; document.getElementById('inRoute').value = "";
+    }
 
-        function addNoteRow() {
-            notesArray.push({ time: new Date().toLocaleString('ar-EG'), text: document.getElementById('newNote').value });
-            renderAll();
-        }
+    function addNoteRow() {
+        const text = document.getElementById('newNote').value;
+        if(!text) return;
+        notesArray.push({ time: new Date().toLocaleString('ar-EG'), text: text });
+        renderAll();
+        document.getElementById('newNote').value = "";
+    }
 
-        function renderAll() {
-            const vBody = document.getElementById('vitalsBody'); vBody.innerHTML = "";
-            vitalsArray.forEach((v, i) => { vBody.innerHTML += `<tr><td>${v.time}</td><td>${v.bp}</td><td>${v.pulse}</td><td>${v.temp}</td><td>${v.o2 || ''}</td><td><button onclick="vitalsArray.splice(${i},1);renderAll();">✕</button></td></tr>`; });
-            
-            const dBody = document.getElementById('drugsBody'); dBody.innerHTML = "";
-            drugsArray.forEach((d, i) => { dBody.innerHTML += `<tr><td>${d.time}</td><td>${d.name}</td><td>${d.dose}</td><td>${d.route}</td><td><button onclick="drugsArray.splice(${i},1);renderAll();">✕</button></td></tr>`; });
+    // 4. DRAW TABLES ON SCREEN
+    function renderAll() {
+        const vBody = document.getElementById('vitalsBody'); vBody.innerHTML = "";
+        vitalsArray.forEach((v, i) => { 
+            vBody.innerHTML += `<tr><td>${v.time}</td><td>${v.bp}</td><td>${v.pulse}</td><td>${v.temp}</td><td>${v.o2}</td><td><button onclick="vitalsArray.splice(${i},1);renderAll();" style="color:red; background:none; border:none; cursor:pointer;">✕</button></td></tr>`; 
+        });
+        
+        const dBody = document.getElementById('drugsBody'); dBody.innerHTML = "";
+        drugsArray.forEach((d, i) => { 
+            dBody.innerHTML += `<tr><td>${d.time}</td><td>${d.name}</td><td>${d.dose}</td><td>${d.route}</td><td><button onclick="drugsArray.splice(${i},1);renderAll();" style="color:red; background:none; border:none; cursor:pointer;">✕</button></td></tr>`; 
+        });
 
-            const nBody = document.getElementById('obsBody'); nBody.innerHTML = "";
-            notesArray.forEach((n, i) => { nBody.innerHTML += `<tr><td>${n.time}</td><td>${n.text}</td><td><button onclick="notesArray.splice(${i},1);renderAll();">✕</button></td></tr>`; });
-        }
+        const nBody = document.getElementById('obsBody'); nBody.innerHTML = "";
+        notesArray.forEach((n, i) => { 
+            nBody.innerHTML += `<tr><td>${n.time}</td><td>${n.text}</td><td><button onclick="notesArray.splice(${i},1);renderAll();" style="color:red; background:none; border:none; cursor:pointer;">✕</button></td></tr>`; 
+        });
+    }
 
-        function saveFullTableh(status) {
-            const name = document.getElementById('pName').value;
+    // 5. MASTER SAVE
+    function saveFullTableh(status) {
+        const name = document.getElementById('pName').value;
+        if (!name) return alert("يرجى إدخال الاسم");
             const data = {
-                patientName: name, status: status,
-                personal: { dob: document.getElementById('pDob').value, gender: document.getElementById('pGender').value, job: document.getElementById('pJob').value, address: document.getElementById('pAddress').value, emergency: document.getElementById('pEmergency').value },
-                clinical: { complaint: document.getElementById('h_complaint').value, history: document.getElementById('h_present').value, bloodType: document.getElementById('h_blood').value, allergy: document.getElementById('h_allergy').value, chronic: document.getElementById('h_chronic').value },
-                vitalsHistory: vitalsArray, drugsHistory: drugsArray, observations: notesArray, timestamp: firebase.firestore.FieldValue.serverTimestamp()
-            };
+            patientName: name, status: status,
+            personal: { dob: document.getElementById('pDob').value, gender: document.getElementById('pGender').value, job: document.getElementById('pJob').value, address: document.getElementById('pAddress').value, emergency: document.getElementById('pEmergency').value },
+            clinical: { complaint: document.getElementById('h_complaint').value, history: document.getElementById('h_present').value, bloodType: document.getElementById('h_blood').value, allergy: document.getElementById('h_allergy').value, chronic: document.getElementById('h_chronic').value },
+            vitalsHistory: vitalsArray, drugsHistory: drugsArray, observations: notesArray, timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        };
 
-            if (admissionId) {
-                
-        db.collection("hospitalTableh").doc(admissionId).update(data).then(() => { alert("✅ تم التحديث"); if(status==='archived') window.location.href="registry.html"; });
-            } else {
-                db.collection("hospitalTableh").add(data).then(() => {
-                    document.getElementById('qrModal').style.display='block';
-                    document.getElementById('qrcode').innerHTML="";
-                    new QRCode(document.getElementById("qrcode"), { text: "https://hach-beep.github.io/Ka-/emergency_id.html?name="+encodeURIComponent(name), width: 200, height: 200 });
-                });
-            }
+        if (admissionId) {
+            db.collection("hospitalTableh").doc(admissionId).update(data).then(() => alert("✅ تم التحديث بنجاح"));
+        } else {
+            db.collection("hospitalTableh").add(data).then(() => {
+                document.getElementById('qrModal').style.display = 'block';
+                document.getElementById('qrcode').innerHTML = "";
+                new QRCode(document.getElementById("qrcode"), { text: "https://hach-beep.github.io/Ka-/emergency_id.html?name=" + encodeURIComponent(name), width: 200, height: 200 });
+            });
         }
-    </script>
+    }
+</script>
 </body>
 </html>
         
