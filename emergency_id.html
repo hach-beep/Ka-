@@ -159,7 +159,7 @@
 
         </div>
     </div>
-<script>
+    <script>
     // 1. YOUR FIREBASE CONFIG
     const firebaseConfig = {
         apiKey: "AIzaSyDqMEr5yKTjN3GV5osJmwW_2hdKVQOzFWs",
@@ -172,37 +172,40 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // 2. GET THE PATIENT NAME FROM THE URL
-    // Example link: emergency_id.html?name=Ahmed_Ali
+    // 2. GET NAME FROM URL
     const urlParams = new URLSearchParams(window.location.search);
     const patientName = urlParams.get('name');
 
     if (patientName) {
         loadEmergencyData(patientName);
-    } else {
-        alert("يرجى مسح رمز المريض أولاً");
     }
 
     async function loadEmergencyData(name) {
-        // Look in the "hospitalTableh" folder we created earlier
-        const doc = await db.collection("hospitalTableh").doc(name).get();
+        // THE FIX: We search the collection for the name instead of looking for a specific ID
+        const snapshot = await db.collection("hospitalTableh")
+                                 .where("patientName", "==", name)
+                                 .get();
         
-        if (doc.exists) {
-            const data = doc.data();
+        if (!snapshot.empty) {
+            // Get the most recent record (the last one in the list)
+            const docs = snapshot.docs;
+            const latestDoc = docs[docs.length - 1];
+            const data = latestDoc.data();
             
-            // Fill the Apple-style card with REAL data from the Tableh
-            document.getElementById('pName').innerText = data.personal.name;
+            // Map the data to your Apple-style UI
+            document.getElementById('pName').innerText = data.patientName;
             document.getElementById('pBlood').innerText = data.clinical.bloodType || "O+";
-            document.getElementById('pAllergy').innerText = data.clinical.allergy;
-document.getElementById('pChronic').innerText = data.clinical.chronic;
-            document.getElementById('pBirth').innerText = "تاريخ الميلاد: " + data.personal.dob;
+            document.getElementById('pAllergy').innerText = data.clinical.allergy || "لا يوجد";
+            document.getElementById('pChronic').innerText = data.clinical.chronic || "لا يوجد";
+            document.getElementById('pMeds').innerText = data.clinical.history || "لا يوجد";
+            document.getElementById('pBirth').innerText = "تاريخ الميلاد: " + (data.personal.dob || "غير مسجل");
             
-            // Update the "Full History" button to link to this specific patient
-            document.getElementById('fullHistoryBtn').href = `tableh_pro.html?name=${name}`;
+            // Link the gold button to the full documentation
+            document.getElementById('fullHistoryBtn').href = `health_pro.html?id=${latestDoc.id}`;
         } else {
-            alert("لم يتم العثور على سجل لهذا المريض");
+            alert("لم يتم العثور على سجل طبي لهذا الاسم. يرجى التأكد من ملء الطبلة أولاً.");
         }
     }
-</script>
+
 </body>
 </html>
