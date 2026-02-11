@@ -191,10 +191,17 @@
                 drugsArray = d.drugsHistory || [];
                 renderAll();
             });
-        }function addVitalsRow() {
-            vitalsArray.push({ time: new Date().toLocaleTimeString('ar-EG'), bp: document.getElementById('inBP').value, pulse: document.getElementById('inPulse').value, temp: document.getElementById('inTemp').value, o2: document.getElementById('o2').value });
-            renderAll();
-        }
+            function addVitalsRow() {
+        const bp = document.getElementById('inBP').value || "-";
+        const pulse = document.getElementById('inPulse').value || "-";
+        const temp = document.getElementById('inTemp').value || "-";
+        const o2 = document.getElementById('ino2').value || "-"; // Fixed ID
+
+        vitalsArray.push({ time: new Date().toLocaleTimeString('ar-EG'), bp, pulse, temp, o2 });
+        renderAll();
+        document.getElementById('inBP').value = ""; document.getElementById('inPulse').value = ""; 
+        document.getElementById('inTemp').value = ""; document.getElementById('ino2').value = "";
+            }
 
         function addDrugRow() {
             drugsArray.push({ time: new Date().toLocaleTimeString('ar-EG'), name: document.getElementById('inDrug').value, dose: document.getElementById('inDose').value, route: document.getElementById('inRoute').value });
