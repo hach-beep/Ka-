@@ -171,55 +171,86 @@
     <button class="btn-save-all" onclick="saveFullTableh('active')">حفظ التحديثات الحالية 💾</button>
     <button class="btn-save-all" style="background:#1e293b;" onclick="saveFullTableh('archived')">أرشفة نهائية (خروج المريض) 🔒</button>
            </div>
-           
-
+          // Replace ONLY the <script> section at the bottom of health_pro.html
 <script>
-    const firebaseConfig = { /* PASTE YOUR KEYS HERE */ };
+    const firebaseConfig = {
+        apiKey: "AIzaSyDqMEr5yKTjN3GV5osJmwW_2hdKVQOzFWs",
+        authDomain: "dentalclinicbooking-system.firebaseapp.com",
+        projectId: "dentalclinicbooking-system",
+        storageBucket: "dentalclinicbooking-system.firebasestorage.app",
+        messagingSenderId: "892853005967",
+        appId: "1:892853005967:web:1a5fb182c073eba1ee0afa"
+    };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
     const urlParams = new URLSearchParams(window.location.search);
-    const patientName = urlParams.get('name');
-    const admissionId = urlParams.get('id'); // NEW: Get specific visit ID
+    const urlName = urlParams.get('name');
+    const admissionId = urlParams.get('id'); 
 
     let notesArray = [];
 
-    // 1. AUTO-LOAD DATA
-    if (patientName) {
-        document.getElementById('pName').value = patientName;
-        if (admissionId) {
-            // LOAD EXISTING ADMISSION FOR EDITING
-            db.collection("hospitalTableh").doc(admissionId).get().then(doc => {
-                const d = doc.data();
-                document.getElementById('h_complaint').value = d.clinical.complaint;
-                document.getElementById('h_present').value = d.clinical.history;
-                notesArray = d.observations || [];
-                renderNotes();
-            });
-        }
+    // 1. AUTO-LOAD
+    if (urlName) document.getElementById('pName').value = urlName;
+    if (admissionId) {
+        db.collection("hospitalTableh").doc(admissionId).get().then(doc => {
+            const d = doc.data();
+            document.getElementById('pName').value = d.patientName;
+            document.getElementById('h_complaint').value = d.clinical.complaint;
+            document.getElementById('h_present').value = d.clinical.history;
+            notesArray = d.observations || [];
+            renderNotes();
+        });
     }
 
+    // 2. FIXED SAVE LOGIC
     function saveFullTableh(status) {
         const name = document.getElementById('pName').value;
+        if (!name) return alert("يرجى إدخال الاسم");
+
         const data = {
             patientName: name,
             status: status,
             clinical: {
                 complaint: document.getElementById('h_complaint').value,
                 history: document.getElementById('h_present').value,
+                bloodType: document.getElementById('h_blood').value
             },
             observations: notesArray,
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
         };
 
         if (admissionId) {
-            // UPDATE EXISTING VISIT
+            // UPDATE EXISTING
             db.collection("hospitalTableh").doc(admissionId).update(data).then(() => alert("تم تحديث السجل"));
-        } else {
-            // CREATE NEW VISIT
-            db.collection("hospitalTableh").add(data).then(() => alert("تم إنشاء دخول جديد"));
+        } else { 
+// CREATE NEW
+            db.collection("hospitalTableh").add(data).then(() => {
+                alert("تم إنشاء دخول جديد");
+                window.location.href = "registry.html";
+            });
         }
     }
-    </script>
+
+    function addNoteRow() {
+        const text = document.getElementById('newNote').value;
+        if(!text) return;
+        notesArray.push({ time: new Date().toLocaleString('ar-EG'), text: text });
+        renderNotes();
+        document.getElementById('newNote').value = "";
+    }
+
+    function renderNotes() {
+        const body = document.getElementById('obsBody');
+        body.innerHTML = "";
+        notesArray.forEach((n, i) => {
+            body.innerHTML += `<tr><td>${n.time}</td><td>${n.text}</td><td><button onclick="deleteNoteRow(${i})" style="color:red; background:none; border:none;">🗑️</button></td></tr>`;
+        });
+    }
+
+    function deleteNoteRow(i) { notesArray.splice(i, 1); renderNotes(); }
+</script>
+        </div>
+    </div>
 </body>
 </html>
