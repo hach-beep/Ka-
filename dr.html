@@ -3,136 +3,270 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>حجز موعد - عيادة د. محمد برهان</title>
+    <title>حجز موعد - د. محمد برهان</title>
+    
+    <!-- Libraries -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
     <style>
-        :root { --premium-blue: #003459; --accent-blue: #0077b6; --soft-bg: #f8fafc; }
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; background-color: var(--soft-bg); direction: rtl; }
-        
-        /* SIDE-BY-SIDE HERO BOX */
-        .hero-section { 
-            background: linear-gradient(rgba(0, 52, 89, 0.85), rgba(0, 119, 182, 0.85)), url('https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&q=80&w=1000');
-            background-size: cover; background-position: center; padding: 60px 20px; color: white;
-        }
-        .hero-container { display: flex; align-items: center; justify-content: center; gap: 30px; max-width: 750px; margin: 0 auto; }
-        
-        .profile-pic { 
-            width: 150px; height: 150px; border-radius: 50%; border: 5px solid rgba(255,255,255,0.4); 
-            object-fit: cover; 
-            object-position: center 15%; /* FACE FOCUS FIXED HERE */
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3); 
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;500;700;900&display=swap');
+
+        :root {
+            --main-blue: #5d89f1;
+            --bg-light: #f4f7fe;
+            --text-dark: #1a1a1a;
+            --text-gray: #7d8bb2;
         }
 
-        .hero-text { text-align: right; flex: 1; }
-        .hero-text h1 { margin: 0; font-size: 2rem; font-weight: 800; }
-        .slogan { font-size: 1rem; color: #e0f2fe; font-style: italic; margin-top: 10px; }
+        body { 
+            font-family: 'Noto Sans Arabic', sans-serif; 
+            margin: 0; background-color: var(--bg-light); direction: rtl; color: var(--text-dark);
+            padding-bottom: 100px;
+        }
 
-        .info-strip { background: white; max-width: 550px; 
-        margin: -35px auto 30px auto; padding: 18px; border-radius: 20px; display: flex; justify-content: space-around; box-shadow: 0 15px 35px rgba(0,0,0,0.1); font-weight: bold; color: var(--premium-blue); }
-        .container { max-width: 550px; margin: 0 auto 60px auto; background: white; padding: 35px; border-radius: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.05); box-sizing: border-box; }
-        label { display: block; margin: 20px 0 10px; font-weight: 700; }
-        input, select { width: 100%; padding: 16px; border: 2px solid #f1f5f9; border-radius: 15px; font-size: 1rem; box-sizing: border-box; }
-        
-        .time-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 15px; }
-        .time-btn { padding: 14px; border: 1px solid #e2e8f0; color: var(--premium-blue); border-radius: 12px; cursor: pointer; font-weight: 700; text-align: center; background: white; }
-        .time-btn.selected { background: var(--accent-blue); color: white; }
-        .btn-confirm { background: var(--premium-blue); color: white; border: none; padding: 20px; width: 100%; border-radius: 18px; font-size: 1.2rem; font-weight: 800; cursor: pointer; margin-top: 40px; }
-        #success { display: none; text-align: center; }
-        @media (max-width: 600px) { .hero-container { flex-direction: column; text-align: center; } .hero-text { text-align: center; } .time-grid { grid-template-columns: repeat(2, 1fr); } }
+        /* --- TOP IMAGE SECTION --- */
+        .dr-hero {
+            width: 100%;
+            height: 45vh;
+            background: url('doctor.jpg') no-repeat center center;
+            background-size: cover;
+            position: relative;
+        }
+
+        .top-nav-icons {
+            position: absolute; top: 40px; left: 20px; right: 20px;
+            display: flex; justify-content: space-between;
+        }
+
+        .nav-icon {
+            background: white; width: 40px; height: 40px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1); font-size: 1.2rem;
+        }
+
+        .dr-overlay-text {
+            position: absolute; bottom: 60px; right: 25px;
+            text-align: right;
+        }
+        .rating-badge {
+            background: white; padding: 4px 10px; border-radius: 8px;
+            font-size: 0.8rem; font-weight: bold; display: inline-flex; align-items: center; gap: 5px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 10px;
+        }.dr-overlay-text h1 { margin: 0; font-size: 2.2rem; font-weight: 900; }
+        .dr-overlay-text p { margin: 0; color: var(--text-gray); font-weight: 500; }
+
+        /* --- CONTENT CARD --- */
+        .content-card {
+            background: white;
+            margin-top: -35px;
+            border-radius: 35px 35px 0 0;
+            padding: 25px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .section-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 15px; margin-top: 10px;
+        }
+        .section-header h3 { margin: 0; font-size: 1.1rem; font-weight: 800; }
+        .section-header span { color: var(--text-gray); font-size: 0.8rem; }
+
+        /* --- HORIZONTAL DATE SCROLL --- */
+        .date-scroll {
+            display: flex; overflow-x: auto; gap: 12px; padding-bottom: 15px;
+            scrollbar-width: none; /* Hide scrollbar */
+        }
+        .date-scroll::-webkit-scrollbar { display: none; }
+
+        .date-pill {
+            min-width: 65px; height: 85px; background: white;
+            border: 1px solid #eee; border-radius: 20px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            cursor: pointer; transition: 0.3s; flex-shrink: 0;
+        }
+        .date-pill span:first-child { font-size: 0.8rem; color: var(--text-gray); margin-bottom: 5px; }
+        .date-pill span:last-child { font-size: 1.1rem; font-weight: 900; }
+
+        .date-pill.selected { background: var(--main-blue); border-color: var(--main-blue); color: white; }
+        .date-pill.selected span { color: white; }
+        .date-pill.holiday { opacity: 0.3; cursor: not-allowed; background: #f1f1f1; }
+
+        /* --- TIME GRID --- */
+        .time-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+        .time-btn {
+            padding: 12px; border: 1px solid #eee; border-radius: 15px;
+            text-align: center; font-weight: 700; font-size: 0.85rem; cursor: pointer;
+            background: white; transition: 0.2s;
+        }
+        .time-btn.selected { background: var(--main-blue); color: white; border-color: var(--main-blue); }
+        .time-btn.booked { background: #f1f5f9; color: #cbd5e1; cursor: not-allowed; text-decoration: line-through; border-color: #f1f5f9; }
+
+        /* --- BOTTOM ACTION BAR --- */
+        .bottom-bar {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: white; padding: 20px 25px;
+            display: flex; align-items: center; gap: 15px;
+            border-top: 1px solid #f1f1f1; z-index: 100;
+        }
+
+        .chat-circle {
+            width: 55px; height: 55px; border-radius: 50%; border: 1px solid #eee;
+            display: flex; align-items: center; justify-content: center; font-size: 1.4rem;
+            }
+                .btn-book-now {
+            background: var(--main-blue); color: white; border: none;
+            padding: 18px; border-radius: 20px; font-weight: 800; font-size: 1.1rem;
+            flex: 1; cursor: pointer; box-shadow: 0 10px 20px rgba(93, 137, 241, 0.3);
+        }
+
+        /* Input for Name/Phone */
+        .input-field {
+            width: 100%; padding: 15px; border: 1px solid #eee; border-radius: 15px;
+            margin-bottom: 15px; font-size: 1rem; background: #fafafa; box-sizing: border-box;
+        }
+
+        /* Success Modal */
+        #qrModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 5000; text-align: center; color: white; padding-top: 50px; backdrop-filter: blur(10px); }
+        #qrcode { background: white; padding: 20px; display: inline-block; border-radius: 25px; margin: 20px; }
     </style>
 </head>
 <body>
-    <div class="hero-section">
-        <div class="hero-container">
-            <img src="IMG_20260203_233626_888~2.jpg" class="profile-pic"> <!-- MAKE SURE PHOTO NAME IS CORRECT -->
-            <div class="hero-text">
-                <h1>عيادة د. محمد برهان</h1>
-                <p style="margin:5px 0; color:#caf0f8;">طب زراعة و تجميل الأسنان</p>
-                <div class="slogan">أسنان جميلة بدقائق معدودة ✨</div>
-            </div>
+
+    <div class="dr-hero">
+        <div class="top-nav-icons">
+            
+        </div>
+        <div class="dr-overlay-info">
+    
+            <h1 style="color: white; text-shadow: 0 2px 10px rgba(0,0,0,0.3);">د. محمد برهان</h1>
+            <p style="color: #e0e7ff;">طب وجراحة وتجميل الأسنان</p>
         </div>
     </div>
-    <div class="info-strip"><span>📍 كركوك</span><span>📞 07709126081</span></div>
-    <div class="container" id="formBody">
-        <label>اسم المريض الكامل:</label><input type="text" id="pName" placeholder=" أدخل اسم المريض الثلاثي">
-        <label>رقم الهاتف:</label><input type="tel" id="pPhone" placeholder="أدخل رقم الهاتف">
-        <label>سبب الزيارة :</label>
-        <select id="pReason">
-            <option value="فحص عام">فحص عام</option>
-            <option value="تنظيف">تنظيف</option>
-            <option value="تقويم">تقويم</option>
-            <option value="حشوات">حشوات</option>
-            <option value="قلع أسنان">قلع أسنان</option>
-            <option value="تركيب أسنان">تركيب أسنان</option>
-            <option value="برد أسنان (جسر)">برد أسنان (جسر)</option>
-        </select>
-        <label>اختر التاريخ:</label><input type="date" id="pDate" onchange="checkAvailability()">
-        <label>الأوقات المتاحة:</label><div id="timeGrid" class="time-grid"><p style="grid-column: span 3; text-align: center;">يرجى اختيار التاريخ أولاً...</p></div>
-        <button class="btn-confirm" id="subBtn" onclick="submitBooking()" disabled>تأكيد الحجز الآن ✅</button>
-    </div>
-    <div class="container" id="success"><div style="font-size: 60px; color: #25D366;">✔️</div><h2>تم الحجز بنجاح!</h2><button class="btn-confirm" onclick="location.reload()">حجز موعد جديد</button></div>
-    
-    <script>
-                    const firebaseConfig = {
-        apiKey: "AIzaSyDqMEr5yKTjN3GV5osJmwW_2hdKVQOzFWs",
-        authDomain: "dentalclinicbooking-system.firebaseapp.com",
-        projectId: "dentalclinicbooking-system",
-        storageBucket: "dentalclinicbooking-system.firebasestorage.app",
-        messagingSenderId: "892853005967",
-        appId: "1:892853005967:web:1a5fb182c073eba1ee0afa"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-    let selectedTime = "";
 
-    // 2. REFRESH SLOTS LOGIC
-    async function refreshSlots() {
-        const date = document.getElementById('pDate').value;
-        const grid = document.getElementById('timeGrid');
-        grid.innerHTML = "جاري التحميل...";
+    <div class="content-card">
+        <input type="text" id="pName" class="input-field" placeholder="الاسم الثلاثي للمريض">
+        <input type="tel" id="pPhone" class="input-field" placeholder="رقم الهاتف">
+
+        <div class="section-header">
+            <h3>اختر التاريخ</h3>
+            <span id="currentMonth">فبراير 2026</span>
+        </div>
         
-        // Load busy times from database
-        const snap = await db.collection("bookings").where("date", "==", date).get();
-        let booked = [];
-        snap.forEach(doc => booked.push(doc.data().time.trim()));
+        <div class="date-scroll" id="dateContainer">
+            <!-- Dates generated by JS -->
+        </div>
 
-        grid.innerHTML = "";
-        // Generate 15-min slots from 2 PM to 8 PM
-        for (let h = 14; h < 20; h++) {
-            for (let m of ["00", "15", "30", "45"]) {
-                let label = `${h > 12 ? h - 12 : h}:${m} م`;
-                if (!booked.includes(label.trim())) {
-                    let btn = document.createElement('div');
-                    btn.className = "time-btn"; btn.innerText = label;
-                    btn.onclick = function() {
-                        document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('selected'));
-                        this.classList.add('selected'); 
-                        selectedTime = label;
-                        document.getElementById('subBtn').disabled = false;
-                    };
+        <div class="section-header">
+            <h3>اختر الوقت</h3>
+            <span id="slotCount">0 متاح</span>
+        </div>
+        
+        <div id="timeGrid" class="time-grid">
+            <p style="grid-column: span 3; color: var(--text-gray); text-align: center;">يرجى اختيار التاريخ أولاً...</p>
+        </div>
+    </div>
+
+    <div class="bottom-bar">
+        <button class="btn-book-now" id="subBtn" onclick="submitBooking()" disabled>حجز الموعد الآن</button>
+    </div>
+    <div id="qrModal">
+        <h2 style="font-weight: 900;">تم الحجز بنجاح! ✅</h2>
+        <div id="qrcode"></div><br>
+        <button onclick="location.reload()" style="background:white; color:black; padding:15px 40px; border-radius:15px; border:none; font-weight:bold;">إغلاق</button>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDqMEr5yKTjN3GV5osJmwW_2hdKVQOzFWs",
+            authDomain: "dentalclinicbooking-system.firebaseapp.com",
+            projectId: "dentalclinicbooking-system",
+            storageBucket: "dentalclinicbooking-system.firebasestorage.app",
+            messagingSenderId: "892853005967",
+            appId: "1:892853005967:web:1a5fb182c073eba1ee0afa"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        let selectedDate = "";
+        let selectedTime = "";
+        let bookedData = [];
+
+        // 1. Generate Dates (Next 14 days)
+        const dateContainer = document.getElementById('dateContainer');
+        const days = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+        
+        for (let i = 0; i < 14; i++) {
+            let d = new Date();
+            d.setDate(d.getDate() + i);
+            let dayName = days[d.getDay()];
+            let dateNum = d.getDate();
+            let fullDate = d.toISOString().split('T')[0];
+            let isFriday = d.getDay() === 5;
+
+            let pill = document.createElement('div');
+            pill.className = 'date-pill' + (isFriday ? ' holiday' : '');
+            pill.innerHTML = `<span>${dayName}</span><span>${dateNum}</span>`;
+            
+            if (!isFriday) {
+                pill.onclick = function() {
+                    document.querySelectorAll('.date-pill').forEach(p => p.classList.remove('selected'));
+                    this.classList.add('selected');
+                    selectedDate = fullDate;
+                    refreshSlots();
+                };
+            }
+            dateContainer.appendChild(pill);
+        }
+
+        // 2. Load Busy Slots
+        async function refreshSlots() {
+            const grid = document.getElementById('timeGrid');
+            grid.innerHTML = "جاري التحميل...";
+            
+            const snap = await db.collection("bookings").where("date", "==", selectedDate).get();
+            let booked = [];
+            snap.forEach(doc => booked.push(doc.data().time.trim()));
+
+            grid.innerHTML = "";
+            let count = 0;
+            for (let h = 14; h < 20; h++) {
+                for (let m of ["00", "30"]) {
+                    let label = `${h > 12 ? h - 12 : h}:${m} م`;
+                    let isBooked = booked.includes(label.trim());
+                         let btn = document.createElement('div');
+                    btn.className = "time-btn" + (isBooked ? " booked" : "");
+                    btn.innerText = label;
+                    if (!isBooked) {
+                        count++;
+                        btn.onclick = function() {
+                            document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('selected'));
+                            this.classList.add('selected');
+                            selectedTime = label;
+                            document.getElementById('subBtn').disabled = false;
+                        };
+                    }
                     grid.appendChild(btn);
                 }
             }
+            document.getElementById('slotCount').innerText = count + " متاح";
         }
-    }
 
-    // 3. SAVE BOOKING
-    function submitBooking() {
-        const name = document.getElementById('pName').value;
-        const date = document.getElementById('pDate').value;
-        if (!name || !date || !selectedTime) return;
-        document.getElementById('subBtn').innerText = "جاري الحفظ...";
-        db.collection("bookings").add({
-            name, date, time: selectedTime, 
-            phone: document.getElementById('pPhone').value, 
-            reason: document.getElementById('pReason').value, 
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        }).then(() => { 
-            document.getElementById('formBody').style.display = 'none'; 
-            document.getElementById('success').style.display = 'block'; 
-        });
-    }
-</script>
+        function submitBooking() {
+            const name = document.getElementById('pName').value;
+            const phone = document.getElementById('pPhone').value;
+            if (!name || !phone) return alert("يرجى إدخال الاسم والهاتف");
+
+            document.getElementById('subBtn').innerText = "جاري الحفظ...";
+            db.collection("bookings").add({
+                name, phone, date: selectedDate, time: selectedTime, timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => {
+                document.getElementById('qrModal').style.display = 'block';
+                new QRCode(document.getElementById("qrcode"), { text: name + " | " + selectedDate + " | " + selectedTime, width: 180, height: 180 });
+            });
+        }
+    </script>
 </body>
 </html>
