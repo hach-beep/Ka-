@@ -1,166 +1,177 @@
-<!DOCTYPE html>
+    <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>حجز موعد - د. محمد برهان</title>
+    <title>لوحة التحكم الاحترافية - د. محمد برهان</title>
     
     <!-- Libraries -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;500;700;900&display=swap');
 
         :root {
-            --primary-black: #0f172a;
-            --accent-blue: #3b82f6;
-            --soft-gray: #f8fafc;
-            --text-muted: #64748b;
+            --navy: #0f172a;
+            --gold: #ffc300;
+            --accent: #3b82f6;
+            --bg: #f8fafc;
+            --white: #ffffff;
         }
 
         body { 
             font-family: 'Noto Sans Arabic', sans-serif; 
-            margin: 0; background-color: #f1f5f9; direction: rtl; color: var(--primary-black);
+            margin: 0; background-color: var(--bg); direction: rtl; color: var(--navy);
         }
 
-        /* --- TOP SECTION (Doctor Image) --- */
-        .header-bg {
-            background: white;
-            height: 350px;
-            position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            overflow: hidden;
+        /* --- NAVIGATION --- */
+        nav {
+            background: var(--navy); color: white; padding: 15px 30px;
+            display: flex; justify-content: space-between; align-items: center;
+            position: sticky; top: 0; z-index: 1000; box-shadow: 0 4px 20px rgba(0,0,0,0.1);
         }
-
-        .dr-large-img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            object-position: center 15%;
+        .nav-brand { display: flex; align-items: center; gap: 12px; }
+        .nav-brand img { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--gold); }
+        
+        .btn-action {
+            background: var(--gold); color: var(--navy); border: none;
+            padding: 10px 20px; border-radius: 12px; font-weight: 800;
+            cursor: pointer; font-size: 0.9rem; transition: 0.3s;
         }
+        .btn-action:hover { transform: scale(1.05); background: white; }
 
-        .top-buttons {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            right: 20px;
-            display: flex;
-            justify-content: space-between;
-            z-index: 10;
+        /* --- STATS BAR --- */
+        .stats-container {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px; max-width: 1100px; margin: 30px auto; padding: 0 20px;
         }
-
-        .circle-btn {
-            background: white; width: 45px; height: 45px; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1); font-size: 1.2rem;
+        .stat-card {
+            background: white; padding: 20px; border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.03); border-bottom: 4px solid var(--gold);
+            text-align: center;
         }
-
-        .dr-overlay-info {
-            position: absolute;
-            bottom: 60px;
-            right: 30px;
-            color: var(--primary-black);
-            text-align: right;
-        }.rating { background: white; padding: 4px 10px; border-radius: 10px; font-size: 0.8rem; font-weight: bold; display: inline-block; margin-bottom: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-
-        /* --- MAIN BOOKING CARD --- */
-        .booking-card {
-            background: white;
-            margin-top: -40px;
-            border-radius: 40px 40px 0 0;
-            padding: 30px;
-            position: relative;
-            min-height: 60vh;
-            box-shadow: 0 -10px 30px rgba(0,0,0,0.05);
+        .stat-card span { font-size: 0.8rem; color: #64748b; font-weight: bold; }
+        .stat-card div { font-size: 1.8rem; font-weight: 900; color: var(--navy); margin-top: 5px; }
+        /* --- MAIN CONTENT --- */
+        .main-content { max-width: 1100px; margin: 0 auto; padding: 0 20px 50px 20px; }
+        
+        .search-wrapper {
+            background: white; padding: 12px 20px; border-radius: 15px;
+            display: flex; align-items: center; gap: 10px; margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.02); border: 1px solid #e2e8f0;
         }
+        .search-wrapper input { border: none; outline: none; width: 100%; font-size: 1rem; background: transparent; }
 
-        .section-title { font-weight: 800; font-size: 1.1rem; margin-bottom: 15px; display: block; }
-
-        /* Inputs */
-        input[type="text"], input[type="tel"], select {
-            width: 100%; padding: 15px; border: 1px solid #e2e8f0; border-radius: 15px;
-            margin-bottom: 20px; font-size: 1rem; background: var(--soft-gray);
+        .table-card {
+            background: white; border-radius: 25px; box-shadow: 0 20px 50px rgba(0,0,0,0.05);
+            overflow: hidden; border: 1px solid #f1f5f9;
         }
+        table { width: 100%; border-collapse: collapse; }
+        th { background: #f8fafc; padding: 20px; text-align: right; font-size: 0.8rem; color: #64748b; text-transform: uppercase; }
+        td { padding: 20px; border-bottom: 1px solid #f1f5f9; font-size: 0.95rem; }
 
-        /* Time Grid (30 min gaps) */
-        .time-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 30px; }
-        .time-btn { 
-            padding: 12px; border: 1px solid #e2e8f0; border-radius: 12px; 
-            text-align: center; font-weight: bold; font-size: 0.85rem; cursor: pointer;
-            transition: 0.2s; background: white;
+        .patient-name { font-weight: 700; color: var(--accent); cursor: pointer; text-decoration: underline; }
+        .phone-link { color: var(--navy); text-decoration: none; font-weight: 500; opacity: 0.7; }
+        .btn-delete { color: #cbd5e1; background: none; border: none; cursor: pointer; font-size: 1.2rem; }
+        .btn-delete:hover { color: #ef4444; }
+
+        /* --- MODALS --- */
+        .modal { 
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(15, 23, 42, 0.7); z-index: 2000; backdrop-filter: blur(10px); 
         }
-        .time-btn.selected { background: var(--accent-blue); color: white; border-color: var(--accent-blue); }
-        .time-btn.booked { background: #f1f5f9; color: #cbd5e1; cursor: not-allowed; text-decoration: line-through; border-color: #f1f5f9; }
-
-        /* Bottom Action Bar */
-        .action-bar {
-            position: fixed; bottom: 0; left: 0; right: 0;
-            background: white; padding: 20px 30px;
-            display: flex; align-items: center; gap: 20px;
-            border-top: 1px solid #eee; z-index: 100;
+        .modal-content { 
+            background: white; width: 95%; max-width: 500px; margin: 50px auto; 
+            border-radius: 30px; padding: 35px; position: relative;
+            box-shadow: 0 25px 70px rgba(0,0,0,0.3);
         }
-
-        .btn-book {
-            background: var(--accent-blue); color: white; border: none;
-            padding: 18px; border-radius: 20px; font-weight: 800; font-size: 1.1rem;
-            flex: 1; cursor: pointer; box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3);
+        .modal-header { margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 15px; }
+        
+        input, select, textarea { 
+            width: 100%; padding: 15px; margin: 10px 0; border-radius: 12px; 
+            border: 1px solid #e2e8f0; font-size: 1rem; box-sizing: border-box; background: #f8fafc;
         }
+        .btn-save { background: var(--navy); color: white; border: none; padding: 18px; width: 100%; border-radius: 15px; font-weight: 700; cursor: pointer; margin-top: 15px; }
 
-        .chat-icon { width: 55px; height: 55px; border-radius: 50%; border: 1px solid #eee; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
+        #historyList { max-height: 200px; overflow-y: auto; margin-bottom: 20px; }
+        .note-item { background: #f1f5f9; padding: 12px; border-radius: 10px; margin-bottom: 8px; font-size: 0.9rem; }
 
-        /* Success Modal */
-        #qrModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.95); z-index: 5000; text-align: center; color: white; padding-top: 50px; backdrop-filter: blur(10px); }
-        #qrcode { background: white; padding: 20px; display: inline-block; border-radius: 25px; margin: 20px; }
-
-        @media (max-width: 450px) { .time-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 600px) { .stats-container { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
-        <div class="header-bg">
-        <div class="top-buttons">
-    
+    <nav>
+        <div class="nav-brand">
+            <img src="doctor.jpg" alt="Dr">
+            <h1>د. محمد برهان</h1>
         </div>
-        <img src="IMG_20260203_233626_888.jpg" class="dr-large-img" alt="Doctor">
-        
-        <div class="dr-overlay-info">
-            <h1 style="margin:0; font-size: 2rem; font-weight: 900;">د. محمد برهان</h1>
-            <p style="margin:0; font-weight: 500; opacity: 0.7;">طب وجراحة وتجميل الأسنان</p>
+        <div style="display:flex; gap:10px;">
+            <button class="btn-action" onclick="openManualModal()"> حجز يدوي +</button>
+            <button class="btn-action" style="background:none; color:white; border:1px solid rgba(255,255,255,0.3);" onclick="firebase.auth().signOut()">خروج</button>
+        </div>
+    </nav>
+
+    <div class="stats-container">
+        <div class="stat-card"><span>مواعيد اليوم</span><div id="statToday">0</div></div>
+        <div class="stat-card"><span>إجمالي المرضى</span><div id="statTotal">0</div></div>
+        <div class="stat-card"><span>الحالات الموثقة</span><div id="statNotes">0</div></div>
+    </div>
+
+    <div class="main-content">
+        <div class="search-wrapper">
+            <span>🔍</span>
+            <input type="text" id="searchInput" onkeyup="searchTable()" placeholder="ابحث عن مريض بالاسم أو الهاتف...">
+        </div>
+
+        <div class="table-card">
+            <table>
+                <thead>
+                    <tr>
+                        <th>المريض</th>
+                        <th>التاريخ</th>
+                        <th>الوقت</th>
+                        <th>المعالجة</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <tr><td colspan="5" style="text-align:center; padding:40px;">جاري تحميل البيانات...</td></tr>
+                </tbody>
+            </table>
         </div>
     </div>
 
-    <div class="booking-card">
-        <div id="formContent">
-            <span class="section-title">المعلومات الشخصية</span>
-            <input type="text" id="pName" placeholder="الاسم الثلاثي للمريض">
-            <input type="tel" id="pPhone" placeholder="رقم الهاتف">
-
-            <span class="section-title">اختر التاريخ</span>
-            <input type="date" id="pDate" onchange="refreshSlots()">
-
-            <span class="section-title">اختر الوقت (30 دقيقة لكل موعد)</span>
-            <div id="timeGrid" class="time-grid">
-                <p style="grid-column: span 3; color: var(--text-muted); text-align: center; padding: 20px;">يرجى اختيار التاريخ أولاً...</p>
-            </div>
+    <!-- MODAL: MANUAL BOOKING -->
+    <div id="manualModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header"><h3>إضافة حجز يدوي</h3></div>
+            <input type="text" id="mName" placeholder="اسم المريض الثلاثي">
+            <input type="tel" id="mPhone" placeholder="رقم الهاتف">
+            <input type="date" id="mDate">
+            <select id="mTime">
+                <option value="02:00 م">02:00 م</option><option value="03:00 م">03:00 م</option>
+                <option value="04:00 م">04:00 م</option><option value="05:00 م">05:00 م</option>
+                <option value="06:00 م">06:00 م</option><option value="07:00 م">07:00 م</option>
+            </select>
+            <button class="btn-save" onclick="saveManualBooking()">تأكيد الحجز 💾</button>
+            <button class="btn-save" style="background:none; color:var(--navy);" onclick="closeModals()">إلغاء</button>
         </div>
     </div>
-
-    <div class="action-bar">
-        <button class="btn-book" id="subBtn" onclick="submitBooking()" disabled>حجز الموعد الآن</button>
-    </div>
-
-    <!-- SUCCESS MODAL -->
-    <div id="qrModal">
-        <h2 style="font-weight: 900;">تم الحجز بنجاح! ✅</h2>
-        <p>نراك قريبا </p>
-        <div id="qrcode"></div><br>
-        <button onclick="location.reload()" style="background:white; color:black; padding:15px 40px; border-radius:15px; border:none; font-weight:bold;">إغلاق</button>
+        <!-- MODAL: MEDICAL HISTORY & NOTES -->
+    <div id="historyModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header"><h3 id="modalTitle">السجل الطبي</h3></div>
+            <div id="historyList"></div>
+            <textarea id="historyNote" placeholder="أضف ملاحظة طبية جديدة..."></textarea>
+            <button class="btn-save" onclick="saveMedicalNote()">حفظ الملاحظة 📝</button>
+            <button class="btn-save" style="background:none; color:var(--navy);" onclick="closeModals()">إغلاق</button>
+        </div>
     </div>
 
     <script>
+        // FIREBASE CONFIG
         const firebaseConfig = {
             apiKey: "AIzaSyDqMEr5yKTjN3GV5osJmwW_2hdKVQOzFWs",
             authDomain: "dentalclinicbooking-system.firebaseapp.com",
@@ -171,60 +182,86 @@
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
-        let selectedTime = "";
-            async function refreshSlots() {
-            const date = document.getElementById('pDate').value;
-            const grid = document.getElementById('timeGrid');
-            grid.innerHTML = "جاري التحميل...";
+
+        let activePatientName = "";
+
+        // AUTH CHECK
+        firebase.auth().onAuthStateChanged(user => {
+            if (user) loadDashboard();
+            else window.location.href = "login.html";
+        });
+
+        function loadDashboard() {
+            db.collection("bookings").onSnapshot(snap => {
+                const body = document.getElementById('tableBody');
+                body.innerHTML = "";
+                document.getElementById('statTotal').innerText = snap.size;
+                
+                let all = [];
+                snap.forEach(doc => all.push({id: doc.id, ...doc.data()}));
+                all.sort((a,b) => a.date.localeCompare(b.date));
+
+                all.forEach(d => {
+                    body.innerHTML += `<tr>
+                        <td><span class="patient-name" onclick="openHistory('${d.name}')">${d.name}</span><br><a href="tel:${d.phone}" class="phone-link">${d.phone}</a></td>
+                        <td>${d.date}</td><td>${d.time}</td><td>${d.reason || 'فحص'}</td>
+                        <td><button class="btn-delete" onclick="deleteBooking('${d.id}')">🗑️</button></td>
+                    </tr>`;
+                });
+            });
+            db.collection("medicalHistory").onSnapshot(snap => document.getElementById('statNotes').innerText = snap.size);
+        }
+        // MANUAL BOOKING
+        function saveManualBooking() {
+            const name = document.getElementById('mName').value;
+            const date = document.getElementById('mDate').value;
+            const time = document.getElementById('mTime').value;
+            if(!name || !date) return alert("يرجى إكمال البيانات");
             
-            // Friday Check
-            if (new Date(date).getDay() === 5) {
-                grid.innerHTML = "<p style='grid-column:span 3; color:red; font-weight:bold;'>الجمعة عطلة العيادة</p>";
-                return;
-            }
-
-            const snap = await db.collection("bookings").where("date", "==", date).get();
-            let booked = [];
-            snap.forEach(doc => booked.push(doc.data().time.trim()));
-
-            grid.innerHTML = "";
-            // 30-minute intervals from 2 PM to 8 PM
-            for (let h = 14; h < 20; h++) {
-                for (let m of ["00", "30"]) {
-                    let label = `${h > 12 ? h - 12 : h}:${m} م`;
-                    let isBooked = booked.includes(label.trim());
-                    
-                    let btn = document.createElement('div');
-                    btn.className = "time-btn" + (isBooked ? " booked" : "");
-                    btn.innerText = label;
-                    if (!isBooked) {
-                        btn.onclick = function() {
-                            document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('selected'));
-                            this.classList.add('selected');
-                            selectedTime = label;
-                            document.getElementById('subBtn').disabled = false;
-                        };
-                    }
-                    grid.appendChild(btn);
-                }
-            }
+            db.collection("bookings").add({
+                name, date, time, phone: document.getElementById('mPhone').value, 
+                reason: "حجز يدوي", timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => { closeModals(); alert("تم الحجز بنجاح"); });
         }
 
-        function submitBooking() {
-            const name = document.getElementById('pName').value;
-            const date = document.getElementById('pDate').value;
-            const phone = document.getElementById('pPhone').value;
-            if (!name || !date || !selectedTime) return alert("يرجى إكمال البيانات");
+        // MEDICAL NOTES
+        async function openHistory(name) {
+            activePatientName = name;
+            document.getElementById('modalTitle').innerText = "سجل: " + name;
+            document.getElementById('historyModal').style.display = 'block';
+            const list = document.getElementById('historyList');
+            list.innerHTML = "جاري التحميل...";
 
-            document.getElementById('subBtn').innerText = "جاري الحفظ...";
-            db.collection("bookings").add({
-                name, date, time: selectedTime, phone, timestamp: firebase.firestore.FieldValue.serverTimestamp()
-            }).then(() => {
-                document.getElementById('qrModal').style.display = 'block';
-                new QRCode(document.getElementById("qrcode"), { text: name + " | " + date + " | " + selectedTime, width: 200, height: 200 });
+            const snap = await db.collection("medicalHistory").where("patientName", "==", name).get();
+            list.innerHTML = snap.empty ? "لا يوجد سجل سابق" : "";
+            snap.forEach(doc => {
+                list.innerHTML += `<div class="note-item"><strong>${doc.data().date}</strong><br>${doc.data().note}</div>`;
             });
         }
+
+        function saveMedicalNote() {
+            const note = document.getElementById('historyNote').value;
+            if(!note) return;
+            db.collection("medicalHistory").add({
+                patientName: activePatientName, note: note,
+                date: new Date().toLocaleDateString('ar-EG'),
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => { document.getElementById('historyNote').value = ""; openHistory(activePatientName); });
+        }
+
+        function searchTable() {
+            let val = document.getElementById('searchInput').value.toLowerCase();
+            let rows = document.getElementById('tableBody').rows;
+            for (let row of rows) { row.style.display = row.innerText.toLowerCase().includes(val) ? "" : "none"; }
+        }
+
+        function openManualModal() { document.getElementById('manualModal').style.display = 'block'; }
+        function closeModals() { 
+            document.getElementById('manualModal').style.display = 'none'; 
+            document.getElementById('historyModal').style.display = 'none'; 
+                          }
+         function deleteBooking(id) { if(confirm("حذف الموعد؟")) db.collection("bookings").doc(id).delete(); }
     </script>
 </body>
-</html>q
-            
+</html>
+    
