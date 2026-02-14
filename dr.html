@@ -72,106 +72,67 @@
         <button class="btn-confirm" id="subBtn" onclick="submitBooking()" disabled>تأكيد الحجز الآن ✅</button>
     </div>
     <div class="container" id="success"><div style="font-size: 60px; color: #25D366;">✔️</div><h2>تم الحجز بنجاح!</h2><button class="btn-confirm" onclick="location.reload()">حجز موعد جديد</button></div>
+    
     <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyDqMEr5yKTjN3GV5osJmwW_2hdKVQOzFWs",
-            authDomain: "dentalclinicbooking-system.firebaseapp.com",
-            projectId: "dentalclinicbooking-system",
-            storageBucket: "dentalclinicbooking-system.firebasestorage.app",
-            messagingSenderId: "892853005967",
-            appId: "1:892853005967:web:1a5fb182c073eba1ee0afa"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-        let selectedTime = "";
+                    const firebaseConfig = {
+        apiKey: "AIzaSyDqMEr5yKTjN3GV5osJmwW_2hdKVQOzFWs",
+        authDomain: "dentalclinicbooking-system.firebaseapp.com",
+        projectId: "dentalclinicbooking-system",
+        storageBucket: "dentalclinicbooking-system.firebasestorage.app",
+        messagingSenderId: "892853005967",
+        appId: "1:892853005967:web:1a5fb182c073eba1ee0afa"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    let selectedTime = "";
 
-        // 2. THE SMART AVAILABILITY CHECK
+    // 2. REFRESH SLOTS LOGIC
     async function refreshSlots() {
-        const dateInput = document.getElementById('pDate').value;
+        const date = document.getElementById('pDate').value;
         const grid = document.getElementById('timeGrid');
-        const subBtn = document.getElementById('subBtn');
-        
         grid.innerHTML = "جاري التحميل...";
-        subBtn.disabled = true;
-
-        // A. Friday Check (Friday is index 5)
-        const day = new Date(dateInput).getDay();
-        if (day === 5) {
-            grid.innerHTML = "<p style='grid-column: span 3; color:red; font-weight:bold; padding:20px;'>الجمعة عطلة العيادة</p>";
-            return;
-        }
-
-        // B. Custom Holiday Check (Checks the 'holidays' folder in Firebase)
-        try {
-            const holidayDoc = await db.collection("holidays").doc(dateInput).get();
-            if (holidayDoc.exists) {
-                grid.innerHTML = `<p style='grid-column: span 3; color:red; font-weight:bold; padding:20px;'>نعتذر، هذا اليوم عطلة: (${holidayDoc.data().note})</p>`;
-                return;
-            }
-        } catch(e) { console.log("Holiday check skipped", e); }
-
-        // C. Load Booked Times from Database
-        const snapshot = await db.collection("bookings").where("date", "==", dateInput).get();
-        let bookedTimes = [];
-        snapshot.forEach(doc => bookedTimes.push(doc.data().time.trim()));
+        
+        // Load busy times from database
+        const snap = await db.collection("bookings").where("date", "==", date).get();
+        let booked = [];
+        snap.forEach(doc => booked.push(doc.data().time.trim()));
 
         grid.innerHTML = "";
-
-        // D. Generate 15-min slots from 2 PM (14:00) to 8 PM (20:00)
-        for (let hour = 14; hour < 20; hour++) {
-            for (let min of ["00", "15", "30", "45"]) {
-                let displayHour = hour > 12 ? hour - 12 : hour;
-                let timeLabel = `${displayHour}:${min} م`;
-                
-                // If the time is NOT already in the database, show the buttonif (!bookedTimes.includes(timeLabel.trim())) {
+        // Generate 15-min slots from 2 PM to 8 PM
+        for (let h = 14; h < 20; h++) {
+            for (let m of ["00", "15", "30", "45"]) {
+                let label = `${h > 12 ? h - 12 : h}:${m} م`;
+                if (!booked.includes(label.trim())) {
                     let btn = document.createElement('div');
-                    btn.className = "time-btn";
-                    btn.innerText = timeLabel;
+                    btn.className = "time-btn"; btn.innerText = label;
                     btn.onclick = function() {
                         document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('selected'));
-                        this.classList.add('selected');
-                        selectedTime = timeLabel;
-                        subBtn.disabled = false;
+                        this.classList.add('selected'); 
+                        selectedTime = label;
+                        document.getElementById('subBtn').disabled = false;
                     };
                     grid.appendChild(btn);
                 }
             }
         }
-        if(grid.innerHTML === "") grid.innerHTML = "<p style='grid-column:span 3;'>لا توجد أوقات متاحة لهذا اليوم</p>";
     }
 
-    // 3. SUBMIT BOOKING FUNCTION
+    // 3. SAVE BOOKING
     function submitBooking() {
         const name = document.getElementById('pName').value;
         const date = document.getElementById('pDate').value;
-        const reason = document.getElementById('pReason').value;
-        const phone = document.getElementById('pPhone') ? document.getElementById('pPhone').value : "غير مسجل";
-
-        if (!name || !date || !selectedTime) {
-            alert("يرجى إكمال جميع البيانات واختيار الوقت");
-            return;
-        }
-
+        if (!name || !date || !selectedTime) return;
         document.getElementById('subBtn').innerText = "جاري الحفظ...";
-        document.getElementById('subBtn').disabled = true;
-
         db.collection("bookings").add({
-            name: name,
-            phone: phone,
-            date: date,
-            time: selectedTime,
-            reason: reason,
+            name, date, time: selectedTime, 
+            phone: document.getElementById('pPhone').value, 
+            reason: document.getElementById('pReason').value, 
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        }).then(() => {
-            document.getElementById('formBody').style.display = 'none';
-            document.getElementById('success').style.display = 'block';
-        }).catch(err => {
-            alert("خطأ في الحفظ: " + err.message);
-            document.getElementById('subBtn').innerText = "تأكيد الحجز الآن ✅";
-            document.getElementById('subBtn').disabled = false;
+        }).then(() => { 
+            document.getElementById('formBody').style.display = 'none'; 
+            document.getElementById('success').style.display = 'block'; 
         });
-        
-        }
+    }
 </script>
 </body>
 </html>
