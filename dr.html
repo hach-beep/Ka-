@@ -96,7 +96,20 @@
                 document.getElementById('subBtn').disabled = true;
                 return; 
             }
+            const holidayDoc = await db.collection("holidays").doc(dateInput).get();
+    if (holidayDoc.exists) {
+        grid.innerHTML = `<p style='grid-column: span 3; color:red;'>نعتذر، هذا اليوم عطلة: (${holidayDoc.data().note})</p>`;
+        return;
+    }
 
+    // C. LOAD BOOKINGS IF NOT A HOLIDAY
+    const snapshot = await db.collection("bookings").where("date", "==", dateInput).get();
+    let bookedTimes = [];
+    snapshot.forEach(doc => bookedTimes.push(doc.data().time));
+
+    grid.innerHTML = "";
+    // ... (keep your existing loop that creates the time buttons)
+        }
             const snapshot = await db.collection("bookings").where("date", "==", dateInput).get();
             let bookedTimes = [];
             snapshot.forEach(doc => bookedTimes.push(doc.data().time));
