@@ -48,9 +48,7 @@
             <button id="adminHistoryIcon" class="icon-btn" style="display:none;" onclick="openAllRecords()">📂</button>
             <button class="icon-btn" onclick="location.reload()">🔄</button>
             <button class="icon-btn" onclick="firebase.auth().signOut()">🚪</button>
-<button class="icon-btn" onclick="openManualBooking()">📝 حجز يدوي</button>
-<button class="icon-btn" onclick="setHoliday()" style="color:var(--gold);">🌴 عطلة</button>
-        </div>
+   </div>
     </header>
 
     <div class="container">
@@ -223,35 +221,7 @@ async function openHistory(name) {
         }
 
             function openManualBooking() {
-    const name = prompt("اسم المريض الثلاثي:");
-    const phone = prompt("رقم الهاتف:");
-    const date = prompt("التاريخ (YYYY-MM-DD):", new Date().toISOString().split('T')[0]);
-    const time = prompt("الوقت (مثال: 02:00 م):");
-    
-    if (name && date && time) {
-        db.collection("bookings").add({
-            name: name,
-            phone: phone || "حجز يدوي",
-            date: date,
-            time: time,
-            reason: "حجز من العيادة",
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        }).then(() => alert("تم الحجز اليدوي بنجاح"));
-    }
-}
-
-// 2. Holiday Logic
-function setHoliday() {
-    const date = prompt("أدخل تاريخ العطلة (YYYY-MM-DD):", new Date().toISOString().split('T')[0]);
-    const note = prompt("سبب العطلة (اختياري):", "عطلة رسمية");
-    
-    if (date) {
-        db.collection("holidays").doc(date).set({
-            date: date,
-            note: note
-        }).then(() => alert("تم تسجيل اليوم كعطلة. لن يتمكن المرضى من الحجز في هذا التاريخ."));
-    }
-}
+    const name 
             
         function saveNote() {
             const noteText = document.getElementById('historyNote').value;
