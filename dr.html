@@ -85,34 +85,68 @@
         const db = firebase.firestore();
         let selectedTime = "";
 
-        
-                    
-                    if (!bookedTimes.includes(timeLabel)) {
-                        let btn = document.createElement('div');
-                        btn.className = "time-btn";
-                        btn.innerText = timeLabel;
-                        btn.onclick = function() {
-                            document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('selected'));
-                            this.classList.add('selected');
-                            selectedTime = timeLabel;
-                            document.getElementById('subBtn').disabled = false;
-                        };
-                        grid.appendChild(btn);
-                    }
-                }
-            }
-            if(grid.innerHTML === "") { grid.innerHTML = "<p style='grid-column:span 3;'>لا توجد أوقات متاحة لهذا اليوم</p>"; }
-        }
+        function loadBookings() {
+            db.collection("bookings").onSnapshot((snapshot) => {
+                const tableBody = document.getElementById('tableBody');
+                tableBody.innerHTML = "";
+                let all = [];
+                snapshot.forEach(doc => all.push({id: doc.id, ...doc.data()}));
+                all.sort((a,b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time));
+
+                all.forEach((data) => {
+                    const nameHTML = userIsAdmin ? `<span class="admin-link" onclick="openHistory('${data.name}')">${data.name}</span>` : `<strong>${data.name}</strong>`;
+                    tableBody.innerHTML += `<tr>
+                        <td>${nameHTML}</td>
+                        <td><a href="tel:${data.phone}" style="text-decoration:none; color:var(--accent);">📞 ${data.phone}</a></td>
+                        <td>${data.date}</td>
+                        <td>${data.time}</td>
+                        <td>${data.reason}</td>
+                        <td><button onclick="deleteBooking('${data.id}')" style="border:none; background:none; cursor:pointer;">🗑️</button></td>
+                    </tr>`;
+                });
+            });
         }
 
-        function submitBooking() {
-            const name = document.getElementById('pName').value;
-           const phone = document.getElementById('pPhone').value;
-            const date = document.getElementById('pDate').value;
-            const reason = document.getElementById('pReason').value;
-            db.collection("bookings").add({ name, phone, date, time: selectedTime, reason, timestamp: firebase.firestore.FieldValue.serverTimestamp() })
-            .then(() => { document.getElementById('formBody').style.display = 'none'; document.getElementById('success').style.display = 'block'; });
+        async function openHistory(name) {
+            activePatientName = name;
+            document.getElementById('modalTitle').innerText = name;
+            document.getElementById('historyModal').style.display = 'block';
+            const list = document.getElementById('historyList');
+            list.innerHTML = "جاري التحميل...";
+            const snapshot = await db.collection("medicalHistory").where("patientName", "==", name).get();
+            list.innerHTML = snapshot.empty ? "لا يوجد سجل" : "";
+            snapshot.forEach(doc => { list.innerHTML += `<div style="padding:10px; border-bottom:1px solid #eee;"><small>${doc.data().date}</small><br>${doc.data().note}</div>`; });
         }
+
+        async function openAllRecords() {
+            document.getElementById('allRecordsModal').style.display = 'block';
+            const snapshot = await db.collection("medicalHistory").get();
+            const list = document.getElementById('allRecordsList');
+            list.innerHTML = "";
+            snapshot.forEach(doc => {
+                const d = doc.data();
+                list.innerHTML += `<div style="padding:15px; border-bottom:1px solid #eee;"><strong style="color:var(--accent);">${d.patientName}</strong> <small>(${d.date})</small><br>${d.note}</div>`;
+            });
+        }
+
+        function saveNote() {
+            const note = document.getElementById('historyNote').value;
+            if(!note) return;
+            db.collection("medicalHistory").add({
+                patientName: activePatientName, note: note, date: new Date().toLocaleDateString('ar-EG'), timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => { document.getElementById('historyNote').value = ""; closeModals(); });
+        }
+
+        function searchTable() {
+            let val = document.getElementById('searchInput').value.toLowerCase();
+            let rows = document.getElementById('tableBody').rows;
+            for (let row of rows) { row.style.display = row.innerText.toLowerCase().includes(val) ? "" : "none"; }
+        }
+
+        function closeModals() { document.getElementById('historyModal').style.display = 'none'; document.getElementById('allRecordsModal').style.display = 'none'; }
+        function deleteBooking(id) { if(confirm("حذف؟")) db.collection("bookings").doc(id).delete(); }
     </script>
 </body>
 </html>
+                    
+                    
