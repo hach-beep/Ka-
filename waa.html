@@ -98,159 +98,85 @@
         </div>
     </div>
     <script>
-            async function openAllRecords() {
-                        document.getElementById('allRecordsModal').style.display = 'block';
-                        const list = document.getElementById('allRecordsList');
-                        list.innerHTML = "جاري التحميل...";
-
-                        const snapshot = await db.collection("medicalHistory").get();
-                        list.innerHTML = "";
-                        
-                        snapshot.forEach(doc => {
-                            const d = doc.data();
-                            list.innerHTML += `
-                                <div style="padding:15px; border-bottom:1px solid #eee;">
-                                    <strong style="color:var(--accent);">${d.patientName}</strong> <small>(${d.date})</small><br>${d.note}
-                                </div>`;
-                        });
-            }
-        const firebaseConfig = {
-            apiKey: "AIzaSyDqMEr5yKTjN3GV5osJmwW_2hdKVQOzFWs",
-            authDomain: "dentalclinicbooking-system.firebaseapp.com",
-            projectId: "dentalclinicbooking-system",
-            storageBucket: "dentalclinicbooking-system.firebasestorage.app",
-            messagingSenderId: "892853005967",
-            appId: "1:892853005967:web:1a5fb182c073eba1ee0afa"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-
-        const ADMINS = ["dr.mohamed@gmail.com", "haiyamkhalid@gmail.com"]; 
-        let activePatientName = "";
-        let userIsAdmin = false;
-
-        firebase.auth().onAuthStateChanged((user) => {
-            if (user) {
-                userIsAdmin = ADMINS.includes(user.email);
-                if (userIsAdmin) document.getElementById('adminHistoryIcon').style.display = 'flex';
-                loadBookings();
-            } else {
-                window.location.href = "login.html";
-            }
-        });
-function loadBookings() {
-            db.collection("bookings").onSnapshot((snapshot) => {
-                const tableBody = document.getElementById('tableBody');
-                tableBody.innerHTML = "";
-
-                // 1. Convert snapshot to an array so we can sort it
-                let allBookings = [];
-                snapshot.forEach(doc => {
-                    allBookings.push({ id: doc.id, ...doc.data() });
-                });
-
-                // 2. THE SMART SORT (Date first, then Time)
-                allBookings.sort((a, b) => {
-                    // Compare Dates (YYYY-MM-DD)
-                    if (a.date !== b.date) {
-                        return a.date.localeCompare(b.date);
                     }
-                    // If dates are the same, compare Times (02:00 م)
-                    return a.time.localeCompare(b.time);
-                });
+const firebaseConfig = {
+        apiKey: "AIzaSyDqMEr5yKTjN3GV5osJmwW_2hdKVQOzFWs",
+        authDomain: "dentalclinicbooking-system.firebaseapp.com",
+        projectId: "dentalclinicbooking-system",
+        storageBucket: "dentalclinicbooking-system.firebasestorage.app",
+        messagingSenderId: "892853005967",
+        appId: "1:892853005967:web:1a5fb182c073eba1ee0afa"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    let activePatientName = "";
 
-                // 3. Display the sorted list
-                allBookings.forEach((data) => {
-                    const nameHTML = userIsAdmin ? `<span class="admin-link" onclick="openHistory('${data.name}')">${data.name}</span>` : `<strong>${data.name}</strong>`;
-                        const pPhone = data.phone || "لا يوجد رقم";
-            tableBody.innerHTML += `
-                <tr>
-                    <td>${nameHTML}</td>
-                    <td><a href="tel:${pPhone}" style="text-decoration:none; color:var(--accent); font-weight:bold;">📞 ${pPhone}</a></td>
-                    <td>${data.date}</td>
-                    <td>${data.time}</td>
-                    <td><span style="font-size:0.8rem; background:#e0f2fe; padding:4px 8px; border-radius:10px;">${data.reason}</span></td>
-                    <td><button class="btn-del" onclick="deleteBooking('${data.id}')">🗑️</button></td>
-                </tr>`;
-                });
+    // 1. AUTH CHECK
+    firebase.auth().onAuthStateChanged(user => { 
+        if (user) { loadBookings(); } 
+        else { window.location.href = "login.html"; } 
+    });
 
-                if (allBookings.length === 0) {
-                    tableBody.innerHTML = "<tr><td colspan='6' style='text-align:center;'>لا توجد مواعيد</td></tr>";
-                }
-            });
-        }
-           function searchTable() {
-    // 1. Get what the user typed
-    let input = document.getElementById("searchInput").value.toLowerCase().trim();
-    // 2. Get all the rows in the table
-    let rows = document.getElementById("tableBody").getElementsByTagName("tr");
-
-    for (let i = 0; i < rows.length; i++) {
-        // 3. Look at all the text in the WHOLE row
-        let rowText = rows[i].textContent.toLowerCase();
-        
-        // 4. If the text matches, show the row. If not, hide it.
-        if (rowText.includes(input)) {
-            rows[i].style.display = "";
-        } else {
-            rows[i].style.display = "none";
-        }
-    }
-}
-        
-async function openHistory(name) {
-            activePatientName = name;
-            document.getElementById('modalTitle').innerText = "سجل: " + name;
-            document.getElementById('historyModal').style.display = 'block';
-            const list = document.getElementById('historyList');
-            list.innerHTML = "جاري التحميل...";
-
-            const snapshot = await db.collection("medicalHistory").where("patientName", "==", name).get();
-            let notes = [];
-            snapshot.forEach(doc => notes.push({id: doc.id, ...doc.data()}));
-            notes.sort((a, b) => b.timestamp - a.timestamp);
-
-            list.innerHTML = notes.length === 0 ? "لا يوجد سجل سابق" : "";
-            notes.forEach(n => {
-                list.innerHTML += `
-                    <div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #eee;">
-                        <div><small style="color:#64748b;">${n.date}</small><br><strong>${n.note}</strong></div>
-                        <button onclick="deleteNote('${n.id}')" style="color:red; background:none; border:none; cursor:pointer;">✕</button>
-                    </div>`;
-            });
-        }
-
-            function openManualBooking() {
-    const name 
+    // 2. LOAD & SORT TABLE
+    function loadBookings() {
+        db.collection("bookings").onSnapshot(snap => {
+            const body = document.getElementById('tableBody');
+            body.innerHTML = "";
+            let all = [];
+            snap.forEach(doc => all.push({id: doc.id, ...doc.data()}));
             
-        function saveNote() {
-            const noteText = document.getElementById('historyNote').value;
-            if(!noteText) return;
-            db.collection("medicalHistory").add({
-                patientName: activePatientName,
-                note: noteText,
-                date: new Date().toLocaleDateString('ar-EG'),
-                timestamp: firebase.firestore.FieldValue.serverTimestamp()
-            }).then(() => {
-                document.getElementById('historyNote').value = "";
-                openHistory(activePatientName);
+            // Sort by Date then Time
+            all.sort((a,b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time));
+            
+            all.forEach(d => {
+                body.innerHTML += `<tr>
+                    <td><span class="admin-link" onclick="openHistory('${d.name}')">${d.name}</span></td>
+                    <td><a href="tel:${d.phone}" style="text-decoration:none; color:#3b82f6;">📞 ${d.phone}</a></td>
+                    <td>${d.date}</td><td>${d.time}</td><td>${d.reason}</td>
+                    <td><button onclick="deleteBooking('${d.id}')" style="border:none; background:none; cursor:pointer;">🗑️</button></td>
+                </tr>`;
             });
-        }
+        });
+    }
 
-        function deleteNote(id) {
-            if(confirm("حذف هذه الملاحظة؟")) {
-                db.collection("medicalHistory").doc(id).delete().then(() => openHistory(activePatientName));
-            }
-        }
+    // 3. MEDICAL HISTORY LOGIC
+    async function openHistory(name) {
+        activePatientName = name;
+        document.getElementById('modalTitle').innerText = name;
+        document.getElementById('historyModal').style.display = 'block';
+        const snap = await db.collection("medicalHistory").where("patientName", "==", name).get();
+        const list = document.getElementById('historyList');
+        list.innerHTML = snap.empty ? "لا يوجد سجل" : "";
+        snap.forEach(doc => { 
+            list.innerHTML += `<div style="padding:10px; border-bottom:1px solid #eee;"><small>${doc.data().date}</small><br>${doc.data().note}</div>`; 
+        });
+    }
 
-        function closeModals() { 
+    function saveNote() {
+        const note = document.getElementById('historyNote').value;
+        if(!note) return;
+        db.collection("medicalHistory").add({ 
+            patientName: activePatientName, 
+            note: note, 
+            date: new Date().toLocaleDateString('ar-EG'), 
+            timestamp: 
+                    firebase.firestore.FieldValue.serverTimestamp() 
+        }).then(() => { 
+            document.getElementById('historyNote').value = ""; 
             document.getElementById('historyModal').style.display = 'none'; 
-            document.getElementById('allRecordsModal').style.display = 'none'; 
-        }
+        });
+    }
 
-        function deleteBooking(id) { 
-            if(confirm("حذف الموعد؟")) db.collection("bookings").doc(id).delete(); 
-            }
+    // 4. SEARCH & UTILS
+    function searchTable() {
+        let val = document.getElementById('searchInput').value.toLowerCase();
+        let rows = document.getElementById('tableBody').rows;
+        for (let row of rows) { row.style.display = row.innerText.toLowerCase().includes(val) ? "" : "none"; }
+    }
+
+    function closeModals() { document.getElementById('historyModal').style.display = 'none'; }
+    function deleteBooking(id) { if(confirm("حذف؟")) db.collection("bookings").doc(id).delete(); }
+        
     </script>
 </body>
 </html>
