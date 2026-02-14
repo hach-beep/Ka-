@@ -1,182 +1,233 @@
-        <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة التحكم - عيادة د. محمد برهان</title>
+    <title>حجز موعد - د. محمد برهان</title>
+    
+    <!-- Libraries -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
     <style>
-        :root { --dark: #003459; --accent: #0077b6; --bg: #f4f9fb; }
-        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); margin: 0; direction: rtl; }
-        header { background: var(--dark); color: white; padding: 20px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        .dr-profile { display: flex; align-items: center; gap: 15px; }
-        .dr-photo { width: 55px; height: 55px; border-radius: 50%; border: 2px solid white; object-fit: cover; }
-        .actions { display: flex; gap: 10px; }
-        .icon-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 10px; border-radius: 12px; cursor: pointer; font-size: 1.2rem; }
-        
-        .container { padding: 15px; max-width: 900px; margin: 0 auto; }
-        
-        /* SEARCH BAR */
-        .search-box { background: white; padding: 12px; border-radius: 15px; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); border: 1px solid #e2e8f0; }
-        .search-box input { border: none; outline: none; width: 100%; font-size: 1rem; background: transparent; }
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;500;700;900&display=swap');
 
-        .card { background: white; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; min-width: 700px; }
-        th { background: #f8fafc; text-align: right; padding: 15px; color: #64748b; font-size: 0.85rem; }
-        td { padding: 15px; border-bottom: 1px solid #f1f5f9; }
-        admin-link { color: var(--accent); cursor: pointer; text-decoration: underline; font-weight: bold; }
-        .btn-del { background: #fee2e2; color: #ef4444; border: none; padding: 8px; border-radius: 8px; cursor: pointer; }
+        :root {
+            --primary-black: #0f172a;
+            --accent-blue: #3b82f6;
+            --soft-gray: #f8fafc;
+            --text-muted: #64748b;
+        }
 
-        /* MODAL */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 2000; }
-        .modal-content { background: white; width: 90%; max-width: 500px; margin: 30px auto; padding: 25px; border-radius: 25px; position: relative; }
-        #historyList { max-height: 250px; overflow-y: auto; background: #f8fafc; padding: 15px; border-radius: 12px; margin: 15px 0; border: 1px solid #eee; }
-        textarea { width: 100%; height: 100px; border-radius: 12px; padding: 12px; border: 1px solid #ddd; box-sizing: border-box; }
-        .save-btn { background: var(--accent); color: white; border: none; padding: 15px; width: 100%; border-radius: 12px; font-weight: bold; margin-top: 10px; cursor: pointer; }
+        body { 
+            font-family: 'Noto Sans Arabic', sans-serif; 
+            margin: 0; background-color: #f1f5f9; direction: rtl; color: var(--primary-black);
+        }
+
+        /* --- TOP SECTION (Doctor Image) --- */
+        .header-bg {
+            background: white;
+            height: 350px;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            overflow: hidden;
+        }
+
+        .dr-large-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center 15%;
+        }
+
+        .top-buttons {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: space-between;
+            z-index: 10;
+        }
+
+        .circle-btn {
+            background: white; width: 45px; height: 45px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1); font-size: 1.2rem;
+        }
+
+        .dr-overlay-info {
+            position: absolute;
+            bottom: 60px;
+            right: 30px;
+            color: var(--primary-black);
+            text-align: right;
+        }.rating { background: white; padding: 4px 10px; border-radius: 10px; font-size: 0.8rem; font-weight: bold; display: inline-block; margin-bottom: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+
+        /* --- MAIN BOOKING CARD --- */
+        .booking-card {
+            background: white;
+            margin-top: -40px;
+            border-radius: 40px 40px 0 0;
+            padding: 30px;
+            position: relative;
+            min-height: 60vh;
+            box-shadow: 0 -10px 30px rgba(0,0,0,0.05);
+        }
+
+        .section-title { font-weight: 800; font-size: 1.1rem; margin-bottom: 15px; display: block; }
+
+        /* Inputs */
+        input[type="text"], input[type="tel"], select {
+            width: 100%; padding: 15px; border: 1px solid #e2e8f0; border-radius: 15px;
+            margin-bottom: 20px; font-size: 1rem; background: var(--soft-gray);
+        }
+
+        /* Time Grid (30 min gaps) */
+        .time-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 30px; }
+        .time-btn { 
+            padding: 12px; border: 1px solid #e2e8f0; border-radius: 12px; 
+            text-align: center; font-weight: bold; font-size: 0.85rem; cursor: pointer;
+            transition: 0.2s; background: white;
+        }
+        .time-btn.selected { background: var(--accent-blue); color: white; border-color: var(--accent-blue); }
+        .time-btn.booked { background: #f1f5f9; color: #cbd5e1; cursor: not-allowed; text-decoration: line-through; border-color: #f1f5f9; }
+
+        /* Bottom Action Bar */
+        .action-bar {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: white; padding: 20px 30px;
+            display: flex; align-items: center; gap: 20px;
+            border-top: 1px solid #eee; z-index: 100;
+        }
+
+        .btn-book {
+            background: var(--accent-blue); color: white; border: none;
+            padding: 18px; border-radius: 20px; font-weight: 800; font-size: 1.1rem;
+            flex: 1; cursor: pointer; box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3);
+        }
+
+        .chat-icon { width: 55px; height: 55px; border-radius: 50%; border: 1px solid #eee; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
+
+        /* Success Modal */
+        #qrModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.95); z-index: 5000; text-align: center; color: white; padding-top: 50px; backdrop-filter: blur(10px); }
+        #qrcode { background: white; padding: 20px; display: inline-block; border-radius: 25px; margin: 20px; }
+
+        @media (max-width: 450px) { .time-grid { grid-template-columns: repeat(2, 1fr); } }
     </style>
 </head>
 <body>
-
-    <header>
-        <div class="dr-profile">
-            <img src="IMG_20260203_233626_888~2.jpg" class="dr-photo">
-            <div class="dr-name"><h1>عيادة د. محمد برهان </h1><p>لوحة التحكم</p></div>
+        <div class="header-bg">
+        <div class="top-buttons">
+            <div class="circle-btn" onclick="history.back()">→</div>
+            <div class="circle-btn">🔗</div>
         </div>
-        <div class="actions">
-            <button id="adminHistoryIcon" class="icon-btn" style="display:none;" onclick="openAllRecords()">📂</button>
-            <button class="icon-btn" onclick="location.reload()">🔄</button>
-            <button class="icon-btn" onclick="firebase.auth().signOut()">🚪</button>
-   </div>
-    </header>
-
-    <div class="container">
-        <!-- SEARCH BAR -->
-        <div class="search-box">
-            <span>🔍</span>
-            <input type="text" id="searchInput" onkeyup="searchTable()" placeholder="ابحث عن اسم المريض...">
-        </div>
-
-        <div class="card">
-            <table>
-                <thead>
-                    <tr>
-                        <th>الاسم الثلاثي</th>
-                        <th>رقم الهاتف</th>
-                        <th>التاريخ</th>
-                        <th>الوقت</th>
-                        <th>السبب</th>
-                        <th>إجراء</th>
-                    </tr>
-                </thead>
-                <tbody id="tableBody"></tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- SPECIFIC PATIENT HISTORY MODAL -->
-    <div id="historyModal" class="modal">
-        <div class="modal-content">
-            <span onclick="closeModals()" style="float:left; cursor:pointer; font-size:1.5rem;">&times;</span>
-            <h2 id="modalTitle">السجل الطبي</h2>
-            
-            <!-- THIS IS WHERE OLD NOTES WILL SHOW -->
-            <div id="historyList">جاري تحميل السجل...</div>
-            
-            <label style="font-weight:bold;">إضافة ملاحظة جديدة:</label>
-            <textarea id="historyNote" placeholder="اكتب التشخيص أو العلاج هنا..."></textarea>
-            <button class="save-btn" onclick="saveNote()">حفظ في السجل 💾</button>
-        </div>
-    </div>
-        <!-- ALL RECORDS MODAL (The Hidden Room for the Folder Icon) -->
-    <div id="allRecordsModal" class="modal">
-        <div class="modal-content" style="max-width: 600px;">
-            <span onclick="closeModals()" style="float:left; cursor:pointer; font-size:1.5rem;">&times;</span>
-            <h2 style="color:var(--dark);">كافة السجلات الطبية</h2>
-            <div id="allRecordsList" style="max-height:450px; overflow-y:auto;"></div>
-        </div>
-    </div>
-    <script>
-                    }
-const firebaseConfig = {
-        apiKey: "AIzaSyDqMEr5yKTjN3GV5osJmwW_2hdKVQOzFWs",
-        authDomain: "dentalclinicbooking-system.firebaseapp.com",
-        projectId: "dentalclinicbooking-system",
-        storageBucket: "dentalclinicbooking-system.firebasestorage.app",
-        messagingSenderId: "892853005967",
-        appId: "1:892853005967:web:1a5fb182c073eba1ee0afa"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-    let activePatientName = "";
-
-    // 1. AUTH CHECK
-    firebase.auth().onAuthStateChanged(user => { 
-        if (user) { loadBookings(); } 
-        else { window.location.href = "login.html"; } 
-    });
-
-    // 2. LOAD & SORT TABLE
-    function loadBookings() {
-        db.collection("bookings").onSnapshot(snap => {
-            const body = document.getElementById('tableBody');
-            body.innerHTML = "";
-            let all = [];
-            snap.forEach(doc => all.push({id: doc.id, ...doc.data()}));
-            
-            // Sort by Date then Time
-            all.sort((a,b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time));
-            
-            all.forEach(d => {
-                body.innerHTML += `<tr>
-                    <td><span class="admin-link" onclick="openHistory('${d.name}')">${d.name}</span></td>
-                    <td><a href="tel:${d.phone}" style="text-decoration:none; color:#3b82f6;">📞 ${d.phone}</a></td>
-                    <td>${d.date}</td><td>${d.time}</td><td>${d.reason}</td>
-                    <td><button onclick="deleteBooking('${d.id}')" style="border:none; background:none; cursor:pointer;">🗑️</button></td>
-                </tr>`;
-            });
-        });
-    }
-
-    // 3. MEDICAL HISTORY LOGIC
-    async function openHistory(name) {
-        activePatientName = name;
-        document.getElementById('modalTitle').innerText = name;
-        document.getElementById('historyModal').style.display = 'block';
-        const snap = await db.collection("medicalHistory").where("patientName", "==", name).get();
-        const list = document.getElementById('historyList');
-        list.innerHTML = snap.empty ? "لا يوجد سجل" : "";
-        snap.forEach(doc => { 
-            list.innerHTML += `<div style="padding:10px; border-bottom:1px solid #eee;"><small>${doc.data().date}</small><br>${doc.data().note}</div>`; 
-        });
-    }
-
-    function saveNote() {
-        const note = document.getElementById('historyNote').value;
-        if(!note) return;
-        db.collection("medicalHistory").add({ 
-            patientName: activePatientName, 
-            note: note, 
-            date: new Date().toLocaleDateString('ar-EG'), 
-            timestamp: 
-                    firebase.firestore.FieldValue.serverTimestamp() 
-        }).then(() => { 
-            document.getElementById('historyNote').value = ""; 
-            document.getElementById('historyModal').style.display = 'none'; 
-        });
-    }
-
-    // 4. SEARCH & UTILS
-    function searchTable() {
-        let val = document.getElementById('searchInput').value.toLowerCase();
-        let rows = document.getElementById('tableBody').rows;
-        for (let row of rows) { row.style.display = row.innerText.toLowerCase().includes(val) ? "" : "none"; }
-    }
-
-    function closeModals() { document.getElementById('historyModal').style.display = 'none'; }
-    function deleteBooking(id) { if(confirm("حذف؟")) db.collection("bookings").doc(id).delete(); }
+        <img src="doctor.jpg" class="dr-large-img" alt="Doctor">
         
+        <div class="dr-overlay-info">
+            <div class="rating">⭐ 4.9</div>
+            <h1 style="margin:0; font-size: 2rem; font-weight: 900;">د. محمد برهان</h1>
+            <p style="margin:0; font-weight: 500; opacity: 0.7;">طب وجراحة وتجميل الأسنان</p>
+        </div>
+    </div>
+
+    <div class="booking-card">
+        <div id="formContent">
+            <span class="section-title">المعلومات الشخصية</span>
+            <input type="text" id="pName" placeholder="الاسم الثلاثي للمريض">
+            <input type="tel" id="pPhone" placeholder="رقم الهاتف">
+
+            <span class="section-title">اختر التاريخ</span>
+            <input type="date" id="pDate" onchange="refreshSlots()">
+
+            <span class="section-title">اختر الوقت (30 دقيقة لكل موعد)</span>
+            <div id="timeGrid" class="time-grid">
+                <p style="grid-column: span 3; color: var(--text-muted); text-align: center; padding: 20px;">يرجى اختيار التاريخ أولاً...</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="action-bar">
+        <div class="chat-icon">💬</div>
+        <button class="btn-book" id="subBtn" onclick="submitBooking()" disabled>حجز الموعد الآن</button>
+    </div>
+
+    <!-- SUCCESS MODAL -->
+    <div id="qrModal">
+        <h2 style="font-weight: 900;">تم الحجز بنجاح! ✅</h2>
+        <p>يرجى تصوير الشاشة والاحتفاظ برمز الموعد</p>
+        <div id="qrcode"></div><br>
+        <button onclick="location.reload()" style="background:white; color:black; padding:15px 40px; border-radius:15px; border:none; font-weight:bold;">إغلاق</button>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDqMEr5yKTjN3GV5osJmwW_2hdKVQOzFWs",
+            authDomain: "dentalclinicbooking-system.firebaseapp.com",
+            projectId: "dentalclinicbooking-system",
+            storageBucket: "dentalclinicbooking-system.firebasestorage.app",
+            messagingSenderId: "892853005967",
+            appId: "1:892853005967:web:1a5fb182c073eba1ee0afa"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        let selectedTime = "";
+            async function refreshSlots() {
+            const date = document.getElementById('pDate').value;
+            const grid = document.getElementById('timeGrid');
+            grid.innerHTML = "جاري التحميل...";
+            
+            // Friday Check
+            if (new Date(date).getDay() === 5) {
+                grid.innerHTML = "<p style='grid-column:span 3; color:red; font-weight:bold;'>الجمعة عطلة العيادة</p>";
+                return;
+            }
+
+            const snap = await db.collection("bookings").where("date", "==", date).get();
+            let booked = [];
+            snap.forEach(doc => booked.push(doc.data().time.trim()));
+
+            grid.innerHTML = "";
+            // 30-minute intervals from 2 PM to 8 PM
+            for (let h = 14; h < 20; h++) {
+                for (let m of ["00", "30"]) {
+                    let label = `${h > 12 ? h - 12 : h}:${m} م`;
+                    let isBooked = booked.includes(label.trim());
+                    
+                    let btn = document.createElement('div');
+                    btn.className = "time-btn" + (isBooked ? " booked" : "");
+                    btn.innerText = label;
+                    if (!isBooked) {
+                        btn.onclick = function() {
+                            document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('selected'));
+                            this.classList.add('selected');
+                            selectedTime = label;
+                            document.getElementById('subBtn').disabled = false;
+                        };
+                    }
+                    grid.appendChild(btn);
+                }
+            }
+        }
+
+        function submitBooking() {
+            const name = document.getElementById('pName').value;
+            const date = document.getElementById('pDate').value;
+            const phone = document.getElementById('pPhone').value;
+            if (!name || !date || !selectedTime) return alert("يرجى إكمال البيانات");
+
+            document.getElementById('subBtn').innerText = "جاري الحفظ...";
+            db.collection("bookings").add({
+                name, date, time: selectedTime, phone, timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => {
+                document.getElementById('qrModal').style.display = 'block';
+                new QRCode(document.getElementById("qrcode"), { text: name + " | " + date + " | " + selectedTime, width: 200, height: 200 });
+            });
+        }
     </script>
 </body>
-</html>
+</html>q
+            
