@@ -122,13 +122,11 @@
 <body>
         <div class="header-bg">
         <div class="top-buttons">
-            <div class="circle-btn" onclick="history.back()">→</div>
-            <div class="circle-btn">🔗</div>
+    
         </div>
         <img src="IMG_20260203_233626_888.jpg" class="dr-large-img" alt="Doctor">
         
         <div class="dr-overlay-info">
-            <div class="rating">⭐ 4.9</div>
             <h1 style="margin:0; font-size: 2rem; font-weight: 900;">د. محمد برهان</h1>
             <p style="margin:0; font-weight: 500; opacity: 0.7;">طب وجراحة وتجميل الأسنان</p>
         </div>
@@ -151,14 +149,13 @@
     </div>
 
     <div class="action-bar">
-        <div class="chat-icon">💬</div>
         <button class="btn-book" id="subBtn" onclick="submitBooking()" disabled>حجز الموعد الآن</button>
     </div>
 
     <!-- SUCCESS MODAL -->
     <div id="qrModal">
         <h2 style="font-weight: 900;">تم الحجز بنجاح! ✅</h2>
-        <p>يرجى تصوير الشاشة والاحتفاظ برمز الموعد</p>
+        <p>نراك قريبا </p>
         <div id="qrcode"></div><br>
         <button onclick="location.reload()" style="background:white; color:black; padding:15px 40px; border-radius:15px; border:none; font-weight:bold;">إغلاق</button>
     </div>
