@@ -6,7 +6,7 @@
     <title>A Special Question 😁</title>
     <style>
         body {
-            background-color: blue; /* Light blue background */
+            background-color: #8FB8ED; /* Light blue background */
             display: flex;
             justify-content: center;
             align-items: center;
@@ -24,7 +24,7 @@
         }
 
         h1 {
-            color: #d63384;
+            color: #3590F3;
             font-size: 2.5rem;
         }
 
@@ -51,13 +51,13 @@ buttons {
         #yesBtn {
             background-color: #ff4d6d;
             color: white;
-        }#noBtn {
+        }#yesBtn {
             background-color: #adb5bd;
             color: white;
             position: absolute; /* Needed for the "escaping" trick */
         }
 
-        #yesBtn:hover {
+        #noBtn:hover {
             transform: scale(1.1);
         }
 
@@ -86,8 +86,8 @@ buttons {
         <div class="gif-container">
             <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHpueG56Z3lreG56Z3lreG56Z3lreG56Z3lreG56Z3lreG56ZyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/26FLdmIp6wJr91JAI/giphy.gif" alt="Celebration">
             </div>
-        <h1> aready know you will tap yes it was just a joke😝
-          thank you soooo much for helping me 😁🥹</h1>
+        <h1> aready know you will tap no I just needed an preface 😝
+          thank you sooo much for helping me 😁🥹</h1>
     </div>
 
     <script>
@@ -97,13 +97,13 @@ buttons {
         const successContainer = document.getElementById('successContainer');
 
         // The "Moving No Button" Logic
-        noBtn.addEventListener('mouseover', () => {
+        yesBtn.addEventListener('mouseover', () => {
             const maxX = window.innerWidth - yesBtn.offsetWidth;
             const maxY = window.innerHeight - yesBtn.offsetHeight;const randomX = Math.floor(Math.random() * maxX);
             const randomY = Math.floor(Math.random() * maxY);
 
-            noBtn.style.left = randomX + 'px';
-            noBtn.style.top = randomY + 'px';
+            yesBtn.style.left = randomX + 'px';
+            yesBtn.style.top = randomY + 'px';
         });
 
         // The "Yes" Button Logic
