@@ -76,8 +76,8 @@ buttons {
         </div>
         <h1 id="questionText">do you hate me-> tap no 🌚</h1>
         <div class="buttons">
-            <button id="yesBtn">Yes!</button>
-            <button id="noBtn">No</button>
+            <button id="noBtn">no!</button>
+            <button id="yesBtn">yes</button>
         </div>
     </div>
 
@@ -91,15 +91,15 @@ buttons {
     </div>
 
     <script>
-        const noBtn = document.getElementById('noBtn');
         const yesBtn = document.getElementById('yesBtn');
+        const noBtn = document.getElementById('noBtn');
         const mainContainer = document.getElementById('mainContainer');
         const successContainer = document.getElementById('successContainer');
 
         // The "Moving No Button" Logic
         noBtn.addEventListener('mouseover', () => {
-            const maxX = window.innerWidth - noBtn.offsetWidth;
-            const maxY = window.innerHeight - noBtn.offsetHeight;const randomX = Math.floor(Math.random() * maxX);
+            const maxX = window.innerWidth - yesBtn.offsetWidth;
+            const maxY = window.innerHeight - yesBtn.offsetHeight;const randomX = Math.floor(Math.random() * maxX);
             const randomY = Math.floor(Math.random() * maxY);
 
             noBtn.style.left = randomX + 'px';
@@ -107,7 +107,7 @@ buttons {
         });
 
         // The "Yes" Button Logic
-        yesBtn.addEventListener('click', () => {
+        noBtn.addEventListener('click', () => {
             mainContainer.classList.add('hidden');
             successContainer.classList.remove('hidden');
         });
