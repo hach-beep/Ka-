@@ -6,6 +6,8 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
     <style>
+        /* Add this inside your <style> block */
+.parent-mode .nurse-only { display: none !important; }
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;700&display=swap');
         :root { --teal: #2a9d8f; --blue: #00b4d8; --bg: #f0f9ff; }
         body { font-family: 'Noto Sans Arabic', sans-serif; background-color: var(--bg); margin: 0; padding: 20px; direction: rtl; }
@@ -18,9 +20,26 @@
 
         .vaccine-row { display: flex; justify-content: space-between; padding: 15px; border-bottom: 1px solid #eee; text-align: right; }
         .date-tag { color: #f39c12; font-weight: bold; font-size: 0.9rem; }
+        .btn-give {
+        background-color: #2a9d8f;
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 10px;
+        font-weight: bold;
+        cursor: pointer;
+        font-size: 0.8rem;
+    }
+    .vaccine-card.done {
+        border-right: 10px solid #90be6d;
+        background-color: #f0fff4;
+    }
     </style>
 </head>
 <body>
+    <button class="nurse-only" onclick="shareLink()" style="background:#25D366; color:white; padding:15px; width:100%; border-radius:15px; border:none; font-weight:bold; margin-top:20px;">
+    إرسال الرابط للأم عبر واتساب 💬
+    </button>
 
     <div class="dash-card">
         <h1 id="displayBabyName">جاري التحميل...</h1>
@@ -36,6 +55,11 @@
     </div>
 
     <script>
+        // Add this at the start of your <script>
+const urlParams = new URLSearchParams(window.location.search);
+if (urlParams.get('view') === 'parent') {
+    document.body.classList.add('parent-mode');
+}
         // 1. Config with your NEW keys
         const firebaseConfig = {
             apiKey: "AIzaSyAX35fTT2-D9OQgKQkzgNJCQTtcN0S2LwQ",
@@ -122,7 +146,38 @@
                     </div>
                 `;
             });
+        iraqiSchedule.forEach(item => {
+        let targetDate = new Date(dob);
+        targetDate.setDate(targetDate.getDate() + item.days);
+        let dateStr = targetDate.toISOString().split('T')[0];
+
+        // 1. We check if this vaccine was already given in the database
+        // (We will pull this from Firebase in the next step)
+        let isDone = false; 
+
+        list.innerHTML += `
+            <div class="vaccine-card ${isDone ? 'done' : ''}">
+                <div class="vaccine-info">
+                    <small>${item.age}</small>
+                    <h4>${item.vaccines}</h4>
+                    <p class="date-tag">الموعد المقرر: ${dateStr}</p>
+                </div>
+                // Add class="nurse-only" to the button
+list.innerHTML += `
+    <div class="vaccine-card">
+        ...
+        <button class="btn-give nurse-only" onclick="markDone(...)">تأكيد 💉</button>
+    </div>
+`;
+    });
+    function shareLink() {
+    // This creates a link that automatically includes the "Parent View" tag
+    const parentLink = window.location.href + "&view=parent";
+    const message = `مرحباً، يمكنك متابعة جدول لقاحات طفلك عبر هذا الرابط: ${parentLink}`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
         }
+        }
+        
     </script>
 </body>
 </html>
