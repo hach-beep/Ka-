@@ -72,6 +72,50 @@
 
         <button onclick="registerBaby()">حفظ البيانات</button>
     </div>
+    <!-- 1. Load the Firebase Libraries -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+<script>
+    // 2. Your NEW Firebase Keys
+    const firebaseConfig = {
+        apiKey: "AIzaSyAX35fTT2-D9OQgKQkzgNJCQTtcN0S2LwQ",
+        authDomain: "babyguard-system.firebaseapp.com",
+        projectId: "babyguard-system",
+        storageBucket: "babyguard-system.firebasestorage.app",
+        messagingSenderId: "834481617596",
+        appId: "1:834481617596:web:868391d8b73a5feabc6eb9"
+    };
+    
+    // 3. Start the Engine
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    function registerBaby() {
+        // 4. Grab data from the HTML boxes
+        const name = document.getElementById('babyName').value;
+        const dob = document.getElementById('babyDob').value;
+        const phone = document.getElementById('momPhone').value;
+
+        if (!name || !dob) {
+            alert("يرجى اجاغبة الاسئلة السابقة  );
+            return;
+        }
+
+        // 5. Save to the "babies" folder with a Unique ID
+        db.collection("babies").add({
+            name: name,
+            dob: dob,
+            momPhone: phone,
+            protectionScore: 10, // Starts at 10% (for the birth vaccine)
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        })
+        .then((docRef) => {
+            // 6. Redirect to the dashboard using the new ID
+            window.location.href = `baby_dash.html?id=${docRef.id}`;
+        });
+    }
+        </script>
 
 </body>
 </html>
