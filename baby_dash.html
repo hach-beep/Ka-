@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>ملف الطفل - BabyGuard</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;700&display=swap');
+        :root { --teal: #2a9d8f; --blue: #00b4d8; --bg: #f0f9ff; }
+        body { font-family: 'Noto Sans Arabic', sans-serif; background-color: var(--bg); margin: 0; padding: 20px; direction: rtl; }
+        
+        .dash-card { background: white; padding: 30px; border-radius: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); max-width: 500px; margin: 0 auto; }
+        
+        /* The Protection Circle */
+        .progress-box { width: 120px; height: 120px; border-radius: 50%; border: 8px solid var(--teal); margin: 20px auto; display: flex; align-items: center; justify-content: center; flex-direction: column; }
+        .progress-box span { font-size: 1.5rem; font-weight: bold; color: var(--teal); }
+
+        .vaccine-row { display: flex; justify-content: space-between; padding: 15px; border-bottom: 1px solid #eee; text-align: right; }
+        .date-tag { color: #f39c12; font-weight: bold; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+
+    <div class="dash-card">
+        <h1 id="displayBabyName">جاري التحميل...</h1>
+        <div class="progress-box">
+            <span id="score">10%</span>
+            <small>نسبة الحماية</small>
+        </div>
+
+        <h3 style="color: var(--blue); margin-top: 30px;">الجدول الزمني للقاحات 💉</h3>
+        <div id="vaccineList">
+            <!-- Vaccine dates will be calculated here -->
+        </div>
+    </div>
+
+    <script>
+        // 1. Config with your NEW keys
+        const firebaseConfig = {
+            apiKey: "AIzaSyAX35fTT2-D9OQgKQkzgNJCQTtcN0S2LwQ",
+            authDomain: "babyguard-system.firebaseapp.com",
+            projectId: "babyguard-system",
+            storageBucket: "babyguard-system.firebasestorage.app",
+            messagingSenderId: "892853005967",
+            appId: "1:892853005967:web:868391d8b73a5feabc6eb9"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // 2. Get the Baby ID from the link
+        const urlParams = new URLSearchParams(window.location.search);
+        const babyId = urlParams.get('id');
+
+        if (babyId) {
+            db.collection("babies").doc(babyId).get().then((doc) => {
+                if (doc.exists) {
+                    const data = doc.data();
+                    document.getElementById('displayBabyName').innerText = data.name;
+                    calculateSchedule(data.dob);
+                }
+            });
+        }
+
+        // 3. THE NURSE LOGIC: Calculating dates
+        function calculateSchedule(dobString) {
+    const dob = new Date(dobString);
+    const list = document.getElementById('vaccineList');
+    list.innerHTML = ""; // Clear the list first
+
+    // 1. We define the official Iraqi Schedule from your photo
+    const iraqiSchedule = [
+        { age: "خلال 24 ساعة الأولى", vaccines: "Hepatitis B (Dose 0)", days: 0 },
+        { age: "خلال الأسبوع الأول", vaccines: "BCG, OPV (Dose 0)", days: 7 },
+        { age: "عمر شهرين", vaccines: "Penta (1), OPV (1), Pneumococcal (1), Rota (1)", days: 60 },
+        { age: "عمر 4 أشهر", vaccines: "Penta (2), OPV (2), Pneumococcal (2), Rota (2), IPV (1)", days: 120 },
+        { age: "عمر 6 أشهر", vaccines: "Penta (3), OPV (3), Pneumococcal (3), Rota (3), IPV (2)", days: 180 },
+        { age: "عمر 9 أشهر", vaccines: "Measles, Vitamin A (100,000 IU)", days: 270 },
+        { age: "عمر 12 شهر", vaccines: "MMR (Dose 1)", days: 365 },
+        { age: "عمر 18 شهر", vaccines: "DPT (Booster 1), OPV (Booster 1), MMR (2), Vit A", days: 545 },
+        { age: "عمر 4-6 سنوات", vaccines: "DPT (Booster 2), OPV (Booster 2), Vit A", days: 1460 }
+    ];
+
+    // 2. We loop through each "Station" in the schedule
+    iraqiSchedule.forEach(item => {
+        // Calculate the target date
+        let targetDate = new Date(dob);
+        targetDate.setDate(targetDate.getDate() + item.days);
+
+        // Format the date to look nice
+        let dateStr = targetDate.toLocaleDateString('ar-EG', {
+            year: 'numeric', month: 'long', day: 'numeric'
+        });
+
+        // 3. Draw the card on the screen
+        list.innerHTML += `
+            <div class="vaccine-card">
+                <div class="vaccine-info">
+                    <small style="color:var(--teal); font-weight:bold;">${item.age}</small>
+                    <h4>${item.vaccines}</h4>
+                    <p class="date-tag">الموعد: ${dateStr}</p>
+                </div>
+            </div>
+        `;
+    });
+}
+
+            list.innerHTML = "";
+            
+            schedule.forEach(v => {
+                // Calculate the future date
+                let vDate = new Date(dob);
+                vDate.setMonth(vDate.getMonth() + v.months);
+                
+                // Format the date to look nice (YYYY-MM-DD)
+                let dateStr = vDate.toISOString().split('T')[0];
+
+                list.innerHTML += `
+                    <div class="vaccine-row">
+                        <span>${v.name}</span>
+                        <span class="date-tag">${dateStr}</span>
+                    </div>
+                `;
+            });
+        }
+    </script>
+</body>
+</html>
