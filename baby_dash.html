@@ -48,9 +48,9 @@
         <div class="status-bubble" id="baby-status">يتحقق...</div>
         <div id="baby-emoji">👶</div>
     </div>
+    <!-- Road mark -->
     <div style="position: absolute; right: 10px; bottom: 5px; font-size: 20px;">🏁</div>
       </div>
-        
         <div class="progress-box">
             <span id="score">0%</span>
             <small>نسبة الحماية</small>
@@ -109,49 +109,56 @@
         });
     }
 
-    // 5. Calculate and Draw Schedule
     function renderSchedule(dobString, completedList) {
-        const dob = new Date(dobString);
-        const listContainer = document.getElementById('vaccineList');
-        listContainer.innerHTML = ""; // Clear list
-        
-        let doneCount = 0;
-      updateBabyAnimation(completedList.length, hasMissedAny, isWalking);
-    }
+    const dob = new Date(dobString);
+    const today = new Date(); // Get current date to check for late shots
+    const listContainer = document.getElementById('vaccineList');
+    listContainer.innerHTML = ""; // Clear list
 
-        iraqiSchedule.forEach((item, index) => {
-            // Calculate target date
-            let targetDate = new Date(dob);
-            targetDate.setDate(targetDate.getDate() + item.days);
-            
-            // Format date nicely
-            const dateStr = targetDate.toLocaleDateString('ar-EG', {
-                year: 'numeric', month: 'long', day: 'numeric'
-            });
+    let doneCount = 0;
+    let hasMissedAny = false; // Initialize here
+    let isWalking = completedList.includes(6); // MMR (1) at index 6
 
-            // Check if this vaccine is done (based on index or specific name)
-            const isDone = completedList.includes(index); 
-            if (isDone) doneCount++;
+    iraqiSchedule.forEach((item, index) => {
+        // 1. Calculate target date
+        let targetDate = new Date(dob);
+        targetDate.setDate(targetDate.getDate() + item.days);
 
-            // Create HTML card
-            const cardHTML = `
-                <div class="vaccine-card ${isDone ? 'done' : ''}">
-                    <div class="vaccine-info">
-                        <small>${item.age}</small>
-                        <h4>${item.vaccines}</h4>
-                        <p class="date-tag">الموعد المقرر: ${dateStr}</p>
-                    </div>
-                    <button class="btn-give nurse-only" onclick="markAsDone(${index})">
-                        ${isDone ? '✅ تم' : 'تأكيد 💉'}
-                    </button>
-                </div>
-            `;
-            listContainer.innerHTML += cardHTML;
+        // 2. Format date
+        const dateStr = targetDate.toLocaleDateString('ar-EG', {
+            year: 'numeric', month: 'long', day: 'numeric'
         });
 
-        // Update progress score
-        const percentage = Math.round((doneCount / iraqiSchedule.length) * 100);
-        document.getElementById('score').innerText = percentage + "%";
+        // 3. Check status
+        const isDone = completedList.includes(index);
+        if (isDone) doneCount++;
+
+        // 4. Check if LATE (Today is past target date and vaccine NOT done)
+        const isLate = (today > targetDate) && !isDone;
+        if (isLate) hasMissedAny = true;
+
+        // 5. Create HTML card
+        const cardHTML = `
+            <div class="vaccine-card ${isDone ? 'done' : (isLate ? 'missed' : '')}">
+                <div class="vaccine-info">
+                    <small>${item.age}</small>
+                    <h4>${item.vaccines}</h4>
+                    <p class="date-tag">${isLate ? '⚠️ متأخر!' : 'الموعد المقرر:'} ${dateStr}</p>
+                </div>
+                <button class="btn-give nurse-only" onclick="markAsDone(${index})">
+                    ${isDone ? '✅ تم' : 'تأكيد 💉'}
+                </button>
+            </div>
+        `;
+        listContainer.innerHTML += cardHTML;
+    });
+
+    // 6. Update progress score
+    const percentage = Math.round((doneCount / iraqiSchedule.length) * 100);
+    document.getElementById('score').innerText = percentage + "%";
+
+    // 7. NOW call the animation after everything is calculated
+    updateBabyAnimation(completedList.length, hasMissedAny, isWalking);
     }
   function updateBabyAnimation(count, isCrying, isWalking) {
     const runner = document.getElementById('baby-runner');
