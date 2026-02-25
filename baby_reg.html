@@ -80,51 +80,46 @@
 <script>
     // 2. Your NEW Firebase Keys
     const firebaseConfig = {
-        apiKey: "AIzaSyAX35fTT2-D9OQgKQkzgNJCQTtcN0S2LwQ",
+        apiKey: "AizasyAX35fTT2-D90QgKQkzgnJCQtcN0S2LWq",
         authDomain: "babyguard-system.firebaseapp.com",
         projectId: "babyguard-system",
-        storageBucket: "babyguard-system.firebasestorage.app",
-        messagingSenderId: "834481617596",
-        appId: "1:834481617596:web:868391d8b73a5feabc6eb9"
+        storageBucket: "babyguard-system.appspot.com",
+        messagingSenderId: "892853005967",
+        appId: "1:892853005967:web:868391d8b73a5feabc6b9"
     };
-    
+
     // 3. Start the Engine
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
     function registerBaby() {
-    // 1. Grab data
-    const name = document.getElementById('babyName').value;
-    const dob = document.getElementById('babyDob').value;
-    const phone = document.getElementById('momPhone').value;
+        // 1. Grab data
+        const name = document.getElementById('babyName').value;
+        const dob = document.getElementById('babyDob').value;
+        const phone = document.getElementById('momPhone').value;
 
-    // 2. Simple Validation
-    if (!name || !dob || !phone) {
-        alert("يرجى إكمال جميع الحقول");
-        return;
+        // 2. Simple Validation
+        if (!name || !dob || !phone) {
+            alert("يرجى إكمال جميع الحقول");
+            return;
+        }
+
+        // 3. Save to Firebase
+        db.collection("babies").add({
+            name: name,
+            dob: dob,
+            momPhone: phone,
+            completedVaccines: [0], // Start with first vaccine done
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        })
+        .then((docRef) => {
+            // REDIRECT using backticks ` `
+            window.location.href = `baby_dash.html?id=${docRef.id}`;
+        })
+        .catch((error) => {
+            alert("خطأ: " + error.message);
+        });
     }
-
-    console.log("Attempting to save..."); // Check your browser console (F12)
-
-    // 3. Save to Firebase
-    db.collection("babies").add({
-        name: name,
-        dob: dob,
-        momPhone: phone,
-        completedVaccines: [0], // Start with first vaccine done
-        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-    })
-    .then((docRef) => {
-        console.log("Document written with ID: ", docRef.id);
-        // CRITICAL: Use backticks `` here, NOT single quotes ''
-        window.location.href = `baby_dash.html?id=${docRef.id}`;
-    })
-    .catch((error) => {
-        alert("خطأ في الاتصال بقاعدة البيانات: " + error.message);
-        console.error("Error adding document: ", error);
-    });
-    }
-        </script>
-
+                </script>
 </body>
 </html>
