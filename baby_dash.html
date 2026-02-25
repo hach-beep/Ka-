@@ -135,4 +135,66 @@
             const isLate = (today > targetDate) && !isDone;
             if (isLate) hasMissedAny = true;
 
-            const dateStr = targetDate.toLocaleDateString('ar-EG', { year:                        
+            const dateStr = targetDate.toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
+
+            listContainer.innerHTML += `
+                <div class="vaccine-card ${isDone ? 'done' : (isLate ? 'missed' : '')}">
+                    <div class="vaccine-info">
+                        <small>${item.age}</small>
+                        <h4>${item.vaccines}</h4>
+                        <p class="date-tag">${isLate ? '⚠️ متأخر!' : 'الموعد المقرر:'} ${dateStr}</p>
+                    </div>
+                    <button class="btn-give nurse-only" onclick="markAsDone(${index})">
+                        ${isDone ? '✅ تم' : 'تأكيد 💉'}
+                    </button>
+                </div>
+            `;
+        });
+
+        const percentage = Math.round((doneCount / iraqiSchedule.length) * 100);
+        document.getElementById('score').innerText = percentage + "%";
+
+        // Move the baby AFTER calculations
+        updateBabyAnimation(completedList.length, hasMissedAny, isWalking);
+    }
+
+    // 5. Baby Movement Logic
+    function updateBabyAnimation(count, isCrying, isWalking) {
+        const runner = document.getElementById('baby-runner');
+        const emoji = document.getElementById('baby-emoji');
+        const status = document.getElementById('baby-status');
+        if(!runner) return;
+
+        runner.style.left = ((count / iraqiSchedule.length) * 90) + "%";
+        runner.className = "";
+
+        if (isCrying) {
+            emoji.innerText = "😭"; status.innerText = "أنا أبكي.. فاتني موعد!";
+            status.style.color = "red"; runner.classList.add("crying");
+        } else if (isWalking) {
+            emoji.innerText = "🚶‍♂️"; status.innerText = "أنا أمشي الآن!";
+            status.style.color = "green"; runner.classList.add("moving");
+        } else {
+            emoji.innerText = "👶"; status.innerText = "أنا أزحف بنشاط";
+            status.style.color = "#2a9d8f"; runner.classList.add("moving");
+        }
+    }
+
+    function markAsDone(index) {
+        db.collection("babies").doc(babyId).get().then(doc => {
+            let completed = doc.data().completedVaccines || [];
+            if (!completed.includes(index)) {
+                completed.push(index);
+                db.collection("babies").doc(babyId).update({ completedVaccines: completed });
+            }
+        });
+    }
+
+    function shareLink() {
+        const parentLink = window.location.href + "&view=parent";
+        const message = `مرحباً، يمكنكِ متابعة نمو طفلكِ وجدول لقاحاته عبر الرابط: \n ${parentLink}`;
+        window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
+    }
+</script>
+</body>
+</html>
