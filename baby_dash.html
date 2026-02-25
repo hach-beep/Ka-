@@ -43,6 +43,13 @@
         </button>
 
         <h1 id="displayBabyName">جاري التحميل...</h1>
+      <div class="baby-track">
+    <div id="baby-runner">
+        <div class="status-bubble" id="baby-status">يتحقق...</div>
+        <div id="baby-emoji">👶</div>
+    </div>
+    <div style="position: absolute; right: 10px; bottom: 5px; font-size: 20px;">🏁</div>
+      </div>
         
         <div class="progress-box">
             <span id="score">0%</span>
@@ -109,6 +116,8 @@
         listContainer.innerHTML = ""; // Clear list
         
         let doneCount = 0;
+      updateBabyAnimation(completedList.length, hasMissedAny, isWalking);
+    }
 
         iraqiSchedule.forEach((item, index) => {
             // Calculate target date
@@ -144,6 +153,26 @@
         const percentage = Math.round((doneCount / iraqiSchedule.length) * 100);
         document.getElementById('score').innerText = percentage + "%";
     }
+  function updateBabyAnimation(count, isCrying, isWalking) {
+    const runner = document.getElementById('baby-runner');
+    const emoji = document.getElementById('baby-emoji');
+    const status = document.getElementById('baby-status');
+    if(!runner) return; // safety check
+
+    runner.style.left = ((count / iraqiSchedule.length) * 90) + "%";
+    runner.className = "";
+
+    if (isCrying) {
+        emoji.innerText = "😭"; status.innerText = "أنا أبكي.. فاتني موعد!";
+        status.style.color = "red"; runner.classList.add("crying");
+    } else if (isWalking) {
+        emoji.innerText = "🚶‍♂️"; status.innerText = "أنا أمشي الآن!";
+        status.style.color = "green"; runner.classList.add("moving");
+    } else {
+        emoji.innerText = "👶"; status.innerText = "أنا أزحف بنشاط";
+        status.style.color = "#2a9d8f"; runner.classList.add("moving");
+    }
+  }
 
     // 6. Action: Mark Vaccine as Done (For Nurses)
     function markAsDone(index) {
