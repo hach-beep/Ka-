@@ -5,15 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ملف الطفل - BabyGuard</title>
     
+    <!-- Load Firebase -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;700&display=swap" rel="stylesheet">
 
     <style>
         :root { --teal: #2a9d8f; --blue: #00b4d8; --bg: #f0f9ff; }
         body { font-family: 'Noto Sans Arabic', sans-serif; background-color: var(--bg); margin: 0; padding: 20px; direction: rtl; }
         body.parent-mode .nurse-only { display: none !important; }
-        .dash-card { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); max-width: 500px; margin: auto; }
+        .dash-card { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); max-width: 500px; margin: auto; }
         .baby-track { width: 100%; height: 80px; background: #e0f2f1; border-radius: 40px; position: relative; margin: 20px 0 35px 0; border: 2px dashed #b2dfdb; }
         #baby-runner { position: absolute; bottom: 10px; left: 0%; font-size: 40px; transition: left 1.5s ease; display: flex; flex-direction: column; align-items: center; }
         .status-bubble { font-size: 11px; background: white; padding: 2px 8px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 5px; font-weight: bold; }
@@ -34,24 +36,33 @@
     <div class="dash-card">
         <button class="btn-share nurse-only" onclick="shareLink()">إرسال الرابط للأم عبر واتساب 💬</button>
         <h1 id="displayBabyName" style="text-align: center;">جاري التحميل...</h1>
+        
         <div class="baby-track">
-            <div id="baby-runner"><div class="status-bubble" id="baby-status">يتحقق...</div><div id="baby-emoji">👶</div></div>
+            <div id="baby-runner">
+                <div class="status-bubble" id="baby-status">يتحقق...</div>
+                <div id="baby-emoji">👶</div>
+            </div>
             <div style="position: absolute; right: 10px; bottom: 5px; font-size: 20px;">🏁</div>
         </div>
-        <div class="progress-box"><span id="score">0%</span><small>نسبة الحماية</small></div>
+
+        <div class="progress-box">
+            <span id="score">0%</span>
+            <small>نسبة الحماية</small>
+        </div>
+
         <h3 style="color: var(--blue); margin-top: 30px;">الجدول الزمني للقاحات 💉</h3>
         <div id="vaccineList"></div>
     </div>
 
 <script>
-    // USE THE CONFIG FROM YOUR REGISTRATION FILE HERE:
+    // 1. Firebase Configuration (Matches your working registration file)
     const firebaseConfig = {
         apiKey: "AizasyAX35fTT2-D90QgKQkzgnJCQtcN0S2LWq",
         authDomain: "babyguard-system.firebaseapp.com",
         projectId: "babyguard-system",
         storageBucket: "babyguard-system.appspot.com",
-        messagingSenderId: "834481617596", // FIXED: Matches your reg file
-        appId: "1:834481617596:web:868391d8b73a5feabc6b9" // FIXED: Matches your reg file
+        messagingSenderId: "834481617596", 
+        appId: "1:834481617596:web:868391d8b73a5feabc6b9" 
     };
 
     firebase.initializeApp(firebaseConfig);
@@ -92,18 +103,21 @@
         listDiv.innerHTML = "";
         
         let doneCount = 0;
-        let isLateAny = false;
-        let milestoneWalk = completedList.includes(6);
+        let hasMissedAny = false;
+        let isWalking = completedList.includes(6); // MMR Index
 
         iraqiSchedule.forEach(function(item, index) {
             let target = new Date(dob);
             target.setDate(target.getDate() + item.days);
+            
             const done = completedList.includes(index);
             if (done) doneCount++;
+
             const late = (today > target) && !done;
-            if (late) isLateAny = true;
+            if (late) hasMissedAny = true;
 
             const dateLabel = target.toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
+
             listDiv.innerHTML += `
                 <div class="vaccine-card ${done ? 'done' : (late ? 'missed' : '')}">
                     <div>
@@ -111,20 +125,26 @@
                         <h4 style="margin:5px 0;">${item.vaccines}</h4>
                         <p class="date-tag">${late ? '⚠️ متأخر!' : 'الموعد:'} ${dateLabel}</p>
                     </div>
-                    <button class="btn-give nurse-only" onclick="updateVaccine(${index})">${done ? '✅' : 'تأكيد'}</button>
+                    <button class="btn-give nurse-only" onclick="updateVaccine(${index})">
+                        ${done ? '✅' : 'تأكيد'}
+                    </button>
                 </div>`;
         });
 
         document.getElementById('score').innerText = Math.round((doneCount / iraqiSchedule.length) * 100) + "%";
-        updateBabyUI(completedList.length, isLateAny, milestoneWalk);
+        
+        // MOVED TO END TO PREVENT CRASH
+        updateBabyUI(completedList.length, hasMissedAny, isWalking);
     }
 
     function updateBabyUI(count, crying, walking) {
         const runner = document.getElementById('baby-runner');
         const emoji = document.getElementById('baby-emoji');
         const status = document.getElementById('baby-status');
+        
         runner.style.left = ((count / iraqiSchedule.length) * 90) + "%";
         runner.className = "";
+
         if (crying) {
             emoji.innerText = "😭"; status.innerText = "أنا أبكي!"; runner.classList.add("crying");
         } else if (walking) {
