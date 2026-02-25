@@ -1,98 +1,82 @@
-<!DOCTYPE html>
+                <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ملف الطفل - BabyGuard</title>
+    
+    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-    <style>
-        /* Add this inside your <style> block */
-.parent-mode .nurse-only { display: none !important; }
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;700&display=swap');
-        :root { --teal: #2a9d8f; --blue: #00b4d8; --bg: #f0f9ff; }
-        body { font-family: 'Noto Sans Arabic', sans-serif; background-color: var(--bg); margin: 0; padding: 20px; direction: rtl; }
-        
-        .dash-card { background: white; padding: 30px; border-radius: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); max-width: 500px; margin: 0 auto; }
-        
-        /* The Protection Circle */
-        .progress-box { width: 120px; height: 120px; border-radius: 50%; border: 8px solid var(--teal); margin: 20px auto; display: flex; align-items: center; justify-content: center; flex-direction: column; }
-        .progress-box span { font-size: 1.5rem; font-weight: bold; color: var(--teal); }
 
-        .vaccine-row { display: flex; justify-content: space-between; padding: 15px; border-bottom: 1px solid #eee; text-align: right; }
-        .date-tag { color: #f39c12; font-weight: bold; font-size: 0.9rem; }
-        .btn-give {
-        background-color: #2a9d8f;
-        color: white;
-        border: none;
-        padding: 10px 15px;
-        border-radius: 10px;
-        font-weight: bold;
-        cursor: pointer;
-        font-size: 0.8rem;
-    }
-    .vaccine-card.done {
-        border-right: 10px solid #90be6d;
-        background-color: #f0fff4;
-    }
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root { --teal: #2a9d8f; --blue: #00b4d8; --bg: #f0f9ff; }
+        body { font-family: 'Noto+Sans+Arabic', sans-serif; background-color: var(--bg); margin: 0; padding: 20px; direction: rtl; }
+        
+        /* Hide nurse elements in parent mode */
+        body.parent-mode .nurse-only { display: none !important; }
+
+        .dash-card { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); max-width: 500px; margin: auto; }
+        
+        .progress-box { width: 120px; height: 120px; border-radius: 50%; border: 8px solid var(--teal); margin: 20px auto; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .progress-box span { font-size: 1.5rem; font-weight: bold; color: var(--teal); }
+        .progress-box small { color: #666; font-size: 0.8rem; }
+
+        .vaccine-card { background: #fff; border: 1px solid #eee; border-radius: 12px; padding: 15px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; transition: 0.3s; }
+        .vaccine-card.done { border-right: 10px solid #90be6d; background-color: #f0fff4; }
+        
+        .vaccine-info h4 { margin: 5px 0; color: #333; }
+        .vaccine-info small { color: var(--teal); font-weight: bold; }
+        .date-tag { color: #f39c12; font-weight: bold; font-size: 0.9rem; margin: 0; }
+
+        .btn-give { background-color: #2a9d8f; color: white; border: none; padding: 8px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.8rem; }
+        .btn-share { background-color: #25D366; color: white; border: none; padding: 15px; width: 100%; border-radius: 10px; margin-bottom: 20px; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
-    <button class="nurse-only" onclick="shareLink()" style="background:#25D366; color:white; padding:15px; width:100%; border-radius:15px; border:none; font-weight:bold; margin-top:20px;">
-    إرسال الرابط للأم عبر واتساب 💬
-    </button>
 
     <div class="dash-card">
+        <button class="btn-share nurse-only" onclick="shareLink()">
+            إرسال الرابط للأم عبر واتساب 💬
+        </button>
+
         <h1 id="displayBabyName">جاري التحميل...</h1>
+        
         <div class="progress-box">
-            <span id="score">10%</span>
+            <span id="score">0%</span>
             <small>نسبة الحماية</small>
         </div>
 
         <h3 style="color: var(--blue); margin-top: 30px;">الجدول الزمني للقاحات 💉</h3>
         <div id="vaccineList">
-            <!-- Vaccine dates will be calculated here -->
+            <!-- Vaccine cards will be calculated here -->
         </div>
     </div>
 
-    <script>
-        // Add this at the start of your <script>
-const urlParams = new URLSearchParams(window.location.search);
-if (urlParams.get('view') === 'parent') {
-    document.body.classList.add('parent-mode');
-}
-        // 1. Config with your NEW keys
-        const firebaseConfig = {
-            apiKey: "AIzaSyAX35fTT2-D9OQgKQkzgNJCQTtcN0S2LwQ",
-            authDomain: "babyguard-system.firebaseapp.com",
-            projectId: "babyguard-system",
-            storageBucket: "babyguard-system.firebasestorage.app",
-            messagingSenderId: "892853005967",
-            appId: "1:892853005967:web:868391d8b73a5feabc6eb9"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
+<script>
+    // 1. Firebase Configuration (Replace with your keys)
+    const firebaseConfig = {
+        apiKey: "AizasyAX35fTT2-D90QgKQkzgnJCQtcN0S2LWq",
+        authDomain: "babyguard-system.firebaseapp.com",
+        projectId: "babyguard-system",
+        storageBucket: "babyguard-system.appspot.com",
+        messagingSenderId: "892853005967",
+        appId: "1:892853005967:web:868391d8b73a5feabc6b9"
+    };
 
-        // 2. Get the Baby ID from the link
-        const urlParams = new URLSearchParams(window.location.search);
-        const babyId = urlParams.get('id');
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
 
-        if (babyId) {
-            db.collection("babies").doc(babyId).get().then((doc) => {
-                if (doc.exists) {
-                    const data = doc.data();
-                    document.getElementById('displayBabyName').innerText = data.name;
-                    calculateSchedule(data.dob);
-                }
-            });
-        }
+    // 2. Detect Mode (Nurse vs Parent)
+    const urlParams = new URLSearchParams(window.location.search);
+    const babyId = urlParams.get('id');
+    if (urlParams.get('view') === 'parent') {
+        document.body.classList.add('parent-mode');
+    }
 
-        // 3. THE NURSE LOGIC: Calculating dates
-        function calculateSchedule(dobString) {
-    const dob = new Date(dobString);
-    const list = document.getElementById('vaccineList');
-    list.innerHTML = ""; // Clear the list first
-
-    // 1. We define the official Iraqi Schedule from your photo
+    // 3. Define Official Iraqi Schedule
     const iraqiSchedule = [
         { age: "خلال 24 ساعة الأولى", vaccines: "Hepatitis B (Dose 0)", days: 0 },
         { age: "خلال الأسبوع الأول", vaccines: "BCG, OPV (Dose 0)", days: 7 },
@@ -105,79 +89,81 @@ if (urlParams.get('view') === 'parent') {
         { age: "عمر 4-6 سنوات", vaccines: "DPT (Booster 2), OPV (Booster 2), Vit A", days: 1460 }
     ];
 
-    // 2. We loop through each "Station" in the schedule
-    iraqiSchedule.forEach(item => {
-        // Calculate the target date
-        let targetDate = new Date(dob);
-        targetDate.setDate(targetDate.getDate() + item.days);
+    // 4. Fetch Baby Data from Firestore
+    if (babyId) {
+        db.collection("babies").doc(babyId).onSnapshot((doc) => {
+            if (doc.exists()) {
+                const data = doc.data();
+                document.getElementById('displayBabyName').innerText = data.name;
+                renderSchedule(data.dob, data.completedVaccines || []);
+            } else {
+                alert("لم يتم العثور على بيانات الطفل");
+            }
+        });
+    }
 
-        // Format the date to look nice
-        let dateStr = targetDate.toLocaleDateString('ar-EG', {
-            year: 'numeric', month: 'long', day: 'numeric'
+    // 5. Calculate and Draw Schedule
+    function renderSchedule(dobString, completedList) {
+        const dob = new Date(dobString);
+        const listContainer = document.getElementById('vaccineList');
+        listContainer.innerHTML = ""; // Clear list
+        
+        let doneCount = 0;
+
+        iraqiSchedule.forEach((item, index) => {
+            // Calculate target date
+            let targetDate = new Date(dob);
+            targetDate.setDate(targetDate.getDate() + item.days);
+            
+            // Format date nicely
+            const dateStr = targetDate.toLocaleDateString('ar-EG', {
+                year: 'numeric', month: 'long', day: 'numeric'
+            });
+
+            // Check if this vaccine is done (based on index or specific name)
+            const isDone = completedList.includes(index); 
+            if (isDone) doneCount++;
+
+            // Create HTML card
+            const cardHTML = `
+                <div class="vaccine-card ${isDone ? 'done' : ''}">
+                    <div class="vaccine-info">
+                        <small>${item.age}</small>
+                        <h4>${item.vaccines}</h4>
+                        <p class="date-tag">الموعد المقرر: ${dateStr}</p>
+                    </div>
+                    <button class="btn-give nurse-only" onclick="markAsDone(${index})">
+                        ${isDone ? '✅ تم' : 'تأكيد 💉'}
+                    </button>
+                </div>
+            `;
+            listContainer.innerHTML += cardHTML;
         });
 
-        // 3. Draw the card on the screen
-        list.innerHTML += `
-            <div class="vaccine-card">
-                <div class="vaccine-info">
-                    <small style="color:var(--teal); font-weight:bold;">${item.age}</small>
-                    <h4>${item.vaccines}</h4>
-                    <p class="date-tag">الموعد: ${dateStr}</p>
-                </div>
-            </div>
-        `;
-    });
-}
+        // Update progress score
+        const percentage = Math.round((doneCount / iraqiSchedule.length) * 100);
+        document.getElementById('score').innerText = percentage + "%";
+    }
 
-            list.innerHTML = "";
-            
-            schedule.forEach(v => {
-                // Calculate the future date
-                let vDate = new Date(dob);
-                vDate.setMonth(vDate.getMonth() + v.months);
-                
-                // Format the date to look nice (YYYY-MM-DD)
-                let dateStr = vDate.toISOString().split('T')[0];
+    // 6. Action: Mark Vaccine as Done (For Nurses)
+    function markAsDone(index) {
+        db.collection("babies").doc(babyId).get().then(doc => {
+            let completed = doc.data().completedVaccines || [];
+            if (!completed.includes(index)) {
+                completed.push(index);
+                db.collection("babies").doc(babyId).update({ completedVaccines: completed });
+            }
+        });
+    }
 
-                list.innerHTML += `
-                    <div class="vaccine-row">
-                        <span>${v.name}</span>
-                        <span class="date-tag">${dateStr}</span>
-                    </div>
-                `;
-            });
-        iraqiSchedule.forEach(item => {
-        let targetDate = new Date(dob);
-        targetDate.setDate(targetDate.getDate() + item.days);
-        let dateStr = targetDate.toISOString().split('T')[0];
-
-        // 1. We check if this vaccine was already given in the database
-        // (We will pull this from Firebase in the next step)
-        let isDone = false; 
-
-        list.innerHTML += `
-            <div class="vaccine-card ${isDone ? 'done' : ''}">
-                <div class="vaccine-info">
-                    <small>${item.age}</small>
-                    <h4>${item.vaccines}</h4>
-                    <p class="date-tag">الموعد المقرر: ${dateStr}</p>
-                </div>
-                // Add class="nurse-only" to the button
-list.innerHTML += `
-    <div class="vaccine-card">
-        ...
-        <button class="btn-give nurse-only" onclick="markDone(...)">تأكيد 💉</button>
-    </div>
-`;
-    });
+    // 7. Share Link via WhatsApp
     function shareLink() {
-    // This creates a link that automatically includes the "Parent View" tag
-    const parentLink = window.location.href + "&view=parent";
-    const message = `مرحباً، يمكنك متابعة جدول لقاحات طفلك عبر هذا الرابط: ${parentLink}`;
-    window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
-        }
-        }
-        
-    </script>
+        const parentLink = window.location.href + "&view=parent";
+        const babyName = document.getElementById('displayBabyName').innerText;
+        const message = `مرحباً، الرابط هذا يتيح لكِ متابعة جدول لقاحات طفلكِ (${babyName}) المحدث: \n ${parentLink}`;
+        window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
+    }
+</script>
+
 </body>
 </html>
