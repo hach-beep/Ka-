@@ -1,4 +1,4 @@
-                <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -15,17 +15,28 @@
         :root { --teal: #2a9d8f; --blue: #00b4d8; --bg: #f0f9ff; }
         body { font-family: 'Noto+Sans+Arabic', sans-serif; background-color: var(--bg); margin: 0; padding: 20px; direction: rtl; }
         
-        /* Hide nurse elements in parent mode */
         body.parent-mode .nurse-only { display: none !important; }
 
         .dash-card { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); max-width: 500px; margin: auto; }
         
+        /* Baby Track */
+        .baby-track { width: 100%; height: 80px; background: #e0f2f1; border-radius: 40px; position: relative; margin: 20px 0 35px 0; border: 2px dashed #b2dfdb; }
+        #baby-runner { position: absolute; bottom: 10px; left: 0%; font-size: 40px; transition: left 1.5s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; align-items: center; z-index: 10; }
+        .status-bubble { font-size: 11px; background: white; padding: 2px 8px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 5px; font-weight: bold; white-space: nowrap; }
+
+        /* Animations */
+        .moving { animation: bounce 0.6s infinite alternate; }
+        @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-5px); } }
+        .crying { animation: shake 0.5s infinite; }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+
         .progress-box { width: 120px; height: 120px; border-radius: 50%; border: 8px solid var(--teal); margin: 20px auto; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .progress-box span { font-size: 1.5rem; font-weight: bold; color: var(--teal); }
         .progress-box small { color: #666; font-size: 0.8rem; }
 
         .vaccine-card { background: #fff; border: 1px solid #eee; border-radius: 12px; padding: 15px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; transition: 0.3s; }
         .vaccine-card.done { border-right: 10px solid #90be6d; background-color: #f0fff4; }
+        .vaccine-card.missed { border-right: 10px solid #e76f51; background-color: #fff5f5; }
         
         .vaccine-info h4 { margin: 5px 0; color: #333; }
         .vaccine-info small { color: var(--teal); font-weight: bold; }
@@ -38,32 +49,29 @@
 <body>
 
     <div class="dash-card">
-        <button class="btn-share nurse-only" onclick="shareLink()">
-            إرسال الرابط للأم عبر واتساب 💬
-        </button>
+        <button class="btn-share nurse-only" onclick="shareLink()">إرسال الرابط للأم عبر واتساب 💬</button>
 
-        <h1 id="displayBabyName">جاري التحميل...</h1>
-      <div class="baby-track">
-    <div id="baby-runner">
-        <div class="status-bubble" id="baby-status">يتحقق...</div>
-        <div id="baby-emoji">👶</div>
-    </div>
-    <!-- Road mark -->
-    <div style="position: absolute; right: 10px; bottom: 5px; font-size: 20px;">🏁</div>
-      </div>
+        <h1 id="displayBabyName" style="text-align: center;">جاري التحميل...</h1>
+        
+        <div class="baby-track">
+            <div id="baby-runner">
+                <div class="status-bubble" id="baby-status">يتحقق...</div>
+                <div id="baby-emoji">👶</div>
+            </div>
+            <div style="position: absolute; right: 10px; bottom: 5px; font-size: 20px;">🏁</div>
+        </div>
+
         <div class="progress-box">
             <span id="score">0%</span>
             <small>نسبة الحماية</small>
         </div>
 
         <h3 style="color: var(--blue); margin-top: 30px;">الجدول الزمني للقاحات 💉</h3>
-        <div id="vaccineList">
-            <!-- Vaccine cards will be calculated here -->
-        </div>
+        <div id="vaccineList"></div>
     </div>
 
 <script>
-    // 1. Firebase Configuration (Replace with your keys)
+    // 1. Firebase Config (Matches your screenshot)
     const firebaseConfig = {
         apiKey: "AizasyAX35fTT2-D90QgKQkzgnJCQtcN0S2LWq",
         authDomain: "babyguard-system.firebaseapp.com",
@@ -76,14 +84,13 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // 2. Detect Mode (Nurse vs Parent)
     const urlParams = new URLSearchParams(window.location.search);
     const babyId = urlParams.get('id');
     if (urlParams.get('view') === 'parent') {
         document.body.classList.add('parent-mode');
     }
 
-    // 3. Define Official Iraqi Schedule
+    // 2. Iraqi Schedule (Matches your screenshot exactly)
     const iraqiSchedule = [
         { age: "خلال 24 ساعة الأولى", vaccines: "Hepatitis B (Dose 0)", days: 0 },
         { age: "خلال الأسبوع الأول", vaccines: "BCG, OPV (Dose 0)", days: 7 },
@@ -96,110 +103,36 @@
         { age: "عمر 4-6 سنوات", vaccines: "DPT (Booster 2), OPV (Booster 2), Vit A", days: 1460 }
     ];
 
-    // 4. Fetch Baby Data from Firestore
+    // 3. Listen to Data
     if (babyId) {
         db.collection("babies").doc(babyId).onSnapshot((doc) => {
             if (doc.exists()) {
                 const data = doc.data();
                 document.getElementById('displayBabyName').innerText = data.name;
                 renderSchedule(data.dob, data.completedVaccines || []);
-            } else {
-                alert("لم يتم العثور على بيانات الطفل");
             }
         });
     }
 
+    // 4. Fixed Render Function
     function renderSchedule(dobString, completedList) {
-    const dob = new Date(dobString);
-    const today = new Date(); // Get current date to check for late shots
-    const listContainer = document.getElementById('vaccineList');
-    listContainer.innerHTML = ""; // Clear list
+        const dob = new Date(dobString);
+        const today = new Date();
+        const listContainer = document.getElementById('vaccineList');
+        listContainer.innerHTML = "";
+        
+        let doneCount = 0;
+        let hasMissedAny = false;
+        let isWalking = completedList.includes(6); // MMR at index 6
 
-    let doneCount = 0;
-    let hasMissedAny = false; // Initialize here
-    let isWalking = completedList.includes(6); // MMR (1) at index 6
+        iraqiSchedule.forEach((item, index) => {
+            let targetDate = new Date(dob);
+            targetDate.setDate(targetDate.getDate() + item.days);
+            
+            const isDone = completedList.includes(index);
+            if (isDone) doneCount++;
 
-    iraqiSchedule.forEach((item, index) => {
-        // 1. Calculate target date
-        let targetDate = new Date(dob);
-        targetDate.setDate(targetDate.getDate() + item.days);
+            const isLate = (today > targetDate) && !isDone;
+            if (isLate) hasMissedAny = true;
 
-        // 2. Format date
-        const dateStr = targetDate.toLocaleDateString('ar-EG', {
-            year: 'numeric', month: 'long', day: 'numeric'
-        });
-
-        // 3. Check status
-        const isDone = completedList.includes(index);
-        if (isDone) doneCount++;
-
-        // 4. Check if LATE (Today is past target date and vaccine NOT done)
-        const isLate = (today > targetDate) && !isDone;
-        if (isLate) hasMissedAny = true;
-
-        // 5. Create HTML card
-        const cardHTML = `
-            <div class="vaccine-card ${isDone ? 'done' : (isLate ? 'missed' : '')}">
-                <div class="vaccine-info">
-                    <small>${item.age}</small>
-                    <h4>${item.vaccines}</h4>
-                    <p class="date-tag">${isLate ? '⚠️ متأخر!' : 'الموعد المقرر:'} ${dateStr}</p>
-                </div>
-                <button class="btn-give nurse-only" onclick="markAsDone(${index})">
-                    ${isDone ? '✅ تم' : 'تأكيد 💉'}
-                </button>
-            </div>
-        `;
-        listContainer.innerHTML += cardHTML;
-    });
-
-    // 6. Update progress score
-    const percentage = Math.round((doneCount / iraqiSchedule.length) * 100);
-    document.getElementById('score').innerText = percentage + "%";
-
-    // 7. NOW call the animation after everything is calculated
-    updateBabyAnimation(completedList.length, hasMissedAny, isWalking);
-    }
-  function updateBabyAnimation(count, isCrying, isWalking) {
-    const runner = document.getElementById('baby-runner');
-    const emoji = document.getElementById('baby-emoji');
-    const status = document.getElementById('baby-status');
-    if(!runner) return; // safety check
-
-    runner.style.left = ((count / iraqiSchedule.length) * 90) + "%";
-    runner.className = "";
-
-    if (isCrying) {
-        emoji.innerText = "😭"; status.innerText = "أنا أبكي.. فاتني موعد!";
-        status.style.color = "red"; runner.classList.add("crying");
-    } else if (isWalking) {
-        emoji.innerText = "🚶‍♂️"; status.innerText = "أنا أمشي الآن!";
-        status.style.color = "green"; runner.classList.add("moving");
-    } else {
-        emoji.innerText = "👶"; status.innerText = "أنا أزحف بنشاط";
-        status.style.color = "#2a9d8f"; runner.classList.add("moving");
-    }
-  }
-
-    // 6. Action: Mark Vaccine as Done (For Nurses)
-    function markAsDone(index) {
-        db.collection("babies").doc(babyId).get().then(doc => {
-            let completed = doc.data().completedVaccines || [];
-            if (!completed.includes(index)) {
-                completed.push(index);
-                db.collection("babies").doc(babyId).update({ completedVaccines: completed });
-            }
-        });
-    }
-
-    // 7. Share Link via WhatsApp
-    function shareLink() {
-        const parentLink = window.location.href + "&view=parent";
-        const babyName = document.getElementById('displayBabyName').innerText;
-        const message = `مرحباً، الرابط هذا يتيح لكِ متابعة جدول لقاحات طفلكِ (${babyName}) المحدث: \n ${parentLink}`;
-        window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
-    }
-</script>
-
-</body>
-</html>
+            const dateStr = targetDate.toLocaleDateString('ar-EG', { year:                        
