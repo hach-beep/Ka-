@@ -70,8 +70,9 @@
         <div id="vaccineList"></div>
     </div>
 
-<script>
-    // 1. Firebase Config (Matches your screenshot)
+
+    <script>
+    // 1. Firebase Configuration
     const firebaseConfig = {
         apiKey: "AizasyAX35fTT2-D90QgKQkzgnJCQtcN0S2LWq",
         authDomain: "babyguard-system.firebaseapp.com",
@@ -84,13 +85,14 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
+    // 2. Detect Mode (Nurse vs Parent)
     const urlParams = new URLSearchParams(window.location.search);
     const babyId = urlParams.get('id');
     if (urlParams.get('view') === 'parent') {
         document.body.classList.add('parent-mode');
     }
 
-    // 2. Iraqi Schedule (Matches your screenshot exactly)
+    // 3. Define Official Iraqi Schedule
     const iraqiSchedule = [
         { age: "خلال 24 ساعة الأولى", vaccines: "Hepatitis B (Dose 0)", days: 0 },
         { age: "خلال الأسبوع الأول", vaccines: "BCG, OPV (Dose 0)", days: 7 },
@@ -103,24 +105,26 @@
         { age: "عمر 4-6 سنوات", vaccines: "DPT (Booster 2), OPV (Booster 2), Vit A", days: 1460 }
     ];
 
-    // 3. Listen to Data
+    // 4. Fetch Baby Data
     if (babyId) {
         db.collection("babies").doc(babyId).onSnapshot((doc) => {
             if (doc.exists()) {
                 const data = doc.data();
                 document.getElementById('displayBabyName').innerText = data.name;
                 renderSchedule(data.dob, data.completedVaccines || []);
+            } else {
+                alert("لم يتم العثور على بيانات الطفل");
             }
         });
     }
 
-    // 4. Fixed Render Function
+    // 5. Calculate and Draw Schedule
     function renderSchedule(dobString, completedList) {
         const dob = new Date(dobString);
         const today = new Date();
         const listContainer = document.getElementById('vaccineList');
-        listContainer.innerHTML = "";
-        
+        listContainer.innerHTML = ""; 
+
         let doneCount = 0;
         let hasMissedAny = false;
         let isWalking = completedList.includes(6); // MMR at index 6
@@ -128,16 +132,18 @@
         iraqiSchedule.forEach((item, index) => {
             let targetDate = new Date(dob);
             targetDate.setDate(targetDate.getDate() + item.days);
-            
+
             const isDone = completedList.includes(index);
             if (isDone) doneCount++;
 
             const isLate = (today > targetDate) && !isDone;
             if (isLate) hasMissedAny = true;
 
-            const dateStr = targetDate.toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
+            const dateStr = targetDate.toLocaleDateString('ar-EG', {
+                year: 'numeric', month: 'long', day: 'numeric'
+            });
 
-            listContainer.innerHTML += `
+            const cardHTML = `
                 <div class="vaccine-card ${isDone ? 'done' : (isLate ? 'missed' : '')}">
                     <div class="vaccine-info">
                         <small>${item.age}</small>
@@ -149,16 +155,16 @@
                     </button>
                 </div>
             `;
+            listContainer.innerHTML += cardHTML;
         });
 
         const percentage = Math.round((doneCount / iraqiSchedule.length) * 100);
         document.getElementById('score').innerText = percentage + "%";
-
-        // Move the baby AFTER calculations
+        
+        // MOVED THIS TO THE END
         updateBabyAnimation(completedList.length, hasMissedAny, isWalking);
     }
 
-    // 5. Baby Movement Logic
     function updateBabyAnimation(count, isCrying, isWalking) {
         const runner = document.getElementById('baby-runner');
         const emoji = document.getElementById('baby-emoji');
@@ -192,9 +198,10 @@
 
     function shareLink() {
         const parentLink = window.location.href + "&view=parent";
-        const message = `مرحباً، يمكنكِ متابعة نمو طفلكِ وجدول لقاحاته عبر الرابط: \n ${parentLink}`;
+        const babyName = document.getElementById('displayBabyName').innerText;
+        const message = `مرحباً، الرابط هذا يتيح لكِ متابعة جدول لقاحات طفلكِ (${babyName}): \n ${parentLink}`;
         window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
     }
-</script>
-</body>
+    </script>
+</body>b
 </html>
