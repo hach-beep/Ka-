@@ -4,35 +4,54 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ملف الطفل - BabyGuard</title>
+    
+    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;700&display=swap" rel="stylesheet">
+
     <style>
         :root { --teal: #2a9d8f; --blue: #00b4d8; --bg: #f0f9ff; }
         body { font-family: 'Noto Sans Arabic', sans-serif; background-color: var(--bg); margin: 0; padding: 20px; direction: rtl; }
+        
+        /* Hide nurse elements in parent mode */
         body.parent-mode .nurse-only { display: none !important; }
-        .dash-card { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); max-width: 500px; margin: auto; }
+
+        .dash-card { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); max-width: 500px; margin: auto; }
+        
+        /* Baby Runner Track */
         .baby-track { width: 100%; height: 80px; background: #e0f2f1; border-radius: 40px; position: relative; margin: 20px 0 35px 0; border: 2px dashed #b2dfdb; }
         #baby-runner { position: absolute; bottom: 10px; left: 0%; font-size: 40px; transition: left 1.5s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; align-items: center; z-index: 10; }
         .status-bubble { font-size: 11px; background: white; padding: 2px 8px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 5px; font-weight: bold; white-space: nowrap; }
-        .progress-box { width: 120px; height: 120px; border-radius: 50%; border: 8px solid var(--teal); margin: 20px auto; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .progress-box span { font-size: 1.5rem; font-weight: bold; color: var(--teal); }
-        .vaccine-card { background: #fff; border: 1px solid #eee; border-radius: 12px; padding: 15px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
-        .vaccine-card.done { border-right: 10px solid #90be6d; background-color: #f0fff4; }
-        .vaccine-card.missed { border-right: 10px solid #e76f51; background-color: #fff5f5; }
-        .date-tag { color: #f39c12; font-weight: bold; font-size: 0.9rem; margin: 0; }
-        .btn-give { background-color: #2a9d8f; color: white; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; }
-        .btn-share { background-color: #25D366; color: white; border: none; padding: 15px; width: 100%; border-radius: 10px; margin-bottom: 20px; cursor: pointer; font-weight: bold; }
+
+        /* Animations */
         .moving { animation: bounce 0.6s infinite alternate; }
         @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-5px); } }
         .crying { animation: shake 0.5s infinite; }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+
+        .progress-box { width: 110px; height: 110px; border-radius: 50%; border: 6px solid var(--teal); margin: 20px auto; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .progress-box span { font-size: 1.4rem; font-weight: bold; color: var(--teal); }
+
+        .vaccine-card { background: #fff; border: 1px solid #eee; border-radius: 12px; padding: 15px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+        .vaccine-card.done { border-right: 10px solid #90be6d; background-color: #f0fff4; }
+        .vaccine-card.missed { border-right: 10px solid #e76f51; background-color: #fff5f5; }
+        
+        .vaccine-info h4 { margin: 5px 0; color: #333; font-size: 1rem; }
+        .date-tag { color: #f39c12; font-weight: bold; font-size: 0.8rem; margin: 0; }
+
+        .btn-give { background-color: #2a9d8f; color: white; border: none; padding: 8px 12px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .btn-share { background-color: #25D366; color: white; border: none; padding: 15px; width: 100%; border-radius: 10px; margin-bottom: 20px; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
+
     <div class="dash-card">
         <button class="btn-share nurse-only" onclick="shareLink()">إرسال الرابط للأم عبر واتساب 💬</button>
-        <h1 id="displayBabyName" style="text-align: center;">جاري التحميل...</h1>
+
+        <h1 id="displayBabyName" style="text-align: center; font-size: 1.5rem;">جاري التحميل...</h1>
+        
         <div class="baby-track">
             <div id="baby-runner">
                 <div class="status-bubble" id="baby-status">يتحقق...</div>
@@ -40,121 +59,147 @@
             </div>
             <div style="position: absolute; right: 10px; bottom: 5px; font-size: 20px;">🏁</div>
         </div>
+
         <div class="progress-box">
             <span id="score">0%</span>
             <small>نسبة الحماية</small>
         </div>
-        <h3 style="color: var(--blue); margin-top: 30px;">الجدول الزمني للقاحات 💉</h3>
+
+        <h3 style="color: var(--blue); margin-top: 25px;">الجدول الزمني للقاحات 💉</h3>
         <div id="vaccineList"></div>
     </div>
 
-    <script>
-        const firebaseConfig = {
-            apiKey: "AizasyAX35fTT2-D90QgKQkzgnJCQtcN0S2LWq",
-            authDomain: "babyguard-system.firebaseapp.com",
-            projectId: "babyguard-system",
-            storageBucket: "babyguard-system.appspot.com",
-            messagingSenderId: "892853005967",
-            appId: "1:892853005967:web:868391d8b73a5feabc6b9"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
+<script>
+    // 1. Firebase Config
+    const firebaseConfig = {
+        apiKey: "AizasyAX35fTT2-D90QgKQkzgnJCQtcN0S2LWq",
+        authDomain: "babyguard-system.firebaseapp.com",
+        projectId: "babyguard-system",
+        storageBucket: "babyguard-system.appspot.com",
+        messagingSenderId: "892853005967",
+        appId: "1:892853005967:web:868391d8b73a5feabc6b9"
+    };
 
-        const urlParams = new URLSearchParams(window.location.search);
-        const babyId = urlParams.get('id');
-        if (urlParams.get('view') === 'parent') document.body.classList.add('parent-mode');
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
 
-        const iraqiSchedule = [
-            { age: "خلال 24 ساعة الأولى", vaccines: "Hepatitis B (Dose 0)", days: 0 },
-            { age: "خلال الأسبوع الأول", vaccines: "BCG, OPV (Dose 0)", days: 7 },
-            { age: "عمر شهرين", vaccines: "Penta (1), OPV (1), Pneumococcal (1), Rota (1)", days: 60 },
-            { age: "عمر 4 أشهر", vaccines: "Penta (2), OPV (2), Pneumococcal (2), Rota (2), IPV (1)", days: 120 },
-            { age: "عمر 6 أشهر", vaccines: "Penta (3), OPV (3), Pneumococcal (3), Rota (3), IPV (2)", days: 180 },
-            { age: "عمر 9 أشهر", vaccines: "Measles, Vitamin A (100,000 IU)", days: 270 },
-            { age: "عمر 12 شهر", vaccines: "MMR (Dose 1)", days: 365 },
-            { age: "عمر 18 شهر", vaccines: "DPT (Booster 1), OPV (Booster 1), MMR (2), Vit A", days: 545 },
-            { age: "عمر 4-6 سنوات", vaccines: "DPT (Booster 2), OPV (Booster 2), Vit A", days: 1460 }
-        ];
+    const urlParams = new URLSearchParams(window.location.search);
+    const babyId = urlParams.get('id');
+    if (urlParams.get('view') === 'parent') {
+        document.body.classList.add('parent-mode');
+    }
 
-        if (babyId) {
-            db.collection("babies").doc(babyId).onSnapshot((doc) => {
-                if (doc.exists()) {
-                    const data = doc.data();
-                    document.getElementById('displayBabyName').innerText = data.name;
-                    renderSchedule(data.dob, data.completedVaccines || []);
-                }
-            });
-        }
+    // 2. Iraqi Schedule (Same as your picture)
+    const iraqiSchedule = [
+        { age: "خلال 24 ساعة الأولى", vaccines: "Hepatitis B (Dose 0)", days: 0 },
+        { age: "خلال الأسبوع الأول", vaccines: "BCG, OPV (Dose 0)", days: 7 },
+        { age: "عمر شهرين", vaccines: "Penta (1), OPV (1), Pneumococcal (1), Rota (1)", days: 60 },
+        { age: "عمر 4 أشهر", vaccines: "Penta (2), OPV (2), Pneumococcal (2), Rota (2), IPV (1)", days: 120 },
+        { age: "عمر 6 أشهر", vaccines: "Penta (3), OPV (3), Pneumococcal (3), Rota (3), IPV (2)", days: 180 },
+        { age: "عمر 9 أشهر", vaccines: "Measles, Vitamin A (100,000 IU)", days: 270 },
+        { age: "عمر 12 شهر", vaccines: "MMR (Dose 1)", days: 365 },
+        { age: "عمر 18 شهر", vaccines: "DPT (Booster 1), OPV (Booster 1), MMR (2), Vit A", days: 545 },
+        { age: "عمر 4-6 سنوات", vaccines: "DPT (Booster 2), OPV (Booster 2), Vit A", days: 1460 }
+    ];
 
-        function renderSchedule(dobString, completedList) {
-            const dob = new Date(dobString);
-            const today = new Date();
-            const listContainer = document.getElementById('vaccineList');
-            listContainer.innerHTML = "";
-            
-            let doneCount = 0;
-            let hasMissedAny = false;
-            let isWalking = completedList.includes(6);
-
-            iraqiSchedule.forEach((item, index) => {
-                let targetDate = new Date(dob);
-                targetDate.setDate(targetDate.getDate() + item.days);
-                const isDone = completedList.includes(index);
-                if (isDone) doneCount++;
-                const isLate = (today > targetDate) && !isDone;
-                if (isLate) hasMissedAny = true;
-
-                const dateStr = targetDate.toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
-                listContainer.innerHTML += `
-                    <div class="vaccine-card ${isDone ? 'done' : (isLate ? 'missed' : '')}">
-                        <div class="vaccine-info">
-                            <small>${item.age}</small>
-                            <h4>${item.vaccines}</h4>
-                            <p class="date-tag">${isLate ? '⚠️ متأخر!' : 'الموعد المقرر:'} ${dateStr}</p>
-                        </div>
-                        <button class="btn-give nurse-only" onclick="markAsDone(${index})">
-                            ${isDone ? '✅ تم' : 'تأكيد 💉'}
-                        </button>
-                    </div>`;
-            });
-
-            document.getElementById('score').innerText = Math.round((doneCount / iraqiSchedule.length) * 100) + "%";
-            updateBabyAnimation(completedList.length, hasMissedAny, isWalking);
-        }
-
-        function updateBabyAnimation(count, isCrying, isWalking) {
-            const runner = document.getElementById('baby-runner');
-            const emoji = document.getElementById('baby-emoji');
-            const status = document.getElementById('baby-status');
-            runner.style.left = ((count / iraqiSchedule.length) * 90) + "%";
-            runner.className = "";
-            if (isCrying) {
-                emoji.innerText = "😭"; status.innerText = "أنا أبكي.. فاتني موعد!";
-                status.style.color = "red"; runner.classList.add("crying");
-            } else if (isWalking) {
-                emoji.innerText = "🚶‍♂️"; status.innerText = "أنا أمشي الآن!";
-                status.style.color = "green"; runner.classList.add("moving");
+    // 3. Real-time Connection
+    if (babyId) {
+        db.collection("babies").doc(babyId).onSnapshot((doc) => {
+            if (doc.exists()) {
+                const data = doc.data();
+                document.getElementById('displayBabyName').innerText = data.name;
+                renderDashboard(data.dob, data.completedVaccines || []);
             } else {
-                emoji.innerText = "👶"; status.innerText = "أنا أزحف بنشاط";
-                status.style.color = "#2a9d8f"; runner.classList.add("moving");
+                alert("لم يتم العثور على ملف الطفل");
             }
-        }
+        });
+    }
 
-        function markAsDone(index) {
-            db.collection("babies").doc(babyId).get().then(doc => {
-                let completed = doc.data().completedVaccines || [];
-                if (!completed.includes(index)) {
-                    completed.push(index);
-                    db.collection("babies").doc(babyId).update({ completedVaccines: completed });
-                }
-            });
-        }
+    // 4. Main Function to draw the page
+    function renderDashboard(dobString, completedList) {
+        const dob = new Date(dobString);
+        const today = new Date();
+        const listContainer = document.getElementById('vaccineList');
+        listContainer.innerHTML = ""; 
+        
+        let doneCount = 0;
+        let isLateGlobal = false;
+        let isWalking = completedList.includes(6); // MMR Dose (Index 6)
 
-        function shareLink() {
-            const parentLink = window.location.href + "&view=parent";
-            const message = `مرحباً، يمكنكِ متابعة نمو طفلكِ وجدول لقاحاته عبر الرابط: \n ${parentLink}`;
-            window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
+        iraqiSchedule.forEach((item, index) => {
+            let targetDate = new Date(dob);
+            targetDate.setDate(targetDate.getDate() + item.days);
+            
+            const isDone = completedList.includes(index);
+            if (isDone) doneCount++;
+
+            const isLate = (today > targetDate) && !isDone;
+            if (isLate) isLateGlobal = true;
+
+            const dateStr = targetDate.toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
+
+            listContainer.innerHTML += `
+                <div class="vaccine-card ${isDone ? 'done' : (isLate ? 'missed' : '')}">
+                    <div class="vaccine-info">
+                        <small style="color:var(--teal); font-weight:bold;">${item.age}</small>
+                        <h4>${item.vaccines}</h4>
+                        <p class="date-tag">${isLate ? '⚠️ متأخر!' : 'الموعد المقرر:'} ${dateStr}</p>
+                    </div>
+                    <button class="btn-give nurse-only" onclick="markAsDone(${index})">
+                        ${isDone ? '✅ تم' : 'تأكيد 💉'}
+                    </button>
+                </div>
+            `;
+        });
+
+        // Update Score
+        const percentage = Math.round((doneCount / iraqiSchedule.length) * 100);
+        document.getElementById('score').innerText = percentage + "%";
+
+        // Update Baby Animation
+        animateBaby(completedList.length, isLateGlobal, isWalking);
+    }
+
+    // 5. Animation Logic
+    function animateBaby(count, crying, walking) {
+        const runner = document.getElementById('baby-runner');
+        const emoji = document.getElementById('baby-emoji');
+        const status = document.getElementById('baby-status');
+        if(!runner) return;
+
+        runner.style.left = ((count / iraqiSchedule.length) * 90) + "%";
+        runner.className = "";
+
+        if (crying) {
+            emoji.innerText = "😭"; status.innerText = "أنا أبكي.. فاتني موعد!";
+            status.style.color = "red"; runner.classList.add("crying");
+        } else if (walking) {
+            emoji.innerText = "🚶‍♂️"; status.innerText = "أنا أمشي الآن!";
+            status.style.color = "green"; runner.classList.add("moving");
+        } else {
+            emoji.innerText = "👶"; status.innerText = "أنا أزحف بنشاط";
+            status.style.color = "#2a9d8f"; runner.classList.add("moving");
         }
-    </script>
+    }
+
+    // 6. Nurse Function
+    function markAsDone(index) {
+        db.collection("babies").doc(babyId).get().then(doc => {
+            let completed = doc.data().completedVaccines || [];
+            if (!completed.includes(index)) {
+                completed.push(index);
+                db.collection("babies").doc(babyId).update({ completedVaccines: completed });
+            }
+        });
+    }
+
+    // 7. Share Function
+    function shareLink() {
+        const parentLink = window.location.href + "&view=parent";
+        const msg = `مرحباً، يمكنكِ متابعة نمو طفلكِ وجدول لقاحاته عبر الرابط: \n ${parentLink}`;
+        window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+    }
+</script>
 </body>
 </html>
+                
