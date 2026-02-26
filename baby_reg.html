@@ -2,64 +2,49 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>Baby Guard - تسجيل مراجع جديد</title>
+    <title>تسجيل طفل جديد - BabyGuard</title>
     <style>
-        body { background-color: #f0f9ff; font-family: 'Segoe UI', Tahoma, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .reg-card { background-color: white; padding: 40px; border-radius: 30px; box-shadow: 0 15px 35px rgba(0,0,0,0.05); width: 90%; max-width: 400px; text-align: center; }
-        label { display: block; text-align: right; margin-bottom: 8px; font-weight: bold; color: #005f8d; }
-        input { width: 100%; padding: 12px; margin-bottom: 20px; border: 1px solid #e2e8f0; border-radius: 12px; box-sizing: border-box; font-size: 1rem; }
-        button { background-color: #2a9d8f; color: white; border: none; padding: 15px; width: 100%; border-radius: 12px; font-weight: bold; font-size: 1.1rem; cursor: pointer; transition: 0.3s; }
-        button:hover { background-color: #21867a; transform: translateY(-3px); }
+        body { background: #f0f9ff; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 350px; text-align: center; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        button { width: 100%; padding: 15px; background: #2a9d8f; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
-    <div class="reg-card">
-        <h1>تسجيل مراجع جديد</h1>
-        <label>اسم الطفل الثلاثي:</label>
-        <input type="text" id="babyName" placeholder="ادخل اسم الطفل">
-        <label>تاريخ الولادة:</label>
-        <input type="date" id="babyDob">
-        <label>رقم هاتف الأم:</label>
-        <input type="tel" id="momPhone" placeholder="0770...">
-        <button onclick="registerBaby()">حفظ البيانات</button>
+    <div class="card">
+        <h2>تسجيل طفل جديد</h2>
+        <input type="text" id="name" placeholder="اسم الطفل الثلاثي">
+        <input type="date" id="dob">
+        <input type="tel" id="phone" placeholder="رقم هاتف الأم">
+        <button onclick="saveBaby()">حفظ وفتح الملف</button>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-
     <script>
-    const firebaseConfig = {
-        apiKey: "AizasyAX35fTT2-D90QgKQkzgnJCQtcN0S2LWq",
-        authDomain: "babyguard-system.firebaseapp.com",
-        projectId: "babyguard-system",
-        storageBucket: "babyguard-system.appspot.com",
-        messagingSenderId: "834481617596", 
-        appId: "1:834481617596:web:868391d8b73a5feabc6b9" 
-    };
+        const firebaseConfig = {
+            apiKey: "AizasyAX35fTT2-D90QgKQkzgnJCQtcN0S2LWq",
+            authDomain: "babyguard-system.firebaseapp.com",
+            projectId: "babyguard-system",
+            storageBucket: "babyguard-system.appspot.com",
+            messagingSenderId: "834481617596",
+            appId: "1:834481617596:web:868391d8b73a5feabc6b9"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
+        function saveBaby() {
+            const n = document.getElementById('name').value;
+            const d = document.getElementById('dob').value;
+            const p = document.getElementById('phone').value;
+            if(!n || !d) return alert("يرجى ملئ البيانات");
 
-    function registerBaby() {
-        const name = document.getElementById('babyName').value.trim();
-        const dob = document.getElementById('babyDob').value;
-        const phone = document.getElementById('momPhone').value;
-
-        if (!name || !dob) { alert("أكمل البيانات!"); return; }
-
-        db.collection("babies").add({
-            name: name,
-            dob: dob,
-            momPhone: phone,
-            completedVaccines: [0], 
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        })
-        .then((docRef) => {
-            // Redirect using both ID and Name
-            window.location.href = `baby_dash.html?id=${docRef.id}&name=${encodeURIComponent(name)}`;
-        })
-        .catch(err => alert("Error: " + err.message));
-    }
-</script>
+            db.collection("babies").add({
+                name: n, dob: d, phone: p, completed: [0]
+            }).then(doc => {
+                window.location.href = "baby_dash.html?id=" + doc.id;
+            }).catch(err => alert("Error: " + err.message));
+        }
+    </script>
 </body>
 </html>
