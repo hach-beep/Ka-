@@ -44,7 +44,6 @@
     </div>
 
 <script>
-    // 1. Firebase Config (Exactly from your registration page)
     const firebaseConfig = {
         apiKey: "AizasyAX35fTT2-D90QgKQkzgnJCQtcN0S2LWq",
         authDomain: "babyguard-system.firebaseapp.com",
@@ -57,10 +56,9 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // 2. Setup Variables
     const urlParams = new URLSearchParams(window.location.search);
-    let babyId = urlParams.get('id');
-    const babyNameSearch = urlParams.get('name'); // Support for name links
+    const bId = urlParams.get('id');
+    const bName = urlParams.get('name') ? decodeURIComponent(urlParams.get('name')) : null;
 
     if (urlParams.get('view') === 'parent') document.body.classList.add('parent-mode');
 
@@ -76,26 +74,24 @@
         { age: "4-6 سنوات", vaccines: "DPT B2, OPV B2", days: 1460 }
     ];
 
-    // 3. Finding the Baby
-    if (babyId) {
-        // Option A: Link has ?id=...
-        db.collection("babies").doc(babyId).onSnapshot(doc => {
+    // THE SMART SEARCH LOGIC
+    if (bId) {
+        db.collection("babies").doc(bId).onSnapshot(doc => {
             if (doc.exists()) startApp(doc);
-            else document.getElementById('displayBabyName').innerText = "ID خطأ";
+            else tryByName(); // Fallback if ID fails
         });
-    } else if (babyNameSearch) {
-        // Option B: Link has ?name=Adam Abdullah
-        db.collection("babies").where("name", "==", babyNameSearch).onSnapshot(snap => {
-            if (!snap.empty) {
-                const doc = snap.docs[0];
-                babyId = doc.id; // Get the real ID for the buttons
-                startApp(doc);
-            } else {
-                document.getElementById('displayBabyName').innerText = "الاسم غير موجود";
-            }
-        });
+    } else if (bName) {
+        tryByName();
     } else {
         document.getElementById('displayBabyName').innerText = "أدخل ID أو اسم الطفل";
+    }
+
+    function tryByName() {
+        if (!bName) return;
+        db.collection("babies").where("name", "==", bName).onSnapshot(snap => {
+            if (!snap.empty) startApp(snap.docs[0]);
+            else document.getElementById('displayBabyName').innerText = "الاسم غير موجود";
+        });
     }
 
     function startApp(doc) {
@@ -130,7 +126,7 @@
                         <h4 style="margin:5px 0;">${item.vaccines}</h4>
                         <p class="date-tag">${late ? '⚠️ متأخر!' : 'الموعد:'} ${dateLabel}</p>
                     </div>
-                    <button class="btn-give nurse-only" onclick="markDone(${index})">${done ? '✅' : 'تأكيد'}</button>
+                    <button class="btn-give nurse-only" onclick="markDone('${doc.id}', ${index})">${done ? '✅' : 'تأكيد'}</button>
                 </div>`;
         });
 
@@ -142,7 +138,6 @@
         const runner = document.getElementById('baby-runner');
         const emoji = document.getElementById('baby-emoji');
         const status = document.getElementById('baby-status');
-        
         runner.style.left = ((count / iraqiSchedule.length) * 90) + "%";
         runner.className = "";
         if (crying) {
@@ -154,12 +149,12 @@
         }
     }
 
-    function markDone(idx) {
-        db.collection("babies").doc(babyId).get().then(doc => {
+    function markDone(id, idx) {
+        db.collection("babies").doc(id).get().then(doc => {
             let list = doc.data().completedVaccines || [];
             if (!list.includes(idx)) {
                 list.push(idx);
-                db.collection("babies").doc(babyId).update({ completedVaccines: list });
+                db.collection("babies").doc(id).update({ completedVaccines: list });
             }
         });
     }
@@ -167,7 +162,7 @@
     function shareLink() {
         const name = document.getElementById('displayBabyName').innerText;
         const link = window.location.origin + window.location.pathname + "?name=" + encodeURIComponent(name) + "&view=parent";
-        window.open("https://wa.me/?text=" + encodeURIComponent("متابعة طفلك " + name + ": " + link), '_blank');
+        window.open("https://wa.me/?text=" + encodeURIComponent("متابعة طفلك: " + link), '_blank');
     }
 </script>
 </body>
