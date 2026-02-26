@@ -33,7 +33,7 @@
 
     <header>
         <div style="font-weight: 900; font-size: 1.4rem;">سجل التلقيحات المركزي</div>
-        <button onclick="location.href='index.html'" style="background:none; border:1px solid white; color:white; padding:5px 15px; border-radius:8px; cursor:pointer;">Home</button>
+        <button onclick="location.href='babyindex.html'" style="background:none; border:1px solid white; color:white; padding:5px 15px; border-radius:8px; cursor:pointer;">Home</button>
     </header>
 
     <div class="container">
@@ -124,7 +124,8 @@
         }
 
         function sendReminder(phone, babyName, vaccine) {
-            const msg = `Dear Mother, this is a reminder from the Health Center. Your child (${babyName}) has missed their scheduled (${vaccine}) vaccination. Please visit us as soon as possible for their safety.`;
+            
+          const msg = `نذكركم من المركز الصحي بضرورة مراجعة المركز لتلقيح طفلكم (${babyName}) بلقاح (${vaccine}) المتأخر. يرجى الحضور في أقرب وقت لضمان سلامة طفلكم.`;
             window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
         }
 
