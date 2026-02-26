@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سجل اللقاحات - BabyGuard</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;700&display=swap');
+        :root { --teal: #2a9d8f; --blue: #00b4d8; --bg: #f0f9ff; }
+        body { font-family: 'Noto Sans Arabic', sans-serif; background-color: var(--bg); direction: rtl; padding: 20px; }
+        .container { max-width: 500px; margin: 0 auto; }
+        .baby-card { background: white; padding: 30px; border-radius: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); text-align: center; margin-bottom: 20px; }
+        .circle { width: 100px; height: 100px; border-radius: 50%; border: 6px solid var(--teal); margin: 15px auto; display: flex; align-items: center; justify-content: center; font-weight: bold; color: var(--teal); font-size: 1.2rem; }
+        .vaccine-item { background: white; padding: 15px; border-radius: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #e2e8f0; }
+        .vaccine-item.done { border-right: 6px solid var(--teal); background: #f0fff4; }
+        .btn-check { background: var(--teal); color: white; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .parent-mode .nurse-only { display: none !important; }
+    </style>
+</head>
+<body id="mainBody">
+    <div class="container">
+        <div class="baby-card">
+            <h1 id="babyName">جاري التحميل...</h1>
+            <div class="circle" id="percent">0%</div>
+            <p style="color:#64748b;">نسبة الحماية المكتملة</p>
+            <button class="nurse-only" onclick="shareWithMom()" style="background:#25D366; color:white; border:none; padding:10px; border-radius:10px; width:100%; font-weight:bold; margin-top:10px;">إرسال الرابط للأم 💬</button>
+        </div>
+        <div id="list"></div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyAX35fTT2-D9OQgKQkzgNJCQTtcN0S2LwQ",
+            authDomain: "babyguard-system.firebaseapp.com",
+            projectId: "babyguard-system",
+            storageBucket: "babyguard-system.firebasestorage.app",
+            messagingSenderId: "892853005967",
+            appId: "1:892853005967:web:1a5fb182c073eba1ee0afa"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        const params = new URLSearchParams(window.location.search);
+        const id = params.get('id');
+        if(params.get('view') === 'parent') document.body.classList.add('parent-mode');
+
+        const schedule = [
+            { name: "Hepatitis B (0)", days: 0 },
+            { name: "BCG, OPV (0)", days: 7 },
+            { name: "Penta 1, Rota 1, PCV 1", days: 60 },
+            { name: "Penta 2, Rota 2, PCV 2, IPV 1", days: 120 },
+            { name: "Penta 3, Rota 3, PCV 3, IPV 2", days: 180 },
+            { name: "Measles, Vit A", days: 270 },
+            { name: "MMR (1)", days: 365 },
+            { name: "DPT B1, OPV B1, MMR 2", days: 545 }
+        ];
+
+        if(id) {
+            db.collection("babies").doc(id).onSnapshot(doc => {
+                const data = doc.data();
+                document.getElementById('babyName').innerText = data.name;
+                const doneList = data.completed || [];
+                renderList(data.dob, doneList);
+                const progress = Math.round((doneList.length / schedule.length) * 100);
+                document.getElementById('percent').innerText = progress + "%";
+            });
+        }
+
+        function renderList(dobStr, doneList) {
+            const listDiv = document.getElementById('list');
+            listDiv.innerHTML = "";
+            const dob = new Date(dobStr);
+
+            schedule.forEach((item, index) => {
+                const target = new Date(dob);
+                target.setDate(target.getDate() + item.days);
+                const isDone = doneList.includes(index);
+
+                listDiv.innerHTML += `
+                    <div class="vaccine-item ${isDone ? 'done' : ''}">
+                        <div>
+                            <strong>${item.name}</strong><br>
+                            <small>${isDone ? '✅ تم التلقيح' : '⏳ الموعد: ' + target.toLocaleDateString('ar-EG')}</small>
+                        </div>
+                        <button class="btn-check nurse-only" onclick="markDone(${index})" ${isDone ? 'disabled' : ''}>${isDone ? 'تم' : 'تأكيد 💉'}</button>
+                    </div>`;
+            });
+        }
+
+        function markDone(index) {
+            db.collection("babies").doc(id).update({
+                completed: firebase.firestore.FieldValue.arrayUnion(index)
+            });
+        }
+
+        function shareWithMom() {
+            const url = window.location.href + "&view=parent";
+            window.open(`https://wa.me/?text=${encodeURIComponent("رابط متابعة لقاحات طفلك: " + url)}`);
+        }
+    </script>
+</body>
+</html>
