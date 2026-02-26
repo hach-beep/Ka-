@@ -28,42 +28,38 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 
     <script>
-        const firebaseConfig = {
-            apiKey: "AizasyAX35fTT2-D90QgKQkzgnJCQtcN0S2LWq",
-            authDomain: "babyguard-system.firebaseapp.com",
-            projectId: "babyguard-system",
-            storageBucket: "babyguard-system.appspot.com",
-            messagingSenderId: "892853005967",
-            appId: "1:892853005967:web:868391d8b73a5feabc6b9"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
+    const firebaseConfig = {
+        apiKey: "AizasyAX35fTT2-D90QgKQkzgnJCQtcN0S2LWq",
+        authDomain: "babyguard-system.firebaseapp.com",
+        projectId: "babyguard-system",
+        storageBucket: "babyguard-system.appspot.com",
+        messagingSenderId: "834481617596", 
+        appId: "1:834481617596:web:868391d8b73a5feabc6b9" 
+    };
 
-        function registerBaby() {
-            const name = document.getElementById('babyName').value;
-            const dob = document.getElementById('babyDob').value;
-            const phone = document.getElementById('momPhone').value;
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
 
-            if (!name || !dob || !phone) {
-                alert("يرجى إكمال جميع الحقول");
-                return;
-            }
+    function registerBaby() {
+        const name = document.getElementById('babyName').value.trim();
+        const dob = document.getElementById('babyDob').value;
+        const phone = document.getElementById('momPhone').value;
 
-            db.collection("babies").add({
-                name: name,
-                dob: dob,
-                momPhone: phone,
-                completedVaccines: [0],
-                timestamp: firebase.firestore.FieldValue.serverTimestamp()
-            })
-            .then((docRef) => {
-                // Fixed: Using backticks for the ID
-                window.location.href = `baby_dash.html?id=${docRef.id}`;
-            })
-            .catch((error) => {
-                alert("خطأ: " + error.message);
-            });
-        }
-    </script>
+        if (!name || !dob) { alert("أكمل البيانات!"); return; }
+
+        db.collection("babies").add({
+            name: name,
+            dob: dob,
+            momPhone: phone,
+            completedVaccines: [0], 
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        })
+        .then((docRef) => {
+            // Redirect using both ID and Name
+            window.location.href = `baby_dash.html?id=${docRef.id}&name=${encodeURIComponent(name)}`;
+        })
+        .catch(err => alert("Error: " + err.message));
+    }
+</script>
 </body>
 </html>
