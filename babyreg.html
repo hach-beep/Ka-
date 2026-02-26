@@ -43,7 +43,7 @@
 
             document.getElementById('regBtn').innerText = "جاري الحفظ...";
             db.collection("babies").add({ name: n, dob: d, phone: p, completed: [] })
-            .then(docRef => { window.location.href = `baby_dash.html?id=${docRef.id}`; });
+            .then(docRef => { window.location.href = `babydash.html?id=${docRef.id}`; });
         }
     </script>
 </body>
