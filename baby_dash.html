@@ -4,13 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ملف الطفل - BabyGuard</title>
-    
-    <!-- Load Firebase -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;700&display=swap" rel="stylesheet">
-
     <style>
         :root { --teal: #2a9d8f; --blue: #00b4d8; --bg: #f0f9ff; }
         body { font-family: 'Noto Sans Arabic', sans-serif; background-color: var(--bg); margin: 0; padding: 20px; direction: rtl; }
@@ -32,11 +28,9 @@
     </style>
 </head>
 <body>
-
     <div class="dash-card">
         <button class="btn-share nurse-only" onclick="shareLink()">إرسال الرابط للأم عبر واتساب 💬</button>
         <h1 id="displayBabyName" style="text-align: center;">جاري التحميل...</h1>
-        
         <div class="baby-track">
             <div id="baby-runner">
                 <div class="status-bubble" id="baby-status">يتحقق...</div>
@@ -44,18 +38,13 @@
             </div>
             <div style="position: absolute; right: 10px; bottom: 5px; font-size: 20px;">🏁</div>
         </div>
-
-        <div class="progress-box">
-            <span id="score">0%</span>
-            <small>نسبة الحماية</small>
-        </div>
-
+        <div class="progress-box"><span id="score">0%</span><small>حماية</small></div>
         <h3 style="color: var(--blue); margin-top: 30px;">الجدول الزمني للقاحات 💉</h3>
         <div id="vaccineList"></div>
     </div>
 
 <script>
-    // 1. Firebase Configuration (Matches your working registration file)
+    // 1. Firebase Config (Exactly from your registration page)
     const firebaseConfig = {
         apiKey: "AizasyAX35fTT2-D90QgKQkzgnJCQtcN0S2LWq",
         authDomain: "babyguard-system.firebaseapp.com",
@@ -68,8 +57,11 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
+    // 2. Setup Variables
     const urlParams = new URLSearchParams(window.location.search);
-    const babyId = urlParams.get('id');
+    let babyId = urlParams.get('id');
+    const babyNameSearch = urlParams.get('name'); // Support for name links
+
     if (urlParams.get('view') === 'parent') document.body.classList.add('parent-mode');
 
     const iraqiSchedule = [
@@ -84,40 +76,53 @@
         { age: "4-6 سنوات", vaccines: "DPT B2, OPV B2", days: 1460 }
     ];
 
+    // 3. Finding the Baby
     if (babyId) {
-        db.collection("babies").doc(babyId).onSnapshot(function(doc) {
-            if (doc.exists()) {
-                const data = doc.data();
-                document.getElementById('displayBabyName').innerText = data.name;
-                renderPage(data.dob, data.completedVaccines || []);
+        // Option A: Link has ?id=...
+        db.collection("babies").doc(babyId).onSnapshot(doc => {
+            if (doc.exists()) startApp(doc);
+            else document.getElementById('displayBabyName').innerText = "ID خطأ";
+        });
+    } else if (babyNameSearch) {
+        // Option B: Link has ?name=Adam Abdullah
+        db.collection("babies").where("name", "==", babyNameSearch).onSnapshot(snap => {
+            if (!snap.empty) {
+                const doc = snap.docs[0];
+                babyId = doc.id; // Get the real ID for the buttons
+                startApp(doc);
             } else {
-                document.getElementById('displayBabyName').innerText = "الملف غير موجود";
+                document.getElementById('displayBabyName').innerText = "الاسم غير موجود";
             }
         });
+    } else {
+        document.getElementById('displayBabyName').innerText = "أدخل ID أو اسم الطفل";
     }
 
-    function renderPage(dobString, completedList) {
+    function startApp(doc) {
+        const data = doc.data();
+        document.getElementById('displayBabyName').innerText = data.name;
+        renderDashboard(data.dob, data.completedVaccines || []);
+    }
+
+    function renderDashboard(dobString, completedList) {
         const dob = new Date(dobString);
         const today = new Date();
         const listDiv = document.getElementById('vaccineList');
         listDiv.innerHTML = "";
         
         let doneCount = 0;
-        let hasMissedAny = false;
-        let isWalking = completedList.includes(6); // MMR Index
+        let isLateAny = false;
+        let walkingReady = completedList.includes(6);
 
-        iraqiSchedule.forEach(function(item, index) {
+        iraqiSchedule.forEach((item, index) => {
             let target = new Date(dob);
             target.setDate(target.getDate() + item.days);
-            
             const done = completedList.includes(index);
             if (done) doneCount++;
-
             const late = (today > target) && !done;
-            if (late) hasMissedAny = true;
+            if (late) isLateAny = true;
 
             const dateLabel = target.toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
-
             listDiv.innerHTML += `
                 <div class="vaccine-card ${done ? 'done' : (late ? 'missed' : '')}">
                     <div>
@@ -125,26 +130,21 @@
                         <h4 style="margin:5px 0;">${item.vaccines}</h4>
                         <p class="date-tag">${late ? '⚠️ متأخر!' : 'الموعد:'} ${dateLabel}</p>
                     </div>
-                    <button class="btn-give nurse-only" onclick="updateVaccine(${index})">
-                        ${done ? '✅' : 'تأكيد'}
-                    </button>
+                    <button class="btn-give nurse-only" onclick="markDone(${index})">${done ? '✅' : 'تأكيد'}</button>
                 </div>`;
         });
 
         document.getElementById('score').innerText = Math.round((doneCount / iraqiSchedule.length) * 100) + "%";
-        
-        // MOVED TO END TO PREVENT CRASH
-        updateBabyUI(completedList.length, hasMissedAny, isWalking);
+        updateBaby(completedList.length, isLateAny, walkingReady);
     }
 
-    function updateBabyUI(count, crying, walking) {
+    function updateBaby(count, crying, walking) {
         const runner = document.getElementById('baby-runner');
         const emoji = document.getElementById('baby-emoji');
         const status = document.getElementById('baby-status');
         
         runner.style.left = ((count / iraqiSchedule.length) * 90) + "%";
         runner.className = "";
-
         if (crying) {
             emoji.innerText = "😭"; status.innerText = "أنا أبكي!"; runner.classList.add("crying");
         } else if (walking) {
@@ -154,8 +154,8 @@
         }
     }
 
-    function updateVaccine(idx) {
-        db.collection("babies").doc(babyId).get().then(function(doc) {
+    function markDone(idx) {
+        db.collection("babies").doc(babyId).get().then(doc => {
             let list = doc.data().completedVaccines || [];
             if (!list.includes(idx)) {
                 list.push(idx);
@@ -165,8 +165,9 @@
     }
 
     function shareLink() {
-        const link = window.location.href + "&view=parent";
-        window.open("https://wa.me/?text=" + encodeURIComponent("متابعة طفلك: " + link), '_blank');
+        const name = document.getElementById('displayBabyName').innerText;
+        const link = window.location.origin + window.location.pathname + "?name=" + encodeURIComponent(name) + "&view=parent";
+        window.open("https://wa.me/?text=" + encodeURIComponent("متابعة طفلك " + name + ": " + link), '_blank');
     }
 </script>
 </body>
