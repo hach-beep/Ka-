@@ -7,16 +7,77 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;700&display=swap');
-        :root { --teal: #2a9d8f; --blue: #00b4d8; --bg: #f0f9ff; }
-        body { font-family: 'Noto Sans Arabic', sans-serif; background-color: var(--bg); direction: rtl; padding: 20px; }
-        .container { max-width: 500px; margin: 0 auto; }
-        .baby-card { background: white; padding: 30px; border-radius: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); text-align: center; margin-bottom: 20px; }
-        .circle { width: 100px; height: 100px; border-radius: 50%; border: 6px solid var(--teal); margin: 15px auto; display: flex; align-items: center; justify-content: center; font-weight: bold; color: var(--teal); font-size: 1.2rem; }
-        .vaccine-item { background: white; padding: 15px; border-radius: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #e2e8f0; }
-        .vaccine-item.done { border-right: 6px solid var(--teal); background: #f0fff4; }
-        .btn-check { background: var(--teal); color: white; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; }
-        .parent-mode .nurse-only { display: none !important; }
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;500;800&display=swap');
+
+    :root {
+        --teal: #2a9d8f;
+        --blue: #00b4d8;
+        --bg: #f8fafc;
+        --white: #ffffff;
+        --shadow: 0 10px 30px rgba(0,0,0,0.04);
+    }
+
+    body { 
+        font-family: 'Noto Sans Arabic', sans-serif; 
+        margin: 0; background-color: var(--bg); direction: rtl; 
+        color: #1e293b; padding-bottom: 40px;
+    }
+
+    .container { max-width: 500px; margin: 0 auto; padding: 20px; }
+
+    /* --- THE HERO CARD (Glassmorphism) --- */
+    .baby-card { 
+        background: linear-gradient(135deg, #2a9d8f 0%, #00b4d8 100%);
+        padding: 40px 20px; border-radius: 35px; 
+        text-align: center; margin-bottom: 30px; color: white;
+        box-shadow: 0 20px 40px rgba(42, 157, 143, 0.2);
+    }
+
+    /* The Progress Ring */
+    .circle { 
+        width: 110px; height: 110px; border-radius: 50%; 
+        border: 6px solid rgba(255,255,255,0.3);
+        margin: 0 auto 15px auto; display: flex; 
+        align-items: center; justify-content: center; 
+        font-weight: 800; font-size: 1.5rem;
+        background: rgba(255,255,255,0.1);
+        backdrop-filter: blur(5px); /* Frosted glass effect */
+    }
+
+    /* --- VACCINE ITEMS --- */
+    .vaccine-item { 
+        background: var(--white); padding: 20px; border-radius: 24px; 
+        margin-bottom: 15px; display: flex; justify-content: space-between; 
+        align-items: center; box-shadow: var(--shadow);
+        border: 1px solid rgba(0,0,0,0.02);
+        transition: 0.3s ease;
+    }
+
+    .vaccine-item.done { 
+        background: #f0fff4; border-right: 8px solid #90be6d; 
+    }
+
+    .vaccine-info strong { font-size: 1rem; color: #334155; }
+    .vaccine-info small { color: #64748b; font-size: 0.8rem; display: block; margin-top: 4px; }
+
+    /* --- BUTTONS --- */
+    .btn-check { 
+        background-color: var(--teal); color: white; border: none; 
+        padding: 12px 20px; border-radius: 14px; font-weight: 700; 
+        cursor: pointer; transition: 0.2s;
+    }
+
+    .btn-check:active { transform: scale(0.95); }
+
+    .share-btn {
+        background: #25D366; color: white; border: none;
+        padding: 18px; border-radius: 20px; width: 100%;
+        font-weight: 800; font-size: 1.1rem; margin-top: 20px;
+        box-shadow: 0 10px 20px rgba(37, 211, 102, 0.2);
+    }
+
+    /* Parent Mode Invisibility */
+    .parent-mode .nurse-only { display: none !important; }
     </style>
 </head>
 <body id="mainBody">
