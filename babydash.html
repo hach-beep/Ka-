@@ -79,26 +79,28 @@
                 const isDone = doneList.includes(index);
 
                 listDiv.innerHTML += `
-                    <div class="vaccine-item ${isDone ? 'done' : ''}">
-                        <div>
-                            <strong>${item.name}</strong><br>
-                            <small>${isDone ? '✅ تم التلقيح' : '⏳ الموعد: ' + target.toLocaleDateString('ar-EG')}</small>
-                        </div>
-                        <button class="btn-check nurse-only" onclick="markDone(${index})" ${isDone ? 'disabled' : ''}>${isDone ? 'تم' : 'تأكيد 💉'}</button>
-                    </div>`;
-            });
-        }
+                <div class="vaccine-item ${isDone ? 'done' : ''}">
+                    <div>
+                        <strong>${item.name}</strong><br>
+                        <small>${isDone ? '✅ تم التلقيح' : '⏳ الموعد: ' + target.toLocaleDateString('ar-EG')}</small>
+                    </div>
+                    <button class="btn-check nurse-only" onclick="markDone(${index})" ${isDone ? 'disabled' : ''}>
+                        ${isDone ? 'تم' : 'تأكيد 💉'}
+                    </button>
+                </div>`;
+        });
+    }
 
-        function markDone(index) {
-            db.collection("babies").doc(id).update({
-                completed: firebase.firestore.FieldValue.arrayUnion(index)
-            });
-        }
+    function markDone(index) {
+        db.collection("babies").doc(id).update({
+            completed: firebase.firestore.FieldValue.arrayUnion(index)
+        });
+    }
 
-        function shareWithMom() {
-            const url = window.location.href + "&view=parent";
-            window.open(`https://wa.me/?text=${encodeURIComponent("رابط متابعة لقاحات طفلك: " + url)}`);
-        }
+    function shareWithMom() {
+        const url = "https://hach-beep.github.io/Ka-/babydash.html?id=" + id + "&view=parent";
+        window.open("https://wa.me/?text=" + encodeURIComponent("رابط متابعة لقاحات طفلك: " + url));
+    }
     </script>
 </body>
 </html>
