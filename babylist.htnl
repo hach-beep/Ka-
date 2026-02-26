@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Master Registry - Nurse Dashboard</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;700&display=swap');
+        :root { --navy: #0a192f; --blue: #0077b6; --bg: #f1f5f9; --red: #e63946; --green: #25D366; }
+        body { font-family: 'Noto Sans Arabic', sans-serif; margin: 0; background: var(--bg); direction: rtl; }
+        
+        header { background: var(--navy); color: white; padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; }
+        .container { max-width: 1100px; margin: 30px auto; padding: 0 20px; }
+        
+        /* SEARCH BAR */
+        .search-box { background: white; padding: 15px; border-radius: 15px; display: flex; align-items: center; gap: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.02); margin-bottom: 20px; }
+        .search-box input { border: none; outline: none; width: 100%; font-size: 1rem; background: transparent; }
+
+        /* TABLE */
+        .card { background: white; border-radius: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 800px; }
+        th { background: #f8fafc; padding: 20px; text-align: right; color: #64748b; font-size: 0.8rem; }
+        td { padding: 20px; border-bottom: 1px solid #f1f5f9; }
+        
+        .patient-link { color: var(--blue); font-weight: bold; cursor: pointer; text-decoration: underline; }
+        .alert-red { color: var(--red); font-weight: bold; background: #fff1f2; padding: 5px 10px; border-radius: 8px; display: inline-flex; align-items: center; gap: 5px; }
+        .btn-reminder { background: var(--green); color: white; border: none; padding: 10px 15px; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 0.8rem; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div style="font-weight: 900; font-size: 1.4rem;">سجل التلقيحات المركزي</div>
+        <button onclick="location.href='index.html'" style="background:none; border:1px solid white; color:white; padding:5px 15px; border-radius:8px; cursor:pointer;">Home</button>
+    </header>
+
+    <div class="container">
+        <div class="search-box">
+            <span>🔍</span>
+            <input type="text" id="search" onkeyup="filterTable()" placeholder="Search by baby name or phone...">
+        </div>
+        
+        <div class="card">
+            <table>
+                <thead>
+                    <tr>
+                        <th>اسم الطفل</th>
+                        <th>رقم الهاتف</th>
+                        <th>الحالة الصحية</th>
+                        <th>تذكير الوالدين</th>
+                        <th>حذف</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <tr><td colspan="5" style="text-align:center; padding:50px;">Loading database...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyAX35fTT2-D9OQgKQkzgNJCQTtcN0S2LwQ",
+            authDomain: "babyguard-system.firebaseapp.com",
+            projectId: "babyguard-system",
+            storageBucket: "babyguard-system.firebasestorage.app",
+            messagingSenderId: "892853005967",
+            appId: "1:892853005967:web:1a5fb182c073eba1ee0afa"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // The Iraqi Schedule for logic check
+        const schedule = [
+            { name: "Hepatitis B (0)", days: 0 },
+            { name: "BCG", days: 7 },
+            { name: "Penta 1", days: 60 },
+            { name: "Penta 2", days: 120 },
+            { name: "Penta 3", days: 180 }
+        ];
+
+        function loadList() {
+            db.collection("babies").onSnapshot(snap => {
+                const body = document.getElementById('tableBody');
+                body.innerHTML = "";
+                const today = new Date();
+
+                snap.forEach(doc => {
+                    const d = doc.data();
+                    const dob = new Date(d.dob);
+                    const completed = d.completed || [];
+                    
+                    // SMART LOGIC: Find the first missing vaccine that is overdue
+                    let overdueVaccine = "";
+                    schedule.forEach((v, index) => {
+                        let targetDate = new Date(dob);
+                        targetDate.setDate(targetDate.getDate() + v.days);
+                        if (today > targetDate && !completed.includes(index)) {
+                            overdueVaccine = v.name;
+                        }
+                    });
+
+                    const statusHTML = overdueVaccine 
+                        ? `<span class="alert-red">⚠️ Overdue: ${overdueVaccine}</span>` 
+                        : `<span style="color:green; font-weight:bold;">✅ Up to Date</span>`;
+
+                    const reminderBtn = overdueVaccine 
+                        ? `<button class="btn-reminder" onclick="sendReminder('${d.phone}', '${d.name}', '${overdueVaccine}')">Send Reminder 💬</button>` 
+                        : `<span style="color:#94a3b8;">No action needed</span>`;
+
+                    body.innerHTML += `
+                        <tr>
+                            <td><span class="patient-link" onclick="location.href='babydash.html?id=${doc.id}'">${d.name}</span></td>
+                            <td>${d.phone}</td>
+                            <td>${statusHTML}</td>
+                            <td>${reminderBtn}</td>
+                            <td><button onclick="deleteBaby('${doc.id}')" style="border:none; background:none; cursor:pointer;">🗑️</button></td>
+                        </tr>
+                    `;
+                });
+            });
+        }
+
+        function sendReminder(phone, babyName, vaccine) {
+            const msg = `Dear Mother, this is a reminder from the Health Center. Your child (${babyName}) has missed their scheduled (${vaccine}) vaccination. Please visit us as soon as possible for their safety.`;
+            window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
+        }
+
+        function filterTable() {
+            let val = document.getElementById('search').value.toLowerCase();
+            let rows = document.getElementById('tableBody').rows;
+            for (let row of rows) { row.style.display = row.innerText.toLowerCase().includes(val) ? "" : "none"; }
+        }
+
+        function deleteBaby(id) { if(confirm("Delete this record?")) db.collection("babies").doc(id).delete(); }
+
+        loadList();
+    </script>
+</body>
+</html>
