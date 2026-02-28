@@ -162,21 +162,21 @@
     }
         
 function shareWithMom() {
-        // 1. Get the phone from your babyData
-        let phone = babyData.phone || "";
-        let cleanPhone = phone.replace(/\s+/g, '').replace('+', '');
-        
-        // 2. Fix the Iraqi format for WhatsApp
-        if (cleanPhone.startsWith('0')) {
-            cleanPhone = '964' + cleanPhone.substring(1);
-        }
+            if (!babyData) return alert("جاري تحميل البيانات، يرجى الانتظار");
 
-        // 3. Create the link to the BEAUTIFUL Mother's Dashboard
-        const url = "https://hach-beep.github.io/Ka-/momdash.html?id=" + id;
-        const msg = `مرحباً، يمكنك متابعة جدول لقاحات طفلك عبر هذا الرابط: ${url}`;
+            // Clean the phone number
+            let phone = babyData.phone || "";
+            let cleanPhone = phone.replace(/\s+/g, '').replace('+', '');
+            
+            if (cleanPhone.startsWith('0')) {
+                cleanPhone = '964' + cleanPhone.substring(1);
+            }
 
-        // 4. Open the specific chat with the mother
-        window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`, '_blank');
+            // Link to the beautiful MOMDASH page
+            const url = "https://hach-beep.github.io/Ka-/momdash.html?id=" + id;
+            const msg = `مرحباً، يمكنك متابعة جدول لقاحات طفلك (${babyData.name}) عبر هذا الرابط: ${url}`;
+
+            window.open("https://wa.me/" + cleanPhone + "?text=" + encodeURIComponent(msg), "_blank");
 }
     </script>
 </body>
