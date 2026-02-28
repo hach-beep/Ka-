@@ -78,7 +78,9 @@
     }
 
     /* Parent Mode Invisibility */
-    .parent-mode .nurse-only { display: none !important; }
+        <button class="nurse-only" onclick="shareWithMom()" style="background:#25D366; color:white; border:none; padding:15px; width:100%; border-radius:15px; font-weight:bold; margin-top:20px; cursor:pointer;">
+    إرسال الرابط للأم عبر واتساب 💬
+</button>
     </style>
 </head>
 <body id="mainBody">
@@ -162,21 +164,31 @@
     }
         
 function shareWithMom() {
-            if (!babyData) return alert("جاري تحميل البيانات، يرجى الانتظار");
+    // 1. Test if the button is alive
+    console.log("Share button clicked");
 
-            // Clean the phone number
-            let phone = babyData.phone || "";
-            let cleanPhone = phone.replace(/\s+/g, '').replace('+', '');
-            
-            if (cleanPhone.startsWith('0')) {
-                cleanPhone = '964' + cleanPhone.substring(1);
-            }
+    if (!babyData) {
+        alert("خطأ: لم يتم تحميل بيانات الطفل بعد");
+        return;
+    }
 
-            // Link to the beautiful MOMDASH page
-            const url = "https://hach-beep.github.io/Ka-/momdash.html?id=" + id;
-            const msg = `مرحباً، يمكنك متابعة جدول لقاحات طفلك (${babyData.name}) عبر هذا الرابط: ${url}`;
+    // 2. Clean the phone number
+    let phone = babyData.phone || "";
+    let cleanPhone = phone.replace(/\s+/g, '').replace('+', '');
+    
+    if (cleanPhone.startsWith('0')) {
+        cleanPhone = '964' + cleanPhone.substring(1);
+    }
 
-            window.open("https://wa.me/" + cleanPhone + "?text=" + encodeURIComponent(msg), "_blank");
+    // 3. Create the link to your beautiful MOMDASH page
+    // Make sure the filename below matches your GitHub file exactly!
+    const url = "https://hach-beep.github.io/Ka-/momdash.html?id=" + id;
+    
+    const msg = `مرحباً، يمكنك متابعة جدول لقاحات طفلك (${babyData.name}) عبر هذا الرابط: ${url}`;
+
+    // 4. Open WhatsApp
+    const waURL = "https://wa.me/" + cleanPhone + "?text=" + encodeURIComponent(msg);
+    window.open(waURL, "_blank");
 }
     </script>
 </body>
