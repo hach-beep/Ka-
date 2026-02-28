@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>حالة التلقيحات - BabyGuard</title>
+    
+    <!-- Libraries -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;500;700;900&display=swap');
+
+        :root {
+            --primary-pink: #fce4ec;
+            --accent-pink: #ff85a1;
+            --text-dark: #2d3436;
+            --text-gray: #636e72;
+            --border: #f1f2f6;
+        }
+
+        body { 
+            font-family: 'Noto Sans Arabic', sans-serif; 
+            margin: 0; background-color: #ffffff; direction: rtl; color: var(--text-dark);
+            padding-bottom: 40px;
+        }
+
+        .container { max-width: 500px; margin: 0 auto; padding: 20px; }
+
+        /* --- TOP SELECTOR --- */
+        .patient-selector {
+            border: 1px solid var(--border); padding: 15px; border-radius: 20px;
+            display: flex; align-items: center; gap: 15px; margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+        }
+        .avatar-box { width: 50px; height: 50px; background: var(--primary-pink); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
+
+        .section-title { font-size: 1.8rem; font-weight: 900; margin: 0; }
+        .born-info { color: var(--text-gray); font-size: 0.9rem; margin-bottom: 25px; }
+
+        /* --- PROGRESS BAR --- */
+        .progress-card { background: var(--primary-pink); padding: 20px; border-radius: 20px; margin-bottom: 30px; }
+        .progress-header { display: flex; justify-content: space-between; font-weight: 800; margin-bottom: 10px; color: #591d48; }
+        .bar-bg { background: rgba(0,0,0,0.05); height: 8px; border-radius: 10px; }
+        .bar-fill { background: var(--accent-pink); height: 100%; border-radius: 10px; width: 0%; transition: 1s; }
+
+        /* --- TABS --- */
+        .tabs { display: flex; background: #f1f2f6; padding: 5px; border-radius: 15px; margin-bottom: 25px; }
+        .tab-btn { flex: 1; padding: 12px; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; background: none; color: var(--text-gray); font-family: inherit; }
+        .tab-btn.active { background: white; color: var(--text-dark); box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+
+        /* --- VACCINE CARDS --- */
+        .v-card {
+            background: white; padding: 20px; border-radius: 20px;
+            margin-bottom: 15px; display: flex; align-items: center; gap: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.03); border: 1px solid #f1f2f6;
+        }
+        .v-icon-box { width: 50px; height: 50px; background: #f8fafc; border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+        .v-info { flex: 1; }
+        .v-info h4 { margin: 0; font-size: 1rem; }
+        .v-info p { margin: 2px 0 0 0; font-size: 0.8rem; color: var(--text-gray); }
+
+        .v-actions { display: flex; gap: 12px; }
+        .icon-btn { background: none; border: none; cursor: pointer; font-size: 1.2rem; color: var(--accent-pink); padding: 0; }
+
+        /* --- MODAL --- */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; align-items: center; justify-content: center; }
+        .modal-content { background: white; width: 85%; max-width: 400px; padding: 30px; border-radius: 30px; text-align: center; position: relative; }
+        .btn-confirm { background: var(--accent-pink); color: white; border: none; padding: 12px 40px; border-radius: 12px; margin-top: 20px; font-weight: bold; cursor: pointer; width: 100%; }
+
+        .nurse-only { display: none; } /* Only shows if nurse is logged in */
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Patient Selector -->
+        <div class="patient-selector">
+            <div class="avatar-box">🖼️</div>
+            <div>
+                <strong id="babyName">جاري التحميل...</strong><br>
+                <small style="color:var(--text-gray)">تم الاختيار</small>
+            </div>
+        </div>
+
+        <h1 class="section-title" id="ageCategory">حديث الولادة</h1>
+        <p class="born-info" id="displayDob">ولد في: --</p>
+
+        <!-- Progress -->
+        <div class="progress-card">
+            <div class="progress-header">
+                <span>تقدم التلقيحات</span>
+                <span id="percentText">0%</span>
+            </div>
+            <div class="bar-bg"><div class="bar-fill" id="progressBar"></div></div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab-btn active" id="tabUp" onclick="switchTab('upcoming')">القادمة</button>
+            <button class="tab-btn" id="tabDone" onclick="switchTab('completed')">المكتملة</button>
+        </div>
+
+        <!-- Vaccine List -->
+        <div id="list"></div>
+    </div>
+
+    <!-- Info Modal -->
+    <div id="infoModal" class="modal">
+        <div class="modal-content">
+            <h2 id="modalTitle">اسم اللقاح</h2>
+            <p id="modalDesc" style="color:var(--text-gray); line-height: 1.6;"></p>
+            <button class="btn-confirm" onclick="closeModal()">إغلاق</button>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyAX35fTT2-D9OQgKQkzgNJCQTtcN0S2LwQ",
+            authDomain: "babyguard-system.firebaseapp.com",
+            projectId: "babyguard-system",
+            storageBucket: "babyguard-system.firebasestorage.app",
+            messagingSenderId: "892853005967",
+            appId: "1:892853005967:web:1a5fb182c073eba1ee0afa"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        const id = new URLSearchParams(window.location.search).get('id');
+        let currentTab = 'upcoming';
+        let babyData = null;
+
+        // Iraqi Schedule Data
+        const schedule = [
+            { name: "BCG", desc: "يحمي من التدرن الرئوي (السل).", days: 7 },
+            { name: "Hepatitis B", desc: "يحمي من التهاب الكبد الفيروسي نوع B.", days: 0 },
+            { name: "OPV - Dose 0", desc: "شلل الأطفال الفموي - الجرعة الصفرية.", days: 7 },
+            { name: "Penta 1", desc: "اللقاح الخماسي: دفتيريا، كزاز، سعال ديكي، هيموفيلس، التهاب كبد.", days: 60 },
+            { name: "Rota 1", desc: "يحمي من فيروس روتا المسبب للإسهال.", days: 60 }
+        ];
+
+        if(id) {
+            db.collection("babies").doc(id).onSnapshot(doc => {
+                babyData = doc.data();
+                document.getElementById('babyName').innerText = babyData.name;
+                document.getElementById('displayDob').innerText = "تاريخ الولادة: " + babyData.dob;
+                updateUI();
+            });
+        }
+
+        function updateUI() {
+            const listDiv = document.getElementById('list');
+            listDiv.innerHTML = "";
+            const completed = babyData.completed || [];
+            const dob = new Date(babyData.dob);
+
+            const progress = Math.round((completed.length / schedule.length) * 100);
+            document.getElementById('progressBar').style.width = progress + "%";
+            document.getElementById('percentText').innerText = progress + "%";
+
+            schedule.forEach((item, index) => {
+                const isDone = completed.includes(index);
+                if ((currentTab === 'completed' && isDone) || (currentTab === 'upcoming' && !isDone)) {
+                    const target = new Date(dob);
+                    target.setDate(target.getDate() + item.days);
+                    
+                    listDiv.innerHTML += `
+                        <div class="v-card">
+                            <div class="v-icon-box">🏥</div>
+                            <div class="v-info">
+                                <h4>${item.name}</h4>
+                                <p>${isDone ? 'تم الإعطاء: ' + babyData.dob : 'الموعد: ' + target.toLocaleDateString('ar-EG')}</p>
+                            </div>
+                            <div class="v-actions">
+                                <button class="icon-btn" onclick="showInfo(${index})">ⓘ</button>
+                                ${!isDone ? `<button class="icon-btn" onclick="alert('تمت الإضافة للتقويم')">📅</button>` : ''}
+                                ${!isDone ? `<button class="icon-btn" onclick="markDone(${index})">➕</button>` : ''}
+                            </div>
+                        </div>`;
+                }
+            });
+        }
+
+        function switchTab(tab) {
+            currentTab = tab;
+            document.getElementById('tabUp').classList.toggle('active', tab === 'upcoming');
+            document.getElementById('tabDone').classList.toggle('active', tab === 'completed');
+            updateUI();
+        }
+
+        function showInfo(index) {
+            const item = schedule[index];
+            document.getElementById('modalTitle').innerText = item.name;
+            document.getElementById('modalDesc').innerText = item.desc;
+            document.getElementById('infoModal').style.display = 'flex';
+        }
+
+        function closeModal() { document.getElementById('infoModal').style.display = 'none'; }
+
+        function markDone(index) {
+            if(confirm("تأكيد إعطاء اللقاح؟")) {
+                db.collection("babies").doc(id).update({
+                    completed: firebase.firestore.FieldValue.arrayUnion(index)
+                });
+            }
+        }
+    </script>
+</body>
+</html>
