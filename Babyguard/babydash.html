@@ -160,12 +160,24 @@
             completed: firebase.firestore.FieldValue.arrayUnion(index)
         });
     }
+        
+function shareWithMom() {
+        // 1. Get the phone from your babyData
+        let phone = babyData.phone || "";
+        let cleanPhone = phone.replace(/\s+/g, '').replace('+', '');
+        
+        // 2. Fix the Iraqi format for WhatsApp
+        if (cleanPhone.startsWith('0')) {
+            cleanPhone = '964' + cleanPhone.substring(1);
+        }
 
-    function shareWithMom() {
-        // This link now points to momdash.html
+        // 3. Create the link to the BEAUTIFUL Mother's Dashboard
         const url = "https://hach-beep.github.io/Ka-/momdash.html?id=" + id;
-        window.open("https://wa.me/?text=" + encodeURIComponent("رابط متابعة لقاحات طفلك: " + url));
-    }
+        const msg = `مرحباً، يمكنك متابعة جدول لقاحات طفلك عبر هذا الرابط: ${url}`;
+
+        // 4. Open the specific chat with the mother
+        window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`, '_blank');
+}
     </script>
 </body>
 </html>
