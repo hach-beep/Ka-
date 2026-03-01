@@ -3,42 +3,168 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BabyGuard - المنظومة الوطنية</title>
+    <title>BabyGuard - National Vaccination Portal</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;500;800&display=swap" rel="stylesheet">
     <style>
-        :root { --navy: #0a192f; --teal: #2a9d8f; --gold: #ffc300; --bg: #f8fafc; }
-        body { font-family: 'Noto Sans Arabic', sans-serif; margin: 0; background: var(--bg); color: var(--navy); }
+        :root { 
+            --navy: #2c3e50; /* Matches your new logo exactly */
+            --teal: #2a9d8f; 
+            --light-blue: #34495e;
+            --white: #ffffff; 
+            --bg: #f8fafc; 
+        }
+
+        body { 
+            font-family: 'Noto Sans Arabic', sans-serif; 
+            margin: 0; 
+            background: var(--bg); 
+            color: var(--navy); 
+            overflow: hidden; /* Keeps it looking like a clean app */
+        }
         
         /* CINEMATIC HERO SECTION */
         .hero {
-            background: linear-gradient(rgba(10, 25, 47, 0.7), rgba(10, 25, 47, 0.7)), 
-                        url('https://images.unsplash.com/photo-1584132967334-10e028bd69f7?auto=format&fit=crop&q=80&w=1200');
-            background-size: cover; background-position: center;
-            height: 100vh; display: flex; align-items: center; justify-content: center; text-align: center; color: white;
+            background: linear-gradient(rgba(44, 62, 80, 0.85), rgba(44, 62, 80, 0.85)), 
+                        url('https://images.unsplash.com/photo-1555252333-9f8e92e65df9?auto=format&fit=crop&q=80&w=1200');
+            background-size: cover; 
+            background-position: center;
+            height: 100vh; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            text-align: center; 
+            color: white;
+            padding: 0 20px;
         }
 
-        .hero-content h1 { font-size: 3.5rem; color: var(--gold); margin: 0; font-weight: 900; }
-        .hero-content p { font-size: 1.4rem; opacity: 0.9; margin: 20px 0 40px; max-width: 700px; line-height: 1.8; }
+        .hero-content {
+            max-width: 800px;
+            animation: fadeIn 1s ease-in;
+        }
 
-        .btn-group { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; }
+        /* Logo Styling */
+        .brand-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+
+        /* SVG Placeholder for your baby feet logo */
+        .logo-icon {
+            width: 60px;
+            height: 60px;
+            fill: white;
+        }
+
+        .hero-content h1 { 
+            font-size: 4rem; 
+            margin: 0; 
+            font-weight: 800; 
+            letter-spacing: -1px;
+            text-transform: uppercase;
+        }
+
+        .hero-content .slogan { 
+            font-size: 1.1rem; 
+            text-transform: uppercase; 
+            letter-spacing: 4px; /* Matches your logo spacing */
+            font-weight: 300;
+            margin-bottom: 40px;
+            opacity: 0.9;
+        }
+
+        .hero-content p { 
+            font-size: 1.2rem; 
+            opacity: 0.8; 
+            margin-bottom: 40px; 
+            line-height: 1.8;
+            font-weight: 300;
+        }
+
+        /* BUTTONS */
+        .btn-group { 
+            display: flex; 
+            gap: 20px; 
+            justify-content: center; 
+            flex-wrap: wrap; 
+        }
+
         .btn { 
-            padding: 20px 45px; border-radius: 20px; font-weight: 800; font-size: 1.2rem; 
-            text-decoration: none; transition: 0.3s; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            display: inline-block;
+            padding: 18px 40px; 
+            border-radius: 15px; 
+            font-weight: 800; 
+            font-size: 1rem; 
+            text-decoration: none; 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-family: inherit;
+            border: 2px solid transparent;
         }
-        .btn-primary { background: var(--gold); color: var(--navy); }
-        .btn-secondary { background: white; color: var(--navy); }
-        .btn:hover { transform: translateY(-5px); filter: brightness(1.1); }
+
+        .btn-primary { 
+            background: var(--white); 
+            color: var(--navy); 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .btn-secondary { 
+            background: transparent; 
+            color: white; 
+            border: 2px solid rgba(255,255,255,0.4);
+        }
+
+        .btn:hover { 
+            transform: translateY(-5px); 
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+        }
+
+        .btn-primary:hover { background: #f1f5f9; }
+        .btn-secondary:hover { border-color: white; background: rgba(255,255,255,0.1); }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive Mobile Adjustments */
+        @media (max-width: 600px) {
+            .hero-content h1 { font-size: 2.5rem; }
+            .hero-content .slogan { font-size: 0.8rem; letter-spacing: 2px; }
+            .btn { width: 100%; }
+        }
     </style>
 </head>
 <body>
     <section class="hero">
         <div class="hero-content">
-            <h1>BabyGuard </h1>
-            <p>The Digital System for Tracking Child Vaccinations. Ensuring every child in the city is protected, one dose at a time.</p>
+            <!-- Branding Section -->
+            <div class="brand-wrapper">
+                <!-- Replace this SVG with your <img src="logo.png"> when ready -->
+                <svg class="logo-icon" viewBox="0 0 24 24">
+                    <path d="M12,2C15.31,2 18,4.69 18,8C18,11.31 15.31,14 12,14C8.69,14 6,11.31 6,8C6,4.69 8.69,2 12,2M12,16C16.42,16 20,17.79 20,20V22H4V20C4,17.79 7.58,16 12,16Z" />
+                </svg>
+                <h1>BabyGuard</h1>
+            </div>
+            
+            <div class="slogan">Protecting the future, one dose at a time</div>
+            
+            <p>
+                Integrated Digital Health Infrastructure. <br>
+                Securely managing the national vaccination registry for a healthier generation.
+            </p>
+
             <div class="btn-group">
-                <a href="babyreg.html" class="btn-primary">Register New Baby </a>
-                <a href="babylist.html" class="btn-secondary">Enter Master Registry</a>
+                <a href="babyreg.html" class="btn btn-primary">
+                    <span>New Enrollment</span>
+                    <span style="margin-right:10px;">+</span>
+                </a>
+                <a href="babylist.html" class="btn btn-secondary">
+                    <span>Access Master Registry</span>
+                </a>
             </div>
         </div>
     </section>
