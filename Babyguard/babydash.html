@@ -1,102 +1,123 @@
-<!DOCTYPE html>
+                <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>سجل اللقاحات - BabyGuard</title>
+    <title>Vaccine Management - BabyGuard</title>
+    
+    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;500;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;500;800&display=swap');
 
-    :root {
-        --teal: #2a9d8f;
-        --blue: #00b4d8;
-        --bg: #f8fafc;
-        --white: #ffffff;
-        --shadow: 0 10px 30px rgba(0,0,0,0.04);
-    }
+        :root {
+            --teal: #2a9d8f;
+            --blue: #00b4d8;
+            --bg: #f8fafc;
+            --white: #ffffff;
+            --text-dark: #1e293b;
+            --shadow: 0 10px 30px rgba(0,0,0,0.05);
+        }
 
-    body { 
-        font-family: 'Noto Sans Arabic', sans-serif; 
-        margin: 0; background-color: var(--bg); direction: rtl; 
-        color: #1e293b; padding-bottom: 40px;
-    }
+        body { 
+            font-family: 'Noto Sans Arabic', sans-serif; 
+            margin: 0; background-color: var(--bg); direction: rtl; 
+            color: var(--text-dark); padding-bottom: 40px;
+        }
 
-    .container { max-width: 500px; margin: 0 auto; padding: 20px; }
+        .container { max-width: 500px; margin: 0 auto; padding: 20px; }
 
-    /* --- THE HERO CARD (Glassmorphism) --- */
-    .baby-card { 
-        background: linear-gradient(135deg, #2a9d8f 0%, #00b4d8 100%);
-        padding: 40px 20px; border-radius: 35px; 
-        text-align: center; margin-bottom: 30px; color: white;
-        box-shadow: 0 20px 40px rgba(42, 157, 143, 0.2);
-    }
+        /* --- HERO CARD --- */
+        .baby-card { 
+            background: linear-gradient(135deg, var(--teal) 0%, var(--blue) 100%);
+            padding: 35px 20px; border-radius: 30px; 
+            text-align: center; margin-bottom: 25px; color: white;
+            box-shadow: 0 15px 35px rgba(42, 157, 143, 0.2);
+        }
 
-    /* The Progress Ring */
-    .circle { 
-        width: 110px; height: 110px; border-radius: 50%; 
-        border: 6px solid rgba(255,255,255,0.3);
-        margin: 0 auto 15px auto; display: flex; 
-        align-items: center; justify-content: center; 
-        font-weight: 800; font-size: 1.5rem;
-        background: rgba(255,255,255,0.1);
-        backdrop-filter: blur(5px); /* Frosted glass effect */
-    }
-        
+        .circle { 
+            width: 90px; height: 90px; border-radius: 50%; 
+            border: 5px solid rgba(255,255,255,0.3);
+            margin: 0 auto 10px auto; display: flex; 
+            flex-direction: column; align-items: center; justify-content: center; 
+            font-weight: 800; font-size: 1.4rem;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(5px);
+        }
 
-    /* --- VACCINE ITEMS --- */
-    .vaccine-item { 
-        background: var(--white); padding: 20px; border-radius: 24px; 
-        margin-bottom: 15px; display: flex; justify-content: space-between; 
-        align-items: center; box-shadow: var(--shadow);
-        border: 1px solid rgba(0,0,0,0.02);
-        transition: 0.3s ease;
-    }
+        .circle small { font-size: 0.7rem; font-weight: 300; }
 
-    .vaccine-item.done { 
-        background: #f0fff4; border-right: 8px solid #90be6d; 
-    }
+        /* --- VACCINE LIST --- */
+        .vaccine-item { 
+            background: var(--white); padding: 18px; border-radius: 20px; 
+            margin-bottom: 12px; display: flex; justify-content: space-between; 
+            align-items: center; box-shadow: var(--shadow);
+            border: 1px solid rgba(0,0,0,0.02);
+        }
 
-    .vaccine-info strong { font-size: 1rem; color: #334155; }
-    .vaccine-info small { color: #64748b; font-size: 0.8rem; display: block; margin-top: 4px; }
+        .vaccine-item.done { 
+            background: #f0fff4; border-right: 6px solid #48bb78; 
+        }
 
-    /* --- BUTTONS --- */
-    .btn-check { 
-        background-color: var(--teal); color: white; border: none; 
-        padding: 12px 20px; border-radius: 14px; font-weight: 700; 
-        cursor: pointer; transition: 0.2s;
-    }
+        .vaccine-info strong { font-size: 0.95rem; color: #334155; }
+        .vaccine-info small { color: #64748b; font-size: 0.8rem; display: block; margin-top: 4px; }
 
-    .btn-check:active { transform: scale(0.95); }
+        /* --- BUTTONS --- */
+        .btn-check { 
+            background-color: var(--teal); color: white; border: none; 
+            padding: 10px 18px; border-radius: 12px; font-weight: 700; 
+            cursor: pointer; transition: 0.2s; font-family: inherit;
+        }
 
-    .share-btn {
-        background: #25D366; color: white; border: none;
-        padding: 18px; border-radius: 20px; width: 100%;
-        font-weight: 800; font-size: 1.1rem; margin-top: 20px;
-        box-shadow: 0 10px 20px rgba(37, 211, 102, 0.2);
-    }
+        .btn-check:disabled { background: #cbd5e1; cursor: default; }
 
-    /* Parent Mode Invisibility */
-        <button class="nurse-only" onclick="shareWithMom()" style="background:#25D366; color:white; border:none; padding:15px; width:100%; border-radius:15px; font-weight:bold; margin-top:20px; cursor:pointer;">
-    إرسال الرابط للأم عبر واتساب 💬
-</button>
+        .share-btn {
+            background: #25D366; color: white; border: none;
+            padding: 16px; border-radius: 20px; width: 100%;
+            font-weight: 800; font-size: 1.05rem; margin-top: 20px;
+            cursor: pointer; box-shadow: 0 8px 20px rgba(37, 211, 102, 0.25);
+            font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 10px;
+        }
+
+        .home-btn {
+            display: block; width: 100%; text-align: center; margin-top: 15px;
+            background: none; border: 1.5px solid var(--teal); color: var(--teal);
+            padding: 10px; border-radius: 15px; text-decoration: none; font-weight: bold;
+        }
+
+        #loader { text-align: center; padding: 50px; color: var(--teal); font-weight: bold; }
     </style>
 </head>
-<body id="mainBody">
+<body>
+
     <div class="container">
-    
+        <!-- Dashboard Header -->
         <div class="baby-card">
-            <h1 id="babyName">جاري التحميل...</h1>
-            <div class="circle" id="percent">0%</div>
-            <p style="color:#64748b;">نسبة الحماية المكتملة</p>
-            <button class="nurse-only" onclick="shareWithMom()" style="background:#25D366; color:white; border:none; padding:10px; border-radius:10px; width:100%; font-weight:bold; margin-top:10px;">إرسال الرابط للأم 💬</button>
-            <button class="home" onclick="location.href='babyindex.html'" style="background:none; border:1px solid #2a9d8f; color:#2a9d8f; padding:5px 15px; border-radius:8px; cursor:pointer; font-weight:bold;">الرئيسية Home</button>
+            <h1 id="babyName" style="margin: 0 0 10px 0;">Loading...</h1>
+            <div class="circle">
+                <span id="percent">0%</span>
+                <small>Completed</small>
+            </div>
+            <p style="font-size: 0.85rem; opacity: 0.9; margin: 5px 0 0 0;">Vaccination Progress</p>
         </div>
+
+        <div id="loader">Syncing database...</div>
         <div id="list"></div>
+
+        <!-- Action Area -->
+        <div id="controls" style="display:none;">
+            <button class="share-btn" onclick="shareWithMom()">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326z"/></svg>
+                Send Link to Mother
+            </button>
+            <a href="babyindex.html" class="home-btn">Return to Home</a>
+        </div>
     </div>
 
     <script>
+        // 1. Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyAX35fTT2-D9OQgKQkzgNJCQTtcN0S2LwQ",
             authDomain: "babyguard-system.firebaseapp.com",
@@ -108,11 +129,12 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
+        // 2. State Management
         const params = new URLSearchParams(window.location.search);
-        const id = params.get('id');
-        if(params.get('view') === 'parent') document.body.classList.add('parent-mode');
+        const babyId = params.get('id');
+        let currentBabyData = null;
 
-        const schedule = [
+        const vaccineSchedule = [
             { name: "Hepatitis B (0)", days: 0 },
             { name: "BCG, OPV (0)", days: 7 },
             { name: "Penta 1, Rota 1, PCV 1", days: 60 },
@@ -123,73 +145,78 @@
             { name: "DPT B1, OPV B1, MMR 2", days: 545 }
         ];
 
-        if(id) {
-            db.collection("babies").doc(id).onSnapshot(doc => {
-                const data = doc.data();
-                document.getElementById('babyName').innerText = data.name;
-                const doneList = data.completed || [];
-                renderList(data.dob, doneList);
-                const progress = Math.round((doneList.length / schedule.length) * 100);
-                document.getElementById('percent').innerText = progress + "%";
+        // 3. Fetch Data
+        if (babyId) {
+            db.collection("babies").doc(babyId).onSnapshot(doc => {
+                if (doc.exists) {
+                    currentBabyData = doc.data();
+                    document.getElementById('loader').style.display = 'none';
+                    document.getElementById('controls').style.display = 'block';
+                    document.getElementById('babyName').innerText = currentBabyData.name;
+                    
+                    const completedIndices = currentBabyData.completed || [];
+                    renderVaccineList(currentBabyData.dob, completedIndices);
+                    
+                    const progress = Math.round((completedIndices.length / vaccineSchedule.length) * 100);
+                    document.getElementById('percent').innerText = progress + "%";
+                } else {
+                    document.getElementById('loader').innerText = "Baby record not found.";
+                }
             });
         }
 
-        function renderList(dobStr, doneList) {
+        function renderVaccineList(dobStr, completedIndices) {
             const listDiv = document.getElementById('list');
             listDiv.innerHTML = "";
             const dob = new Date(dobStr);
 
-            schedule.forEach((item, index) => {
-                const target = new Date(dob);
-                target.setDate(target.getDate() + item.days);
-                const isDone = doneList.includes(index);
+            vaccineSchedule.forEach((item, index) => {
+                const targetDate = new Date(dob);
+                targetDate.setDate(targetDate.getDate() + item.days);
+                const isDone = completedIndices.includes(index);
 
                 listDiv.innerHTML += `
                 <div class="vaccine-item ${isDone ? 'done' : ''}">
-                    <div>
-                        <strong>${item.name}</strong><br>
-                        <small>${isDone ? '✅ تم التلقيح' : '⏳ الموعد: ' + target.toLocaleDateString('ar-EG')}</small>
+                    <div class="vaccine-info">
+                        <strong>${item.name}</strong>
+                        <small>${isDone ? '✅ Vaccinated' : '⏳ Scheduled: ' + targetDate.toLocaleDateString()}</small>
                     </div>
-                    <button class="btn-check nurse-only" onclick="markDone(${index})" ${isDone ? 'disabled' : ''}>
-                        ${isDone ? 'تم' : 'تأكيد 💉'}
+                    <button class="btn-check" onclick="updateVaccineStatus(${index})" ${isDone ? 'disabled' : ''}>
+                        ${isDone ? 'Confirmed' : 'Confirm'}
                     </button>
                 </div>`;
-        });
-    }
+            });
+        }
 
-    function markDone(index) {
-        db.collection("babies").doc(id).update({
-            completed: firebase.firestore.FieldValue.arrayUnion(index)
-        });
-    }
-        
-function shareWithMom() {
-    // 1. Test if the button is alive
-    console.log("Share button clicked");
+        function updateVaccineStatus(index) {
+            if(confirm("Confirm this vaccination dose?")) {
+                db.collection("babies").doc(babyId).update({
+                    completed: firebase.firestore.FieldValue.arrayUnion(index)
+                });
+            }
+        }
 
-    if (!babyData) {
-        alert("خطأ: لم يتم تحميل بيانات الطفل بعد");
-        return;
-    }
+        // 4. THE SHARE FUNCTION
+        function shareWithMom() {
+            if (!currentBabyData) return;
 
-    // 2. Clean the phone number
-    let phone = babyData.phone || "";
-    let cleanPhone = phone.replace(/\s+/g, '').replace('+', '');
-    
-    if (cleanPhone.startsWith('0')) {
-        cleanPhone = '964' + cleanPhone.substring(1);
-    }
+            // Logic to clean the phone number for WhatsApp
+            let rawPhone = currentBabyData.phone || "";
+            let cleanPhone = rawPhone.replace(/\s+/g, '').replace('+', '');
+            
+            // Auto-prefix for Iraq if number starts with 0
+            if (cleanPhone.startsWith('0')) {
+                cleanPhone = '964' + cleanPhone.substring(1);
+            }
 
-    // 3. Create the link to your beautiful MOMDASH page
-    // Make sure the filename below matches your GitHub file exactly!
-    const url = "https://hach-beep.github.io/Ka-/momdash.html?id=" + id;
-    
-    const msg = `مرحباً، يمكنك متابعة جدول لقاحات طفلك (${babyData.name}) عبر هذا الرابط: ${url}`;
+            // Construct the specific link to MOMDASH
+            const momDashUrl = "https://hach-beep.github.io/Ka-/momdash.html?id=" + babyId;
+            
+            const message = `Welcome! You can track the vaccination schedule for (${currentBabyData.name}) through your digital dashboard here: ${momDashUrl}`;
 
-    // 4. Open WhatsApp
-    const waURL = "https://wa.me/" + cleanPhone + "?text=" + encodeURIComponent(msg);
-    window.open(waURL, "_blank");
-}
+            const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
+            window.open(whatsappUrl, "_blank");
+        }
     </script>
 </body>
 </html>
