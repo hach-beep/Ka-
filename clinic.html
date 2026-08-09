@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>بوابة إدارة العيادة | Dr. Burhan</title>
+    <!-- أيقونات FontAwesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --main-blue: #4a76f2;
+            --dark-gray: #333;
+            --light-bg: #f4f7fe;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light-bg);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: var(--dark-gray);
+        }
+
+        .container {
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            background: white;
+            padding: 40px 20px;
+            border-radius: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        }
+
+        .header i {
+            font-size: 60px;
+            color: var(--main-blue);
+            margin-bottom: 15px;
+        }
+
+        h2 { margin-bottom: 5px; font-size: 1.5rem; }
+        p { color: #888; margin-bottom: 30px; }
+
+        /* الأزرار الرئيسية */
+        .main-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            width: 100%;
+            padding: 18px;
+            margin-bottom: 15px;
+            border: none;
+            border-radius: 15px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-dash { background: var(--dark-gray); color: white; }
+        .btn-book { background: var(--main-blue); color: white; }
+        .main-btn:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+
+        /* طبقة الخيارات (Overlay) */
+        .overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            display: none;
+            justify-content: center;
+            align-items: flex-end;
+            z-index: 1000;
+        }
+
+        .options-sheet {
+            background: white;
+            width: 100%;
+            max-width: 500px;
+            border-radius: 25px 25px 0 0;
+            padding: 25px;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+        .option-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: #f8f9ff;
+            border-radius: 12px;
+            cursor: pointer;
+            text-decoration: none;
+            color: var(--dark-gray);
+            font-weight: 600;
+        }
+
+        .option-item i { color: var(--main-blue); font-size: 1.2rem; }
+        .option-item:hover { background: #eef2ff; }
+
+        /* نافذة الباركود */
+        #qrModal {
+            display: none;
+            position: fixed;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            border-radius: 20px;
+            z-index: 1100;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+
+        #qrModal img { width: 200px; height: 200px; margin-bottom: 10px; }
+
+        .close-sheet {
+            margin-top: 10px;
+            background: none; border: none; color: #aaa; cursor: pointer;
+            font-weight: bold; width: 100%; padding: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <i class="fas fa-user-md"></i>
+        <h2>نظام إدارة العيادة الذكي</h2>
+        <p>مرحباً بك في لوحة تحكم د. محمد</p>
+    </div>
+
+    <!-- زر لوحة التحكم الخاص بالطبيب -->
+    <button class="main-btn btn-dash" onclick="location.href='https://hach-beep.github.io/Ka-/waa.html'">
+        <i class="fas fa-chart-pie"></i> لوحة التحكم (للطبيب)
+    </button>
+
+    <!-- زر رابط الحجز الخاص بالمريض -->
+    <button class="main-btn btn-book" onclick="openSheet()">
+        <i class="fas fa-link"></i> نظام حجز المرضى
+    </button>
+</div>
+
+<!-- قائمة الخيارات (تظهر من الأسفل) -->
+<div id="optionsOverlay" class="overlay" onclick="closeSheet()">
+    <div class="options-sheet" onclick="event.stopPropagation()">
+        <h3 style="margin-top:0">خيارات رابط الحجز</h3>
+        
+        <div class="option-item" onclick="location.href='https://hach-beep.github.io/Ka-/dr.html'">
+            <i class="fas fa-external-link-alt"></i> افتح صفحة الحجز
+        </div>
+
+        <div class="option-item" onclick="copyLink()">
+            <i class="fas fa-copy"></i> نسخ رابط الحجز
+        </div>
+
+        <div class="option-item" onclick="showQR()">
+            <i class="fas fa-qrcode"></i> عرض ونسخ الباركود (QR)
+        </div>
+
+        <button class="close-sheet" onclick="closeSheet()">إلغاء</button>
+    </div>
+</div>
+
+<!-- نافذة عرض الباركود -->
+<div id="qrModal">
+    <h3>باركود العيادة</h3>
+    <!-- استبدل qr-code.png برابط الصورة الحقيقي لديك -->
+    <img src="qr-code.png" alt="QR Code" id="qrImg">
+    <p style="font-size: 0.8rem;">يمكن للمريض المسح للحجز فوراً</p>
+    <button class="main-btn btn-book" onclick="closeQR()">إغلاق</button>
+</div>
+
+<script>
+    const bookingLink = "https://hach-beep.github.io/Ka-/dr.html";
+
+    function openSheet() {
+        document.getElementById('optionsOverlay').style.display = 'flex';
+    }
+
+    function closeSheet() {
+        document.getElementById('optionsOverlay').style.display = 'none';
+    }
+
+    function copyLink() {
+        navigator.clipboard.writeText(bookingLink).then(() => {
+            alert("✅ تم نسخ الرابط بنجاح!");
+            closeSheet();
+        });
+    }
+
+    function showQR() {
+        document.getElementById('qrModal').style.display = 'block';
+        closeSheet();
+    }
+
+    function closeQR() {
+        document.getElementById('qrModal').style.display = 'none';
+    }
+
+    // نسخ الصورة (يعتمد على المتصفح، الأفضل هو العرض للمستثمر)
+    function copyQR() {
+        alert("📸 يمكنك الآن أخذ لقطة شاشة للباركود أو حفظ الصورة");
+    }
+</script>
+
+</body>
+</html>
