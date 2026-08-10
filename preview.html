@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>معاينة تصميم التطبيق</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #D5DCF9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .sidebar { background-color: #A7B0CA; width: 80px; }
+        .invoice-card { background-color: white; border-radius: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .product-card { background-color: white; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: 0.3s; }
+        .product-card:hover { transform: translateY(-5px); }
+        .action-btn { background-color: #E58116; color: white; transition: 0.3s; }
+        .action-btn:hover { background-color: #c46d12; box-shadow: 0 4px 12px rgba(229, 129, 22, 0.4); }
+        .text-main { color: #725E54; }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden">
+
+    <!-- 1. Sidebar (Navigation) -->
+    <div class="sidebar flex flex-col items-center py-10 space-y-10 text-3xl">
+        <div class="cursor-pointer">🏠</div>
+        <div class="cursor-pointer">🍔</div>
+        <div class="cursor-pointer">📊</div>
+        <div class="mt-auto cursor-pointer">⚙️</div>
+    </div>
+
+    <!-- 2. Main Content (Menu) -->
+    <div class="flex-1 p-8 overflow-y-auto">
+        <div class="flex items-center gap-6 mb-8">
+            <h1 class="text-3xl font-bold text-main">قائمة الأصناف</h1>
+            <input type="text" placeholder="بحث عن مادة..." class="w-80 px-6 py-2 rounded-full border border-[#A7B0CA] outline-none">
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <!-- Product Card -->
+            <div class="product-card p-6 flex flex-col items-center text-center">
+                <span class="text-6xl mb-2">🍕</span>
+                <span class="font-bold text-main">بيتزا خضار</span>
+                <span class="text-[#E58116] font-bold my-2">45.00 ر.س</span>
+                <button class="w-full py-2 bg-[#A7B0CA] text-white rounded-lg text-sm">إضافة</button>
+            </div>
+            <!-- More Cards -->
+            <div class="product-card p-6 flex flex-col items-center text-center">
+                <span class="text-6xl mb-2">🍔</span>
+                <span class="font-bold text-main">برجر لحم</span>
+                <span class="text-[#E58116] font-bold my-2">32.00 ر.س</span>
+                <button class="w-full py-2 bg-[#A7B0CA] text-white rounded-lg text-sm">إضافة</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. Right Sidebar (Invoice) -->
+    <div class="w-[400px] p-6 h-full">
+        <div class="invoice-card h-full flex flex-col p-8">
+            <h2 class="text-2xl font-bold text-main mb-6">تفاصيل الفاتورة</h2>
+            
+            <div class="space-y-4 mb-8">
+                <label class="text-[#A7B0CA] text-sm">بيانات العميل:</label>
+                <input type="text" placeholder="رقم الهاتف" class="w-full p-3 rounded-lg border border-[#D5DCF9] outline-none">
+                <input type="text" placeholder="اسم الزبون" class="w-full p-3 rounded-lg border border-[#D5DCF9] outline-none">
+            </div>
+
+            <div class="flex-1 border-t border-b border-gray-100 py-4 italic text-gray-400 text-center">
+                لا توجد أصناف مضافة حالياً
+            </div>
+
+            <div class="mt-6 space-y-4">
+                <div class="flex justify-between items-center text-xl font-bold">
+                    <span class="text-main">المجموع:</span>
+                    <span class="text-[#E58116]">0.00 ر.س</span>
+                </div>
+                <button class="action-btn w-full py-5 rounded-2xl text-xl font-bold shadow-lg">إرسال الطلب للمطبخ</button>
+                <button class="w-full text-red-500 font-bold py-2">حذف الكل</button>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
