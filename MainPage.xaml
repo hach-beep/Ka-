@@ -78,7 +78,7 @@
                     <BoxView HeightRequest="1" Color="#D5DCF9"/>
                     <HorizontalStackLayout HorizontalOptions="SpaceBetween">
                         <Label Text="المجموع:" FontSize="20" FontAttributes="Bold" TextColor="#725E54"/>
-                        <Label Text="0.00 ر.س" FontSize="20" FontAttributes="Bold" TextColor="#E58116"/>
+                        <Label Text="0.00 د.ع" FontSize="20" FontAttributes="Bold" TextColor="#E58116"/>
                     </HorizontalStackLayout>
                     
                     <!-- THE IMPORTANT BUTTON -->
