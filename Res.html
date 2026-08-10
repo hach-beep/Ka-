@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة تحكم المطعم - Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Tajawal', sans-serif; background-color: #f0f4f8; }
+        .sidebar { background-color: #A7B0CA; }
+        .action-btn { background-color: #E58116; transition: 0.3s; }
+        .action-btn:hover { background-color: #c46d12; }
+        .secondary-btn { background-color: #725E54; }
+        .card { background-color: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body class="flex h-screen text-gray-800">
+
+    <!-- Sidebar Navigation -->
+    <nav class="sidebar w-20 md:w-64 flex flex-col items-center py-6 text-white">
+        <div class="mb-10 font-bold text-2xl">LOGO</div>
+        <div class="flex flex-col gap-6 w-full px-4">
+            <a href="#" class="bg-white/20 p-3 rounded-lg flex items-center gap-3"><span>🏠</span> <span class="hidden md:inline">الرئيسية</span></a>
+            <a href="#" class="p-3 rounded-lg flex items-center gap-3 hover:bg-white/10"><span>🍔</span> <span class="hidden md:inline">الطلبات</span></a>
+            <a href="#" class="p-3 rounded-lg flex items-center gap-3 hover:bg-white/10"><span>📊</span> <span class="hidden md:inline">التقارير</span></a>
+            <a href="#" class="p-3 rounded-lg flex items-center gap-3 hover:bg-white/10"><span>⚙️</span> <span class="hidden md:inline">الإعدادات</span></a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col md:flex-row overflow-hidden">
+        
+        <!-- Menu/Items Area -->
+        <section class="flex-1 p-6 overflow-y-auto">
+            <header class="flex justify-between items-center mb-8">
+                <h1 class="text-2xl font-bold text-[#725E54]">قائمة الطعام</h1>
+                <input type="text" placeholder="بحث عن صنف..." class="px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#A7B0CA] w-64">
+            </header>
+
+            <!-- Product Grid -->
+            <div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <!-- Example Item -->
+                <div class="card p-4 flex flex-col items-center cursor-pointer hover:scale-105 transition">
+                    <div class="w-24 h-24 bg-gray-100 rounded-full mb-3 flex items-center justify-center text-3xl">🍕</div>
+                    <h3 class="font-bold">بيتزا مارجريتا</h3>
+                    <p class="text-[#E58116] font-bold">45.00 ريال</p>
+                </div>
+                <div class="card p-4 flex flex-col items-center cursor-pointer hover:scale-105 transition">
+                    <div class="w-24 h-24 bg-gray-100 rounded-full mb-3 flex items-center justify-center text-3xl">🍔</div>
+                    <h3 class="font-bold">برجر دجاج</h3>
+                    <p class="text-[#E58116] font-bold">32.00 ريال</p>
+                </div>
+                <!-- Add more cards as needed -->
+            </div>
+        </section>
+
+        <!-- Right Side: Order Summary -->
+        <aside class="w-full md:w-96 bg-[#D5DCF9]/30 border-r border-gray-200 p-6 flex flex-col">
+            <h2 class="text-xl font-bold mb-6 text-[#725E54]">الطلب الحالي</h2>
+            
+            <!-- Customer Info -->
+            <div class="space-y-3 mb-6">
+                <input type="text" placeholder="اسم الزبون" class="w-full p-2 rounded-md border border-gray-300">
+                <input type="text" placeholder="رقم الهاتف" class="w-full p-2 rounded-md border border-gray-300">
+            </div>
+
+            <!-- Cart Items -->
+            <div class="flex-1 overflow-y-auto space-y-4 mb-6">
+                <div class="flex justify-between items-center bg-white p-3 rounded-lg shadow-sm">
+                    <div>
+                        <p class="font-bold text-sm">بيتزا مارجريتا</p>
+                        <p class="text-xs text-gray-500">العدد: 1</p>
+                    </div>
+                    <span class="font-bold">45 ريال</span>
+                </div>
+            </div>
+
+            <!-- Totals & Actions -->
+            <div class="border-t border-gray-300 pt-4 space-y-4">
+                <div class="flex justify-between text-lg font-bold">
+                    <span>المجموع:</span>
+                    <span>45.00 ريال</span>
+                </div>
+                <button class="action-btn w-full text-white py-4 rounded-xl font-bold text-lg shadow-lg">إرسال إلى المطبخ</button>
+                <div class="grid grid-cols-2 gap-2">
+                    <button class="secondary-btn text-white py-2 rounded-lg text-sm">طباعة الفاتورة</button>
+                    <button class="bg-red-500 text-white py-2 rounded-lg text-sm">حذف الطلب</button>
+                </div>
+            </div>
+        </aside>
+    </main>
+
+</body>
+          </html>
