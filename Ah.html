@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>لوحة التحكم الديناميكية</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #D5DCF9; font-family: 'Segoe UI', sans-serif; }
+        .sidebar { background-color: #A7B0CA; }
+        .text-main { color: #725E54; }
+        .accent-orange { color: #E58116; }
+        .btn-primary { background-color: #E58116; transition: 0.3s; }
+        .btn-primary:hover { background-color: #c46d12; transform: translateY(-2px); }
+        .card { background-color: white; border-radius: 18px; transition: 0.3s; }
+        .card:hover { transform: scale(1.03); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden">
+
+    <!-- 1. Side Navigation -->
+    <nav class="sidebar w-24 flex flex-col items-center py-10 space-y-12 shadow-xl">
+        <div class="text-4xl">🥘</div>
+        <div class="text-white text-2xl cursor-pointer">🏠</div>
+        <div class="text-white text-2xl cursor-pointer bg-white/20 p-3 rounded-xl">🍔</div>
+        <div class="text-white text-2xl cursor-pointer">📊</div>
+        <div class="mt-auto text-white text-2xl cursor-pointer">⚙️</div>
+    </nav>
+
+    <!-- 2. Main Menu Area -->
+    <main class="flex-1 p-8 overflow-y-auto">
+        <header class="flex justify-between items-center mb-10">
+            <h1 class="text-3xl font-bold text-main">قائمة الطعام الذكية</h1>
+            <input type="text" id="searchInput" onkeyup="filterItems()" placeholder="بحث عن صنف..." 
+                   class="w-96 px-6 py-3 rounded-full border-none shadow-md outline-none focus:ring-2 focus:ring-[#A7B0CA]">
+        </header>
+
+        <!-- THIS IS THE DYNAMIC GRID (Populated by JavaScript) -->
+        <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+            <!-- Items appear here -->
+        </div>
+    </main>
+
+    <!-- 3. Invoice Sidebar -->
+    <aside class="w-[400px] bg-white m-6 rounded-[30px] shadow-2xl p-8 flex flex-col">
+        <h2 class="text-2xl font-bold text-main mb-8 border-b pb-4">الطلب الحالي</h2>
+        
+        <div id="cartItems" class="flex-1 overflow-y-auto space-y-4 text-gray-400 italic">
+            السلة فارغة حالياً...
+        </div>
+
+        <div class="mt-8 pt-6 border-t border-gray-100 space-y-5">
+            <div class="flex justify-between items-center">
+                <span class="text-xl font-bold text-main">المجموع الكلي:</span>
+                <span id="totalPrice" class="text-2xl font-bold accent-orange">0 د.ع</span>
+            </div>
+            <button class="btn-primary w-full py-5 text-white rounded-2xl font-bold text-xl shadow-lg">إرسال للمطبخ</button>
+        </div>
+    </aside>
+
+    <script>
+        // 1. THIS IS THE "MOCK DATABASE" (Dynamic Data)
+        // In the real app, this will come from Ahmmad's Manager Dashboard
+        const products = [
+            { id: 1, name: "برجر كلاسيك", price: 7500, icon: "🍔" },
+            { id: 2, name: "بيتزا إيطالية", price: 12000, icon: "🍕" },
+            { id: 3, name: "كباب عراقي", price: 15000, icon: "🍢" },
+            { id: 4, name: "شاورما دجاج", price: 5000, icon: "🌯" },
+            { id: 5, name: "عصير برتقال", price: 3000, icon: "🍊" },
+            { id: 6, name: "سلطة يونانية", price: 4500, icon: "🥗" }
+        ];
+
+        let cart = [];
+
+        // 2. Function to Render Products Dynamically
+        function renderProducts(items) {
+            const grid = document.getElementById('productGrid');
+            grid.innerHTML = items.map(item => `
+                <div class="card p-6 flex flex-col items-center text-center shadow-sm">
+                    <span class="text-6xl mb-4">${item.icon}</span>
+                    <h3 class="text-lg font-bold text-main mb-1">${item.name}</h3>
+                    <p class="accent-orange font-bold text-xl mb-4">${item.price.toLocaleString()} د.ع</p>
+                    <button onclick="addToCart(${item.id})" class="w-full py-2 bg-[#A7B0CA] text-white rounded-lg hover:bg-[#8e99b8] font-bold">إضافة</button>
+                </div>
+            `).join('');
+        }
+
+        // 3. Search Logic
+        function filterItems() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = products.filter(p => p.name.includes(query));
+            renderProducts(filtered);
+        }
+
+        // 4. Cart Logic
+        function addToCart(id) {
+            const item = products.find(p => p.id === id);
+            cart.push(item);
+            updateCart();
+        }
+
+        function updateCart() {
+            const cartList = document.getElementById('cartItems');
+            const totalDisplay = document.getElementById('totalPrice');
+            
+            if(cart.length === 0) {
+                cartList.innerHTML = "السلة فارغة حالياً...";
+                totalDisplay.innerHTML = "0 د.ع";
+                return;
+            }
+
+            cartList.innerHTML = cart.map(item => `
+                <div class="flex justify-between items-center bg-[#F8F9FF] p-3 rounded-lg">
+                    <span class="font-bold text-main">${item.name}</span>
+                    <span class="accent-orange font-bold">${item.price.toLocaleString()}</span>
+                </div>
+            `).join('');
+
+            const total = cart.reduce((sum, item) => sum + item.price, 0);
+            totalDisplay.innerHTML = total.toLocaleString() + " د.ع";
+        }
+
+        // Initial Load
+        renderProducts(products);
+    </script>
+</body>
+</html>
