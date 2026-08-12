@@ -149,7 +149,19 @@
     <div class="content-card">
         <input type="text" id="pName" class="input-field" placeholder="الاسم الثلاثي للمريض">
         <input type="tel" id="pPhone" class="input-field" placeholder="رقم الهاتف">
-
+<!-- Type of Service Section -->
+<div class="section-header" style="margin-top: 10px;">
+    <h3>نوع المعالجة</h3>
+</div>
+<select id="pService" class="input-field" style="appearance: none; background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%237d8bb2%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-2.6H18.4c-5%200-9.3%201.8-12.8%205.1A17.6%2017.6%200%200%200%20.5%2085c0%204.9%201.8%209.2%205.1%2012.8L133%20238c3.5%203.5%207.8%205.4%2012.7%205.4s9.2-1.9%2012.7-5.4L287%2097.8c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22/%3E%3C/svg%3E'); background-repeat: no-repeat; background-position: left 15px top 50%; background-size: 12px auto;">
+    <option value="فحص عام">فحص عام</option>
+    <option value="تنظيف أسنان">تنظيف أسنان</option>
+    <option value="استشارة تقويم">استشارة تقويم</option>
+    <option value="حشوات تجميلية">حشوات تجميلية</option>
+    <option value="قلع أسنان">قلع أسنان</option>
+    <option value="تركيب أسنان">تركيب أسنان</option>
+    <option value="برد أسنان (جسر)">برد أسنان (جسر)</option>
+</select>
         <div class="section-header">
             <h3>اختر التاريخ</h3>
             <span id="currentMonth">فبراير 2026</span>
