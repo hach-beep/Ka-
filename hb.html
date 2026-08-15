@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Congratulations Graduate! 🎓</title>
+    <!-- Importing a nice font -->
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Poppins:wght@300;600&display=swap" rel="stylesheet">
+    <!-- Confetti Library -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f4f7f6;
+            text-align: center;
+            padding: 20px;
+            color: #333;
+        }
+
+        h1 { font-family: 'Dancing Script', cursive; color: #2c3e50; font-size: 3rem; margin-bottom: 10px; }
+        p.subtitle { margin-bottom: 30px; color: #7f8c8d; }
+
+        .envelope-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .envelope {
+            background: #ffffff;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 30px;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .envelope:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+            border-color: #3498db;
+        }
+
+        .envelope i { font-size: 2rem; display: block; margin-bottom: 10px; }
+
+        /* Modal Styles */
+        #modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            max-width: 500px;
+            position: relative;
+            animation: openLetter 0.5s ease-out;
+        }
+
+        @keyframes openLetter {
+            from { transform: scale(0.5); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 10px; right: 15px;
+            font-size: 24px; cursor: pointer; color: #999;
+        }
+
+        .letter-text { line-height: 1.6; font-size: 1.1rem; }
+    </style>
+</head>
+<body>
+
+    <h1>To My Favorite Graduate...</h1>
+    <p class="subtitle">I couldn't be there in person, so I built this for you. <br> Open these whenever you need them.</p>
+
+    <div class="envelope-grid" id="grid">
+        <!-- Envelopes will be injected here by JS -->
+    </div>
+
+    <div id="modal" onclick="closeModal()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <div class="letter-text" id="modal-text"></div>
+        </div>
+    </div>
+
+    <script>
+        const letters = [
+            {
+                title: "Open when you're feeling overwhelmed by the job hunt",
+                icon: "💼",
+                content: "Take a deep breath. You just finished a whole degree! That is proof that you can handle hard things. The right job is coming, and until then, I am your #1 fan. Don't let a 'no' make you forget how talented you are."
+            },
+            {
+                title: "Open when you miss me",
+                icon: "❤️",
+                content: "I'm probably missing you more. Close your eyes and remember the last time we laughed together. The distance is just temporary, but what we have is permanent. I'm only a message away!"
+            },
+            {
+                title: "Open when you want to celebrate your first paycheck",
+                icon: "💰",
+                content: "YESSS! Treat yourself to a nice coffee or a dinner! You worked so hard for this. I'm so proud of your independence and your hustle. Save a little, spend a little, and know I'm cheering for you!"
+            },
+            {
+                title: "Open when you're doubting your future",
+                icon: "🌟",
+                content: "Nobody has it all figured out on graduation day. You don't need to know where you'll be in 5 years; you just need to know what you're doing tomorrow. You are capable of amazing things."
+            },
+            {
+                title: "Open right after you get your diploma",
+                icon: "🎓",
+                content: "YOU DID IT! Look around. Look at your friends, your family, and know that I am screaming 'CONGRATULATIONS' from across the world! I am the luckiest person to be with someone as smart as you."
+            }
+        ];
+
+        const grid = document.getElementById('grid');
+        const modal = document.getElementById('modal');
+        const modalText = document.getElementById('modal-text');
+
+        // Generate Envelopes
+        letters.forEach((letter, index) => {
+            const div = document.createElement('div');
+            div.className = 'envelope';
+            div.innerHTML = `<i>${letter.icon}</i><h3>${letter.title}</h3>`;
+            div.onclick = () => openModal(letter.content);
+            grid.appendChild(div);
+        });
+
+        function openModal(content) {
+            modalText.innerText = content;
+            modal.style.display = 'flex';
+            // Trigger Confetti
+            confetti({
+                particleCount: 150,
+                spread: 70,
+                origin: { y: 0.6 }
+            });
+        }
+
+        function closeModal() {
+            modal.style.display = 'none';
+        }
+    </script>
+</body>
+</html>
