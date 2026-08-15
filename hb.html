@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Congratulations Graduate! 🎓</title>
-    <!-- Importing a nice font -->
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Poppins:wght@300;600&display=swap" rel="stylesheet">
-    <!-- Confetti Library -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     
     <style>
@@ -17,10 +15,8 @@
             padding: 20px;
             color: #333;
         }
-
         h1 { font-family: 'Dancing Script', cursive; color: #2c3e50; font-size: 3rem; margin-bottom: 10px; }
-        p.subtitle { margin-bottom: 30px; color: #7f8c8d; }
-
+        .subtitle { margin-bottom: 30px; color: #7f8c8d; }
         .envelope-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -28,7 +24,6 @@
             max-width: 1000px;
             margin: 0 auto;
         }
-
         .envelope {
             background: #ffffff;
             border: 2px solid #e0e0e0;
@@ -36,19 +31,14 @@
             padding: 30px;
             cursor: pointer;
             transition: transform 0.3s, box-shadow 0.3s;
-            position: relative;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
-
         .envelope:hover {
             transform: translateY(-5px);
             box-shadow: 0 10px 20px rgba(0,0,0,0.15);
             border-color: #3498db;
         }
-
-        .envelope i { font-size: 2rem; display: block; margin-bottom: 10px; }
-
-        /* Modal Styles */
+        .envelope i { font-size: 2.5rem; display: block; margin-bottom: 10px; }
         #modal {
             display: none;
             position: fixed;
@@ -59,38 +49,28 @@
             z-index: 100;
             padding: 20px;
         }
-
         .modal-content {
             background: white;
             padding: 40px;
             border-radius: 20px;
             max-width: 500px;
             position: relative;
-            animation: openLetter 0.5s ease-out;
+            text-align: center;
         }
-
-        @keyframes openLetter {
-            from { transform: scale(0.5); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
-        }
-
         .close-btn {
             position: absolute;
             top: 10px; right: 15px;
             font-size: 24px; cursor: pointer; color: #999;
         }
-
-        .letter-text { line-height: 1.6; font-size: 1.1rem; }
+        .letter-text { line-height: 1.6; font-size: 1.1rem; white-space: pre-line; }
     </style>
 </head>
 <body>
 
     <h1>To My Favorite Graduate...</h1>
-    <p class="subtitle">I couldn't be there in person, but promise I will be around when ever you need me</p>
+    <p class="subtitle">I couldn't be there in person, but promise I will be around whenever you need me.</p>
 
-    <div class="envelope-grid" id="grid">
-        <!-- Envelopes will be injected here by JS -->
-    </div>
+    <div class="envelope-grid" id="grid"></div>
 
     <div id="modal" onclick="closeModal()">
         <div class="modal-content" onclick="event.stopPropagation()">
@@ -104,46 +84,45 @@
             {
                 title: "Open when you're feeling overwhelmed by the job",
                 icon: "💼",
-                content: "Take a deep breath. You just finished a whole degree! right it was awful most of the time but it is proof that you can handle hard things. , thats just a small handle you will get cross it, I know you will figure it out, until you be come the CEO of your own company, I am your #1 fan. Don't let a 'no' make you forget how talented you are."
+                content: "Take a deep breath. You just finished a whole degree! right it was awful most of the time but it is proof that you can handle hard things. thats just a small handle you will get cross it, I know you will figure it out and maybe become the CEO of your own company. Don't let a 'no' make you forget how talented you are."
             },
             {
                 title: "Open when you miss me",
                 icon: "❤️",
-                content: "I'm probably missing you more. Close your eyes and remember the I am always loving you. The distance is just temporary, but what we have is permanent. I'm only a message away!"
+                content: "I'm probably missing you more. Close your eyes and remember that I am always loving you. The distance is just temporary, but what we have is permanent. I'm only a message away!"
             },
             {
                 title: "Open when you want to celebrate your first paycheck from full job",
                 icon: "💰",
-                content: "YESSS! Treat yourself to a nice a dinner or trip it could be to iraq 😅! You worked so hard for this. I'm so proud of your independence and your hustle. Save a little, spend a little, and know I'm cheering for you!"
+                content: "YESSS! Treat yourself to a nice dinner or trip it could be to iraq 😂! You worked so hard for this. I'm so proud of your independence and your hustle. Save a little, spend a little, and know I'm cheering for you!"
             },
             {
                 title: "Open when you're doubting your future",
                 icon: "🌟",
-                content: "Nobody has it all figured out on graduation day. You don't need to know where you'll be in 5 years; you just need to know what you're doing tomorrow. You are capable of amazing things.just don't aim for perfect but things little by little you will find yourself on top of my world you are always there no matter where your decision will lead you, if you have an idea do it the worst that could happen is not working out"
+                content: "Nobody has it all figured out on graduation day. You don't need to know where you'll be in 5 years; you just need to know what you're doing tomorrow. You are capable of amazing things. just don't aim for perfect, the worst that could happen is not working out."
             },
             {
                 title: "Open if you decide to take master",
                 icon: "🎓",
                 content: "I am including this because I know you will, maybe not now ont even soon, perhaps when you are 60 hehehe but one day will will make that decision and i am telling you you will be dr, i believe in your brain."
-            }
+            },
             {
-            title: "open at our wedding day",
-                icon: "🫣"
-                 content: "I can't believe that this is happening, I am telling you I doubted it a lot never thought that this day eill come, actually I am lying here I thought about it oftenly your smile your suit your Walk towards me I thought about everything, and as you are going to hold me hand I want to tell you you can't run away anymore yoh are all mine forever, its sweet pain I promise, go easy on me, and since today we will solve everything we survived along distance relationship anything else will be easy my husband 😁", 
-                     },
-                 {
-                     title: "open it if you have a long night"
-                    icon: "🫩" 
-                     content: " you are idiot even to think about opening this, just text me I probably will be waiting you, in case you are scared of that than just think about this as you are awake, What is the difference between a student and an intern? you will not get it i know that you are coming straight to the answer As a student, you pay to have no idea what you’re doing. As an intern, you get paid to have no idea what you’re doing! now go to sleep better to count 100 cheap 🐑 have a good night 
-        },
+                title: "open at our wedding day",
+                icon: "💍",
+                content: "I can't believe that this is happening, I am telling you I doubted it a lot never thought that this day eill come, actually I am lying here I thought about it oftenly your smile your suit your Walk towards me I am going to cry so go easy on me, and since today we will solve everything we survived along distance relationship anything else will be easy my husband. everything, and as you are going to hold me hand I want to tell you you can't run away anymore yoh are all mine forever, its sweet pain."
+            },
+            {
+                title: "open it if you have a long night",
+                icon: "😴",
+                content: "you are idiot even to think about opening this, just text me I probably will be waiting you, in case you are scared of that than just think about this as you are awake, What is the difference between a student and an intern? you will not get it i know that you are coming straight to the answer As a student, you pay to have no idea what you're doing. As an intern, you get paid to have no idea what you're doing! now go to sleep better to count 100 cheap 🐑 have a good night"
+            }
         ];
 
         const grid = document.getElementById('grid');
         const modal = document.getElementById('modal');
         const modalText = document.getElementById('modal-text');
 
-        // Generate Envelopes
-        letters.forEach((letter, index) => {
+        letters.forEach((letter) => {
             const div = document.createElement('div');
             div.className = 'envelope';
             div.innerHTML = `<i>${letter.icon}</i><h3>${letter.title}</h3>`;
@@ -154,7 +133,6 @@
         function openModal(content) {
             modalText.innerText = content;
             modal.style.display = 'flex';
-            // Trigger Confetti
             confetti({
                 particleCount: 150,
                 spread: 70,
@@ -164,16 +142,7 @@
 
         function closeModal() {
             modal.style.display = 'none';
-      // Add this to your JS to show a live timer
-function updateTimer() {
-    const gradDate = new Date("2023-10-27T12:00:00"); // Set this to his ceremony time
-    const now = new Date();
-    const diff = now - gradDate;
-    
-    // Logic to display days, hours, mins...
-}
         }
     </script>
-    
 </body>
 </html>
