@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Clinco - Professional Booking</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+    <style>
+        :root { --primary: #5c86ff; --bg: #f9fbff; --text: #2c3e50; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 0; color: var(--text); }
+        
+        /* Header & Image */
+        .header-image { width: 100%; height: 250px; background: url('https://via.placeholder.com/600x400/000/fff?text=Dr.+Photo') center/cover; position: relative; }
+        .header-overlay { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.8)); padding: 20px; color: white; }
+        
+        .container { padding: 20px; max-width: 500px; margin: -30px auto 0; background: white; border-top-left-radius: 30px; border-top-right-radius: 30px; position: relative; }
+
+        label { display: block; margin-top: 15px; font-weight: 600; font-size: 0.9rem; }
+        input, select { width: 100%; padding: 12px; margin-top: 8px; border: 1px solid #eee; border-radius: 12px; background: #f8faff; box-sizing: border-box; font-size: 1rem; }
+
+        /* Date Selector Pills */
+        .date-container { display: flex; overflow-x: auto; gap: 10px; padding: 10px 0; scrollbar-width: none; }
+        .date-pill { min-width: 70px; padding: 15px 5px; background: white; border: 1px solid #eee; border-radius: 15px; text-align: center; cursor: pointer; }
+        .date-pill.active { background: var(--primary); color: white; border-color: var(--primary); }
+        .date-pill span { display: block; font-size: 0.8rem; }
+        .date-pill strong { font-size: 1.1rem; }
+
+        /* VIP vs Normal Toggle */
+        .type-container { display: flex; gap: 15px; margin-top: 15px; }
+        .type-box { flex: 1; padding: 15px; border: 1px solid #eee; border-radius: 15px; text-align: center; position: relative; cursor: pointer; }
+        .type-box.active { border: 2px solid var(--primary); background: #f0f4ff; }
+        .info-icon { position: absolute; top: 5px; right: 5px; background: #ddd; color: white; width: 18px; height: 18px; border-radius: 50%; font-size: 12px; line-height: 18px; cursor: help; }
+
+        /* Buttons */
+        .btn-confirm { background: var(--primary); color: white; border: none; padding: 18px; border-radius: 15px; width: 100%; margin-top: 25px; font-weight: bold; font-size: 1.1rem; cursor: pointer; box-shadow: 0 10px 20px rgba(92, 134, 255, 0.3); }
+        .btn-back { background: none; border: none; color: #7f8c8d; padding: 10px; margin-top: 10px; cursor: pointer; width: 100%; text-decoration: underline; }
+
+        /* Info Modal */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 100; align-items: center; justify-content: center; }
+        .modal-content { background: white; padding: 20px; border-radius: 20px; width: 80%; max-width: 300px; text-align: center; }
+
+        /* Success Screen */
+        #success-screen { display: none; padding: 40px 20px; text-align: center; }
+    </style>
+</head>
+<body>
+
+    <div id="booking-ui">
+        <div class="header-image">
+            <div class="header-overlay">
+                <h2 id="dr-name">د. محمد برهان</h2>
+                <p>طب وجراحة وتجميل الأسنان</p>
+            </div>
+        </div>
+
+        <div class="container">
+            <label>الاسم الثلاثي للمريض</label>
+            <input type="text" id="name" placeholder="أدخل اسمك الكامل">
+
+            <label>رقم الهاتف</label>
+            <input type="tel" id="phone" placeholder="0770XXXXXXX">
+
+            <label>اختر التاريخ</label>
+            <div class="date-container" id="date-list">
+                <!-- Dates will be generated here -->
+            </div>
+
+            <label>فئة الحجز</label>
+            <div class="type-container">
+                <div class="type-box active" onclick="setType('Normal', this)">
+                    <strong>Normal</strong>
+                    <p style="font-size: 0.7rem; margin: 5px 0;">حجز اعتيادي</p>
+                </div>
+                <div class="type-box" onclick="setType('VIP', this)">
+                    <span class="info-icon" onclick="showInfo(event)">i</span>
+                    <strong>VIP</strong>
+                    <p style="font-size: 0.7rem; margin: 5px 0;">حجز مستعجل</p>
+                </div>
+            </div>
+
+            <button class="btn-confirm" onclick="handleBooking()">حجز الموعد الآن</button>
+            <button class="btn-back" onclick="history.back()">العودة للخلف</button>
+        </div>
+    </div>
+
+    <!-- Success Message -->
+    <div id="success-screen" class="container">
+        <h1 style="color: var(--primary);">تم الحجز بنجاح!</h1>
+        <div id="ticket-details" style="background: #f8faff; padding: 20px; border-radius: 20px; text-align: left; margin: 20px 0;"></div>
+        <p id="time-warning" style="font-weight: bold; color: #e67e22;"></p>
+        <button class="btn-confirm" onclick="location.reload()">حجز جديد</button>
+        <button class="btn-back" onclick="location.href='index.html'">الرئيسية</button>
+    </div>
+
+    <!-- Info Modal -->
+    <div id="info-modal" class="modal" onclick="this.style.display='none'">
+        <div class="modal-content">
+            <h3 style="color: var(--primary);">مميزات الـ VIP</h3>
+            <p>يتم تقديم الموعد للساعة الأولى من افتتاح العيادة. السعر يختلف عن الحجز الاعتيادي.</p>
+            <button class="btn-confirm" style="padding: 10px;">فهمت</button>
+        </div>
+    </div>
+
+    <script>
+        // FIREBASE CONFIG
+        const firebaseConfig = {
+            apiKey: "AIzaSyAWcgHZN1YNaoCYbw5_svArm-DOHwI735o",
+            authDomain: "clinco-app.firebaseapp.com",
+            projectId: "clinco-app",
+            storageBucket: "clinco-app.firebasestorage.app",
+            messagingSenderId: "293678509413",
+            appId: "1:293678509413:web:7d8b9b77e57a68a215c58c"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        let selectedDate = "";
+        let selectedType = "Normal";
+
+        // 1. Generate next 7 days (Skipping Friday)
+        const dateList = document.getElementById('date-list');
+        for (let i = 0; i < 7; i++) {
+            let d = new Date();
+            d.setDate(d.getDate() + i);
+            if(d.getDay() === 5) continue; // Skip Friday
+
+            let dayName = d.toLocaleDateString('ar-EG', { weekday: 'short' });
+            let dayNum = d.getDate();
+            let fullDate = d.toISOString().split('T')[0];
+
+            let pill = document.createElement('div');
+            pill.className = 'date-pill';
+            if(i === 0) { pill.classList.add('active'); selectedDate = fullDate; }
+            pill.onclick = function() {
+                document.querySelectorAll('.date-pill').forEach(p => p.classList.remove('active'));
+                pill.classList.add('active');
+                selectedDate = fullDate;
+            };
+            pill.innerHTML = `<span>${dayName}</span><strong>${dayNum}</strong>`;
+            dateList.appendChild(pill);
+        }
+
+        function setType(type, el) {
+            document.querySelectorAll('.type-box').forEach(b => b.classList.remove('active'));
+            el.classList.add('active');
+            selectedType = type;
+        }
+
+        function showInfo(e) {
+            e.stopPropagation();
+            document.getElementById('info-modal').style.display = 'flex';
+        }
+
+        async function handleBooking() {
+            const name = document.getElementById('name').value;
+            const phone = document.getElementById('phone').value;
+
+            if(!name || !phone) return alert("يرجى إكمال البيانات");
+
+            // Logic for Time Block Message
+            let timeMsg = "";
+            if(selectedType === "VIP") {
+                timeMsg = "ستصلك رسالة بين الساعة 3:00 - 3:30 مساءً لتأكيد دخولك.";
+            } else {
+                timeMsg = "ستصلك رسالة بين الساعة 4:00 - 7:30 مساءً لتأكيد موعدك.";
+            }
+
+            try {
+                await db.collection("appointments").add({
+                    name, phone, date: selectedDate, type: selectedType, 
+                    status: "Home", timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                document.getElementById('booking-ui').style.display = 'none';
+                document.getElementById('success-screen').style.display = 'block';
+                document.getElementById('ticket-details').innerHTML = `
+                    <p><b>المريض:</b> ${name}</p>
+                    <p><b>التاريخ:</b> ${selectedDate}</p>
+                    <p><b>نوع الحجز:</b> ${selectedType}</p>
+                `;
+                document.getElementById('time-warning').innerText = timeMsg;
+
+            } catch (e) { alert("حدث خطأ في الاتصال"); }
+        }
+    </script>
+</body>
+  </html>
