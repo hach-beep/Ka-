@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>حجز موعد - د. محمد برهان</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+    <style>
+        :root { --main-blue: #5b8dfa; --bg-light: #f8f9fb; --text-dark: #1a1a1a; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #fff; margin: 0; padding: 0; color: var(--text-dark); }
+        
+        /* Header Image Section */
+        .dr-header { width: 100%; height: 320px; background: url('https://via.placeholder.com/600x800/222/fff?text=Dr.+Photo') center/cover; position: relative; }
+        .dr-header::after { content: ""; position: absolute; bottom: 0; left: 0; right: 0; height: 100px; background: linear-gradient(transparent, #fff); }
+        .dr-info { position: absolute; bottom: 40px; right: 20px; color: white; text-shadow: 0 2px 4px rgba(0,0,0,0.5); z-index: 2; }
+        .dr-info h1 { margin: 0; font-size: 1.8rem; }
+
+        /* Main Form Container */
+        .form-container { padding: 0 20px 100px; margin-top: -20px; background: #fff; border-top-left-radius: 30px; border-top-right-radius: 30px; position: relative; z-index: 3; }
+
+        .section-title { font-weight: bold; font-size: 1.1rem; margin: 25px 0 10px; display: block; }
+        
+        input, select { width: 100%; padding: 15px; border: 1px solid #f0f0f0; border-radius: 15px; background: var(--bg-light); font-size: 1rem; box-sizing: border-box; outline: none; margin-bottom: 15px; }
+
+        /* Date Scroller */
+        .date-scroller { display: flex; gap: 12px; overflow-x: auto; padding: 10px 0; scrollbar-width: none; }
+        .date-scroller::-webkit-scrollbar { display: none; }
+        .date-card { min-width: 80px; padding: 15px 5px; border-radius: 20px; background: var(--bg-light); text-align: center; border: 1px solid #f0f0f0; cursor: pointer; }
+        .date-card.active { background: var(--main-blue); color: white; }
+        .date-card span { display: block; font-size: 0.8rem; margin-bottom: 5px; opacity: 0.8; }
+        .date-card strong { font-size: 1.2rem; }
+
+        /* Time Grid */
+        .time-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 10px; }
+        .time-slot { padding: 15px 5px; border-radius: 15px; border: 1px solid #f0f0f0; text-align: center; font-size: 0.9rem; cursor: pointer; transition: 0.2s; }
+        .time-slot.active { background: var(--main-blue); color: white; border-color: var(--main-blue); }
+        .time-slot.booked { opacity: 0.3; pointer-events: none; text-decoration: line-through; }
+
+        /* VIP/Normal Selection */
+        .booking-types { display: flex; gap: 15px; margin-top: 10px; }
+        .type-btn { flex: 1; padding: 15px; border-radius: 15px; border: 2px solid #f0f0f0; text-align: center; position: relative; cursor: pointer; }
+        .type-btn.active { border-color: var(--main-blue); background: #f0f4ff; }
+        .info-btn { position: absolute; top: 5px; left: 5px; background: #ddd; color: #fff; width: 20px; height: 20px; border-radius: 50%; font-size: 12px; line-height: 20px; }
+
+        /* Footer Button */
+        .footer-action { position: fixed; bottom: 0; left: 0; right: 0; padding: 20px; background: white; box-shadow: 0 -5px 15px rgba(0,0,0,0.05); }
+        .btn-submit { background: linear-gradient(to left, #5b8dfa, #4a75d1); color: white; border: none; width: 100%; padding: 18px; border-radius: 20px; font-size: 1.1rem; font-weight: bold; cursor: pointer; box-shadow: 0 5px 15px rgba(91, 141, 250, 0.4); }
+        
+        .back-link { text-align: center; margin-top: 10px; font-size: 0.9rem; color: #888; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div class="dr-header">
+        <div class="dr-info">
+            <h1>د. محمد برهان</h1>
+            <span>طب وجراحة وتجميل الأسنان</span>
+        </div>
+    </div>
+
+    <div class="form-container">
+        <label class="section-title">المعلومات الأساسية</label>
+        <input type="text" id="p-name" placeholder="الاسم الثلاثي للمريض">
+        <input type="tel" id="p-phone" placeholder="رقم الهاتف">
+
+        <label class="section-title">نوع المعالجة</label>
+        <select id="p-treatment">
+            <option>فحص عام</option>
+            <option>تنظيف وتبييض</option>
+            <option>حشوات تجميلية</option>
+            <option>تقويم أسنان</option>
+        </select>
+
+        <label class="section-title">اختر التاريخ <small style="float:left; color:#888;">فبراير 2025</small></label>
+        <div class="date-scroller" id="date-list"></div>
+
+        <label class="section-title">نوع الحجز</label>
+        <div class="booking-types">
+            <div class="type-btn active" id="type-normal" onclick="selectType('Normal')">
+                <strong>Normal</strong><br><small>حجز اعتيادي</small>
+            </div>
+            <div class="type-btn" id="type-vip" onclick="selectType('VIP')">
+                <span class="info-btn" onclick="alert('VIP: يتم استدعاؤك في الساعة الأولى من افتتاح العيادة.')">i</span>
+                <strong>VIP</strong><br><small>حجز مستعجل</small>
+            </div>
+        </div>
+
+        <label class="section-title">اختر الوقت <small id="slot-count" style="float:left; color:var(--main-blue);">12 متاح</small></label>
+        <div class="time-grid" id="time-grid">
+            <!-- Times will be generated here -->
+        </div>
+
+        <div class="back-link" onclick="history.back()">العودة للخلف</div>
+    </div>
+
+    <div class="footer-action">
+        <button class="btn-submit" onclick="submitBooking()">حجز الموعد الآن</button>
+    </div>
+
+    <script>
+        // CONFIG
+        const firebaseConfig = {
+            apiKey: "AIzaSyAWcgHZN1YNaoCYbw5_svArm-DOHwI735o",
+            authDomain: "clinco-app.firebaseapp.com",
+            projectId: "clinco-app",
+            storageBucket: "clinco-app.firebasestorage.app",
+            messagingSenderId: "293678509413",
+            appId: "1:293678509413:web:7d8b9b77e57a68a215c58c"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        let selectedDate = "";
+        let selectedTime = "";
+        let selectedType = "Normal";
+
+        // 1. Setup Dates
+        const dateContainer = document.getElementById('date-list');
+        for (let i = 0; i < 7; i++) {
+            let d = new Date();
+            d.setDate(d.getDate() + i);
+            if(d.getDay() === 5) continue;
+            let dayName = d.toLocaleDateString('ar-EG', { weekday: 'short' });
+            let dateStr = d.toISOString().split('T')[0];
+            
+            let card = document.createElement('div');
+            card.className = `date-card ${i===0?'active':''}`;
+            if(i===0) selectedDate = dateStr;
+            card.onclick = () => {
+                document.querySelectorAll('.date-card').forEach(c => c.classList.remove('active'));
+                card.classList.add('active');
+                selectedDate = dateStr;
+            };
+            card.innerHTML = `<span>${dayName}</span><strong>${d.getDate()}</strong>`;
+            dateContainer.appendChild(card);
+        }
+
+        // 2. Setup Time Grid
+        const timeGrid = document.getElementById('time-grid');
+        const times = ["2:00 م", "2:30 م", "3:00 م", "3:30 م", "4:00 م", "4:30 م", "5:00 م", "5:30 م", "6:00 م", "6:30 م", "7:00 م", "7:30 م"];
+        times.forEach(t => {
+            let slot = document.createElement('div');
+            slot.className = 'time-slot';
+            slot.innerText = t;
+            slot.onclick = () => {
+                document.querySelectorAll('.time-slot').forEach(s => s.classList.remove('active'));
+                slot.classList.add('active');
+                selectedTime = t;
+            };
+            timeGrid.appendChild(slot);
+        });
+
+        function selectType(val) {
+            selectedType = val;
+            document.getElementById('type-normal').classList.toggle('active', val === 'Normal');
+            document.getElementById('type-vip').classList.toggle('active', val === 'VIP');
+        }
+
+        async function submitBooking() {
+            const name = document.getElementById('p-name').value;
+            const phone = document.getElementById('p-phone').value;
+            const treat = document.getElementById('p-treatment').value;
+
+            if(!name || !phone || !selectedTime) return alert("يرجى ملء كافة البيانات واختيار الوقت");
+
+            await db.collection("appointments").add({
+                name, phone, treatment: treat, date: selectedDate, time: selectedTime, 
+                type: selectedType, status: "Home", timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            });
+
+            alert(`تم الحجز بنجاح!\nالاسم: ${name}\nالموعد: ${selectedDate} الساعة ${selectedTime}`);
+            location.href = "index.html";
+        }
+    </script>
+</body>
+</html>
