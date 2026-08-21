@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Private Medical Settings</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --navy: #013061;
+            --sky-blue: #93CAFF;
+            --ice-blue: #EEFCFF;
+            --slate-gray: #64748B;
+            --soft-gray: #E2E8F0;
+            --white: #FFFFFF;
+            --holiday-red: #F87171;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--ice-blue);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 500px;
+            background-color: var(--ice-blue);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* --- THE WAVE HEADER (From your Sketch) --- */
+        .header {
+            background-color: var(--navy);
+            color: white;
+            padding: 40px 30px 60px 30px;
+            position: relative;
+        }
+
+        .wave-divider {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            line-height: 0;
+        }
+
+        .wave-divider svg {
+            display: block;
+            width: 100%;
+            height: 40px;
+        }
+
+        .profile-section {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .avatar {
+            width: 60px;
+            height: 60px;
+            background-color: var(--sky-blue);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--navy);
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        /* --- SETTINGS CONTENT --- */
+        .content {
+            padding: 20px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .section-label {
+            color: var(--slate-gray);
+            font-size: 0.75rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            margin: 20px 0 10px 5px;
+            text-transform: uppercase;
+        }
+
+        .settings-card {
+            background: var(--white);
+            border-radius: 16px;
+            border: 1px solid var(--soft-gray);
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        .setting-row {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            gap: 15px;
+            cursor: pointer;
+            transition: background 0.2s;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .setting-row:not(:last-child) {
+            border-bottom: 1px solid var(--soft-gray);
+        }
+
+        .setting-row:hover {
+            background-color: #f8fafc;
+        }
+
+        .icon-box {
+            width: 40px;
+            height: 40px;
+            background-color: var(--ice-blue);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--navy);
+        }
+
+        .setting-info {
+            flex: 1;
+        }
+
+        .setting-title {
+            display: block;
+            color: var(--navy);
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .setting-desc {
+            display: block;
+            color: var(--slate-gray);
+            font-size: 0.8rem;
+        }
+
+        /* --- THE HOLIDAY TOGGLE & BUTTON --- */
+        .holiday-notice {
+            margin: 10px;
+            padding: 12px;
+            background-color: #fff5f5;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.8rem;
+            color: var(--slate-gray);
+            border: 1px solid #fee2e2;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--holiday-red);
+            border-radius: 50%;
+        }
+
+        .disabled-state {
+            opacity: 0.5;
+            pointer-events: none; /* Makes it unclickable */
+            filter: grayscale(1);
+        }
+
+        /* --- SWITCH TOGGLE --- */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 20px;
+        }
+
+        .switch input { opacity: 0; width: 0; height: 0; }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: var(--soft-gray);
+            transition: .4s;
+            border-radius: 20px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 14px; width: 14px;
+            left: 3px; bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider { background-color: var(--navy); }
+        input:checked + .slider:before { transform: translateX(20px); }
+
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <!-- Header with the Wave Shape from your sketch -->
+    <div class="header">
+        <div class="profile-section">
+            <div class="avatar">JD</div>
+            <div>
+                <h2 style="margin: 0; font-size: 1.2rem;">Dr. John Doe</h2>
+                <p style="margin: 0; font-size: 0.8rem; color: var(--sky-blue);">Clinic Administrator</p>
+            </div>
+        </div>
+
+        <div class="wave-divider">
+            <svg viewBox="0 0 500 150" preserveAspectRatio="none">
+                <path d="M0,150 C150,150 200,0 500,150 L500,150 L0,150 Z" fill="var(--ice-blue)"></path>
+            </svg>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="section-label">Schedule Control</div>
+        <div class="settings-card">
+            <!-- Holiday Toggle -->
+            <div class="setting-row" style="cursor: default;">
+                <div class="icon-box"><i class="fa-solid fa-calendar-check"></i></div>
+                <div class="setting-info">
+                    <span class="setting-title">Auto-Holiday Sync</span>
+                    <span class="setting-desc">Close clinic on public holidays</span>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" id="holidayToggle" checked onchange="toggleHoliday()">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <!-- Holiday Notice (The part that becomes unclickable) -->
+            <div id="holidayBanner" class="holiday-notice">
+                <div class="status-dot"></div>
+                <span>Next Closure: <b>July 4th (National Day)</b></span>
+            </div>
+        </div>
+
+        <div class="section-label">Account Security</div>
+        <div class="settings-card">
+            <a href="#" class="setting-row">
+                <div class="icon-box"><i class="fa-solid fa-shield-halved"></i></div>
+                <div class="setting-info">
+                    <span class="setting-title">Two-Factor Auth</span>
+                    <span class="setting-desc">Add a layer of patient data security</span>
+                </div>
+                <i class="fa-solid fa-chevron-right" style="color: var(--soft-gray);"></i>
+            </a>
+            <a href="#" class="setting-row">
+                <div class="icon-box"><i class="fa-solid fa-bell"></i></div>
+                <div class="setting-info">
+                    <span class="setting-title">Booking Alerts</span>
+                    <span class="setting-desc">Instant SMS for new appointments</span>
+                </div>
+                <i class="fa-solid fa-chevron-right" style="color: var(--soft-gray);"></i>
+            </a>
+        </div>
+        
+        <p style="text-align: center; color: var(--slate-gray); font-size: 0.7rem; margin-top: 30px;">
+            Patient Data Encrypted (AES-256)
+        </p>
+    </div>
+</div>
+
+<script>
+    function toggleHoliday() {
+        const isChecked = document.getElementById('holidayToggle').checked;
+        const banner = document.getElementById('holidayBanner');
+        
+        if(isChecked) {
+            banner.classList.remove('disabled-state');
+        } else {
+            banner.classList.add('disabled-state');
+        }
+    }
+</script>
+
+</body>
+  </html>
