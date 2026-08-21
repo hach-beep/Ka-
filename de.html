@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Private Medical Settings</title>
+    <title>Private Medical Glass UI</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
@@ -11,286 +11,243 @@
             --sky-blue: #93CAFF;
             --ice-blue: #EEFCFF;
             --slate-gray: #64748B;
-            --soft-gray: #E2E8F0;
             --white: #FFFFFF;
-            --holiday-red: #F87171;
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.4);
         }
 
-        * {
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        body {
-            background-color: var(--ice-blue);
+        body, html {
             margin: 0;
-            display: flex;
-            justify-content: center;
-            min-height: 100vh;
-        }
-
-        .app-container {
-            width: 100%;
-            max-width: 500px;
+            padding: 0;
+            height: 100%;
+            font-family: 'Inter', -apple-system, sans-serif;
             background-color: var(--ice-blue);
-            position: relative;
-            overflow: hidden;
+            overflow: hidden; /* Prevents double scroll with the panel */
         }
 
-        /* --- THE WAVE HEADER (From your Sketch) --- */
+        /* --- THE WAVE HEADER --- */
         .header {
             background-color: var(--navy);
+            height: 35vh;
+            padding: 40px 25px;
             color: white;
-            padding: 40px 30px 60px 30px;
             position: relative;
         }
 
-        .wave-divider {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            line-height: 0;
-        }
-
-        .wave-divider svg {
-            display: block;
-            width: 100%;
-            height: 40px;
-        }
-
-        .profile-section {
+        .profile-header {
             display: flex;
             align-items: center;
-            gap: 20px;
+            gap: 15px;
         }
 
-        .avatar {
-            width: 60px;
-            height: 60px;
-            background-color: var(--sky-blue);
-            border-radius: 50%;
+        .avatar-glow {
+            width: 50px;
+            height: 50px;
+            border-radius: 15px;
+            background: linear-gradient(135deg, var(--sky-blue), #fff);
             display: flex;
             align-items: center;
             justify-content: center;
             color: var(--navy);
             font-weight: bold;
-            font-size: 1.2rem;
+            box-shadow: 0 0 20px rgba(147, 202, 255, 0.4);
         }
 
-        /* --- SETTINGS CONTENT --- */
-        .content {
-            padding: 20px;
+        .wave-svg {
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 100px;
+        }
+
+        /* --- GRID BLOCKS --- */
+        .container {
+            padding: 0 20px;
+            margin-top: -30px;
             position: relative;
-            z-index: 2;
+            z-index: 10;
         }
 
-        .section-label {
-            color: var(--slate-gray);
-            font-size: 0.75rem;
-            font-weight: 800;
-            letter-spacing: 1px;
-            margin: 20px 0 10px 5px;
-            text-transform: uppercase;
-        }
-
-        .settings-card {
-            background: var(--white);
-            border-radius: 16px;
-            border: 1px solid var(--soft-gray);
-            overflow: hidden;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-        }
-
-        .setting-row {
-            display: flex;
-            align-items: center;
-            padding: 16px;
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
             gap: 15px;
-            cursor: pointer;
-            transition: background 0.2s;
-            text-decoration: none;
-            color: inherit;
         }
 
-        .setting-row:not(:last-child) {
-            border-bottom: 1px solid var(--soft-gray);
-        }
-
-        .setting-row:hover {
-            background-color: #f8fafc;
-        }
-
-        .icon-box {
-            width: 40px;
-            height: 40px;
-            background-color: var(--ice-blue);
-            border-radius: 10px;
+        .block {
+            background: var(--white);
+            border-radius: 24px;
+            padding: 20px;
+            height: 140px;
             display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--navy);
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 0 10px 30px rgba(1, 48, 97, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            cursor: pointer;
         }
 
-        .setting-info {
-            flex: 1;
+        .block i { font-size: 1.5rem; color: var(--navy); }
+        .block span { font-weight: 700; font-size: 0.9rem; color: var(--navy); }
+
+        /* --- GLASSMORPHISM PANEL --- */
+        .glass-panel {
+            position: fixed;
+            bottom: -100%; /* Hidden by default */
+            left: 0;
+            width: 100%;
+            height: 75%; /* 2/3 of the page as per your sketch */
+            
+            /* The Glass Effect */
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            
+            border-top: 1px solid var(--glass-border);
+            border-top-left-radius: 40px;
+            border-top-right-radius: 40px;
+            box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.1);
+            
+            transition: all 0.6s cubic-bezier(0.32, 0, 0.07, 1);
+            z-index: 1000;
+            padding: 30px;
         }
 
-        .setting-title {
-            display: block;
-            color: var(--navy);
-            font-weight: 600;
-            font-size: 0.95rem;
+        .glass-panel.active {
+            bottom: 0;
         }
 
-        .setting-desc {
-            display: block;
-            color: var(--slate-gray);
-            font-size: 0.8rem;
-        }
-
-        /* --- THE HOLIDAY TOGGLE & BUTTON --- */
-        .holiday-notice {
-            margin: 10px;
-            padding: 12px;
-            background-color: #fff5f5;
+        .handle {
+            width: 40px;
+            height: 5px;
+            background: rgba(1, 48, 97, 0.2);
             border-radius: 10px;
+            margin: -10px auto 30px;
+        }
+
+        /* --- TIME BLOCKS (Inside Panel) --- */
+        .time-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .time-chip {
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.5);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            text-align: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--navy);
+        }
+
+        .holiday-banner {
+            background: rgba(248, 113, 113, 0.1);
+            border: 1px solid rgba(248, 113, 113, 0.2);
+            padding: 15px;
+            border-radius: 15px;
+            color: #b91c1c;
+            font-size: 0.85rem;
+            margin-bottom: 20px;
             display: flex;
             align-items: center;
             gap: 10px;
-            font-size: 0.8rem;
-            color: var(--slate-gray);
-            border: 1px solid #fee2e2;
         }
 
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            background-color: var(--holiday-red);
-            border-radius: 50%;
+        /* Background Overlay when panel is open */
+        .overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(1, 48, 97, 0.3);
+            display: none;
+            z-index: 999;
         }
-
-        .disabled-state {
-            opacity: 0.5;
-            pointer-events: none; /* Makes it unclickable */
-            filter: grayscale(1);
-        }
-
-        /* --- SWITCH TOGGLE --- */
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 40px;
-            height: 20px;
-        }
-
-        .switch input { opacity: 0; width: 0; height: 0; }
-
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background-color: var(--soft-gray);
-            transition: .4s;
-            border-radius: 20px;
-        }
-
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 14px; width: 14px;
-            left: 3px; bottom: 3px;
-            background-color: white;
-            transition: .4s;
-            border-radius: 50%;
-        }
-
-        input:checked + .slider { background-color: var(--navy); }
-        input:checked + .slider:before { transform: translateX(20px); }
+        .overlay.active { display: block; }
 
     </style>
 </head>
 <body>
 
-<div class="app-container">
-    <!-- Header with the Wave Shape from your sketch -->
     <div class="header">
-        <div class="profile-section">
-            <div class="avatar">JD</div>
+        <div class="profile-header">
+            <div class="avatar-glow">JD</div>
             <div>
-                <h2 style="margin: 0; font-size: 1.2rem;">Dr. John Doe</h2>
-                <p style="margin: 0; font-size: 0.8rem; color: var(--sky-blue);">Clinic Administrator</p>
+                <h2 style="margin:0; font-size: 1.1rem;">Dr. John Doe</h2>
+                <p style="margin:0; font-size: 0.8rem; opacity: 0.7;">Private Practice Admin</p>
             </div>
         </div>
 
-        <div class="wave-divider">
-            <svg viewBox="0 0 500 150" preserveAspectRatio="none">
-                <path d="M0,150 C150,150 200,0 500,150 L500,150 L0,150 Z" fill="var(--ice-blue)"></path>
-            </svg>
+        <svg class="wave-svg" viewBox="0 0 500 150" preserveAspectRatio="none">
+            <path d="M0,150 C150,150 280,0 500,150 L500,150 L0,150 Z" fill="var(--ice-blue)"></path>
+        </svg>
+    </div>
+
+    <div class="container">
+        <div class="grid">
+            <div class="block" onclick="openGlassPanel('Schedule Settings')">
+                <i class="fa-solid fa-calendar-alt"></i>
+                <span>Clinic<br>Holidays</span>
+            </div>
+            <div class="block" onclick="openGlassPanel('Patient List')">
+                <i class="fa-solid fa-users"></i>
+                <span>Private<br>Patients</span>
+            </div>
+            <div class="block" onclick="openGlassPanel('Availability')">
+                <i class="fa-solid fa-clock"></i>
+                <span>Booking<br>Hours</span>
+            </div>
+            <div class="block" onclick="openGlassPanel('Security')">
+                <i class="fa-solid fa-fingerprint"></i>
+                <span>App<br>Security</span>
+            </div>
         </div>
     </div>
 
-    <div class="content">
-        <div class="section-label">Schedule Control</div>
-        <div class="settings-card">
-            <!-- Holiday Toggle -->
-            <div class="setting-row" style="cursor: default;">
-                <div class="icon-box"><i class="fa-solid fa-calendar-check"></i></div>
-                <div class="setting-info">
-                    <span class="setting-title">Auto-Holiday Sync</span>
-                    <span class="setting-desc">Close clinic on public holidays</span>
-                </div>
-                <label class="switch">
-                    <input type="checkbox" id="holidayToggle" checked onchange="toggleHoliday()">
-                    <span class="slider"></span>
-                </label>
-            </div>
+    <!-- The Overlay -->
+    <div id="overlay" class="overlay" onclick="closeGlassPanel()"></div>
 
-            <!-- Holiday Notice (The part that becomes unclickable) -->
-            <div id="holidayBanner" class="holiday-notice">
-                <div class="status-dot"></div>
-                <span>Next Closure: <b>July 4th (National Day)</b></span>
-            </div>
+    <!-- The Glassmorphism Panel -->
+    <div id="glassPanel" class="glass-panel">
+        <div class="handle"></div>
+        <h2 id="panelTitle" style="color: var(--navy); margin-bottom: 5px;">Settings</h2>
+        <p style="color: var(--slate-gray); font-size: 0.9rem; margin-bottom: 30px;">Manage your clinic preferences</p>
+
+        <div class="holiday-banner">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <span>Clinic will be closed for <b>Eid/National Holiday</b></span>
         </div>
 
-        <div class="section-label">Account Security</div>
-        <div class="settings-card">
-            <a href="#" class="setting-row">
-                <div class="icon-box"><i class="fa-solid fa-shield-halved"></i></div>
-                <div class="setting-info">
-                    <span class="setting-title">Two-Factor Auth</span>
-                    <span class="setting-desc">Add a layer of patient data security</span>
-                </div>
-                <i class="fa-solid fa-chevron-right" style="color: var(--soft-gray);"></i>
-            </a>
-            <a href="#" class="setting-row">
-                <div class="icon-box"><i class="fa-solid fa-bell"></i></div>
-                <div class="setting-info">
-                    <span class="setting-title">Booking Alerts</span>
-                    <span class="setting-desc">Instant SMS for new appointments</span>
-                </div>
-                <i class="fa-solid fa-chevron-right" style="color: var(--soft-gray);"></i>
-            </a>
+        <label style="font-weight: 700; font-size: 0.8rem; color: var(--navy);">AUTOMATIC TIME BLOCKS</label>
+        <div class="time-grid">
+            <div class="time-chip">09:00 AM</div>
+            <div class="time-chip">10:00 AM</div>
+            <div class="time-chip">11:00 AM</div>
+            <div class="time-chip" style="opacity: 0.3;">12:00 PM</div> <!-- Holiday/Unclickable -->
+            <div class="time-chip">01:00 PM</div>
+            <div class="time-chip">02:00 PM</div>
         </div>
-        
-        <p style="text-align: center; color: var(--slate-gray); font-size: 0.7rem; margin-top: 30px;">
-            Patient Data Encrypted (AES-256)
-        </p>
+
+        <button onclick="closeGlassPanel()" style="width: 100%; margin-top: 50px; padding: 18px; border-radius: 20px; border: none; background: var(--navy); color: white; font-weight: bold; box-shadow: 0 10px 20px rgba(1, 48, 97, 0.2);">
+            Update Schedule
+        </button>
     </div>
-</div>
 
-<script>
-    function toggleHoliday() {
-        const isChecked = document.getElementById('holidayToggle').checked;
-        const banner = document.getElementById('holidayBanner');
-        
-        if(isChecked) {
-            banner.classList.remove('disabled-state');
-        } else {
-            banner.classList.add('disabled-state');
+    <script>
+        function openGlassPanel(title) {
+            document.getElementById('panelTitle').innerText = title;
+            document.getElementById('glassPanel').classList.add('active');
+            document.getElementById('overlay').classList.add('active');
         }
-    }
-</script>
+
+        function closeGlassPanel() {
+            document.getElementById('glassPanel').classList.remove('active');
+            document.getElementById('overlay').classList.remove('active');
+        }
+    </script>
 
 </body>
-  </html>
+</html>
