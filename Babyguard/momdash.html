@@ -72,18 +72,23 @@
         .nurse-only { display: none; } /* Only shows if nurse is logged in */
     </style>
 </head>
-    <!-- AI Assistant UI -->
+  <!-- IMPROVED AI Assistant UI -->
 <div id="ai-chat-container" style="position: fixed; bottom: 20px; right: 20px; z-index: 1000;">
-    <button onclick="toggleChat()" style="background: var(--teal); color: white; border: none; padding: 15px; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.2); cursor: pointer;">
-        💬 AI Assistant
+    <button onclick="toggleChat()" style="background: #2a9d8f; color: white; border: none; width: 60px; height: 60px; border-radius: 50%; box-shadow: 0 4px 15px rgba(0,0,0,0.3); cursor: pointer; font-size: 24px;">
+        💬
     </button>
-    <div id="chat-window" style="display: none; width: 300px; background: white; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); margin-bottom: 10px; padding: 15px; border: 1px solid #eee;">
-        <h4 style="margin-top: 0; color: var(--navy);">BabyGuard AI</h4>
-        <div id="chat-history" style="height: 200px; overflow-y: auto; font-size: 0.9rem; margin-bottom: 10px; border-bottom: 1px solid #eee;">
-            <p><strong>AI:</strong> Hello! I am your BabyGuard assistant. Ask me about your baby's vaccines.</p>
+    <div id="chat-window" style="display: none; width: 320px; position: absolute; bottom: 70px; right: 0; background: white; border-radius: 15px; box-shadow: 0 5px 25px rgba(0,0,0,0.2); padding: 15px; border: 1px solid #eee; font-family: sans-serif;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <h4 style="margin: 0; color: #264653;">BabyGuard AI Assistant</h4>
+            <button onclick="toggleChat()" style="background: none; border: none; font-size: 20px; cursor: pointer;">&times;</button>
         </div>
-        <input type="text" id="user-input" placeholder="Ask a question..." style="width: 80%; padding: 5px; border: 1px solid #ddd; border-radius: 5px;">
-        <button onclick="askAI()" style="background: var(--teal); color: white; border: none; padding: 5px 10px; border-radius: 5px;">Send</button>
+        <div id="chat-history" style="height: 250px; overflow-y: auto; font-size: 0.9rem; margin-bottom: 10px; padding: 10px; background: #f9f9f9; border-radius: 10px;">
+            <p><strong>AI:</strong> هلو، انا مساعدك الرقمي في بايبي كارد ، تستطيع سؤالي عن اي شيء .</p>
+        </div>
+        <div style="display: flex; gap: 5px;">
+            <input type="text" id="user-input" placeholder="اكتب هنا..." style="flex-grow: 1; padding: 10px; border: 1px solid #ddd; border-radius: 8px; outline: none;">
+            <button onclick="askAI()" style="background: #2a9d8f; color: white; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-weight: bold;">Send</button>
+        </div>
     </div>
 </div>
 
@@ -96,32 +101,44 @@ function toggleChat() {
 function askAI() {
     const input = document.getElementById('user-input');
     const history = document.getElementById('chat-history');
-    const question = input.value.toLowerCase();
+    const question = input.value.trim().toLowerCase();
     
     if(!question) return;
 
-    history.innerHTML += `<p><strong>You:</strong> ${input.value}</p>`;
+    // Add user message
+    history.innerHTML += `<div style="margin-bottom: 10px; text-align: right;"><span style="background: #e9f5f2; padding: 8px; border-radius: 10px; display: inline-block;">${input.value}</span></div>`;
     
-    // Simulated AI Logic (Agentic Reasoning)
-    let response = "I'm not sure about that. Please consult your doctor at the Kirkuk Health Center.";
+    // Simulated AI Logic
+    let response = "I'm not sure about that specific question. Please consult the nurse at your local health center in Kirkuk.";
     
     if(question.includes("bcg")) {
-        response = "The BCG vaccine protects against Tuberculosis. It is usually given within the first week of birth.";
+        response = "The BCG vaccine protects against Tuberculosis. It is usually given within 24 hours to 7 days after birth.";
     } else if(question.includes("fever")) {
-        response = "A mild fever is common after vaccines like Penta. Use paracetamol as directed by your nurse and keep the baby hydrated.";
+        response = "A mild fever is a normal sign that the vaccine is working. You can use paracetamol drops as prescribed by your doctor.";
     } else if(question.includes("penta")) {
-        response = "The Penta vaccine protects against 5 diseases: Diphtheria, Tetanus, Pertussis, Hepatitis B, and Hib.";
-    } else if(question.includes("missed")) {
-        response = "If you missed a dose, don't worry. Visit the clinic as soon as possible to catch up on the schedule.";
+        response = "The Penta vaccine is very important. It protects against 5 diseases including Hepatitis B and Whooping Cough.";
+    } else if(question.includes("missed") || question.includes("late")) {
+        response = "Don't worry! If you missed a date, go to the clinic tomorrow. It is better to get the vaccine late than never.";
+    } else if(question.includes("opv")) {
+        response = "OPV is the Oral Polio Vaccine. It is given as drops in the mouth to protect your child from paralysis.";
     }
 
+    // Add AI response with a small delay
     setTimeout(() => {
-        history.innerHTML += `<p style="color: var(--teal);"><strong>AI:</strong> ${response}</p>`;
+        history.innerHTML += `<div style="margin-bottom: 10px;"><span style="background: #f1f1f1; padding: 8px; border-radius: 10px; display: inline-block;"><strong>AI:</strong> ${response}</span></div>`;
         history.scrollTop = history.scrollHeight;
-    }, 500);
+    }, 600);
     
     input.value = "";
 }
+
+// Allow pressing "Enter" to send
+document.getElementById("user-input").addEventListener("keypress", function(event) {
+  if (event.key === "Enter") {
+    askAI();
+  }
+});
+</script>
 </script>
 <body>
 
